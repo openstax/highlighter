@@ -28,6 +28,12 @@ module.exports = {
         loader: "eslint-loader",
       },
       {
+        enforce: "pre",
+        test: /\.ts$/,
+        exclude: /node_modules/,
+        loader: "tslint-loader"
+      },
+      {
         test: /\.(js|ts)$/,
         exclude: /node_modules/,
         use: {
