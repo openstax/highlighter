@@ -1,17 +1,29 @@
+import {injectHighlightWrappers} from './highlightUtils';
+import Highlight from './Highlight';
+
+interface options {
+  className?: string
+}
+
 export default class Highlighter {
   container: HTMLElement;
+  highlights: Highlight[] = [];
+  options: options;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, options: options = {}) {
     this.container = container;
+    this.options = options;
   }
 
-  mount() {
+  mount(): void {
   }
 
-  unmount() {
+  unmount(): void {
   }
 
-  loadHighlights(highlights: any) {
+  highlight(highlight: Highlight): void {
+    this.highlights.push(highlight);
+    injectHighlightWrappers(highlight, this.options);
   }
 
   getReferenceElement(id: string): HTMLElement {

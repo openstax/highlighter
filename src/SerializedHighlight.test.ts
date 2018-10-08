@@ -11,6 +11,7 @@ describe('isLoadable', () => {
   beforeEach(() => {
     highlighter = new Highlighter(document.createElement('div'));
     serialized = new SerializedHighlight({
+      id: 'id',
       referenceElementId: 'id',
       startContainer: 'start',
       endContainer: 'end',
