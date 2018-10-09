@@ -1,10 +1,20 @@
+import dom from './dom';
+
 const DATA_ATTR = 'data-highlighted';
 const NODE_TYPE = {
   ELEMENT_NODE: 1,
   TEXT_NODE: 3
 };
+/**
+ * Don't highlight content of these tags.
+ * @type {string[]}
+ */
+const IGNORE_TAGS = [
+  'SCRIPT', 'STYLE', 'SELECT', 'OPTION', 'BUTTON', 'OBJECT', 'APPLET',
+  'VIDEO', 'AUDIO', 'CANVAS', 'EMBED', 'PARAM', 'METER', 'PROGRESS',
+];
 
-export function injectHighlightWrappers(highlight, options = {}) {
+export default function injectHighlightWrappers(highlight, options = {}) {
   const wrapper = createWrapper(Object.assign({
     timestamp: Date.now(),
     id: highlight.id,
@@ -13,8 +23,9 @@ export function injectHighlightWrappers(highlight, options = {}) {
   const createdHighlights = highlightRange(highlight.range, wrapper);
   const normalizedHighlights = normalizeHighlights(createdHighlights);
 
-  return normalizedHighlights;
-};
+  highlight.getRange().setStartBefore(normalizeHighlights[0]);
+  highlight.getRange().setEndAfter(normalizeHighlights[normalizeHighlights.length - 1]);
+}
 
 /**
  * Normalizes highlights. Ensures that highlighting is done with use of the smallest possible number of
@@ -52,7 +63,7 @@ function normalizeHighlights(highlights) {
   });
 
   return normalizedHighlights;
-};
+}
 
 /**
  * Highlights range.
@@ -74,13 +85,11 @@ function highlightRange(range, wrapper) {
     node = startContainer,
     highlights = [],
     highlight,
-    wrapperClone,
-    nodeParent;
+    wrapperClone;
 
   const highlightNode = node => {
     wrapperClone = wrapper.cloneNode(true);
     wrapperClone.setAttribute(DATA_ATTR, true);
-    nodeParent = node.parentNode;
 
     highlight = dom(node).wrap(wrapperClone);
     highlights.push(highlight);
@@ -124,7 +133,7 @@ function highlightRange(range, wrapper) {
   } while (!done);
 
   return highlights;
-};
+}
 
 /**
  * Takes range object as parameter and refines it boundaries
@@ -251,7 +260,7 @@ function flattenNestedHighlights(highlights) {
   do {
     again = flattenOnce();
   } while (again);
-};
+}
 
 /**
  * Merges sibling highlights and normalizes descendant text nodes.
@@ -281,7 +290,7 @@ function mergeSiblingHighlights(highlights) {
 
     dom(highlight).normalizeTextNodes();
   });
-};
+}
 
 /**
  * Creates wrapper for highlights.
@@ -296,11 +305,11 @@ function createWrapper(options) {
     span.setAttribute('data-id', options.id)
   }
   return span;
-};
+}
 
 function isHighlight(el) {
   return el && el.nodeType === NODE_TYPE.ELEMENT_NODE && el.hasAttribute(DATA_ATTR);
-};
+}
 
 function sortByDepth(arr, descending) {
   arr.sort(function (a, b) {

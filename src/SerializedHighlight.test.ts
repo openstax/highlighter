@@ -11,7 +11,6 @@ describe('isLoadable', () => {
   beforeEach(() => {
     highlighter = new Highlighter(document.createElement('div'));
     serialized = new SerializedHighlight({
-      id: 'id',
       referenceElementId: 'id',
       startContainer: 'start',
       endContainer: 'end',
@@ -31,7 +30,7 @@ describe('isLoadable', () => {
 
   test(`returns false if reference element can't be found`, () => {
     getReferenceElement.mockImplementation(() => null);
-    getFirstByXPath.mockImplementation((path: string) => document.createElement('div'));
+    getFirstByXPath.mockImplementation(() => document.createElement('div'));
 
     expect(serialized.isLoadable(highlighter)).toEqual(false);
   });
@@ -52,7 +51,7 @@ describe('isLoadable', () => {
 
   test(`returns true if all nodes are found`, () => {
     getReferenceElement.mockImplementation(() => document.createElement('div'));
-    getFirstByXPath.mockImplementation((path: string) => document.createElement('div'));
+    getFirstByXPath.mockImplementation(() => document.createElement('div'));
 
     expect(serialized.isLoadable(highlighter)).toEqual(true);
   });

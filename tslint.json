@@ -5,7 +5,19 @@
     ],
     "jsRules": {},
     "rules": {
-      "quotemark": [true, "single"]
+      "quotemark": [true, "single"],
+      "trailing-comma": [
+        true,
+        {
+          "multiline": {
+            "objects": "always",
+            "arrays": "always",
+            "functions": "never",
+            "typeLiterals": "ignore"
+          },
+          "esSpecCompliant": true
+        }
+      ]
     },
     "rulesDirectory": []
 }

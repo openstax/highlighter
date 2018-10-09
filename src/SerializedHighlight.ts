@@ -3,7 +3,7 @@ import Highlighter from './Highlighter';
 import {getFirstByXPath} from './xpath';
 
 interface IData {
-  id: string;
+  meta?: object;
   referenceElementId: string;
   startContainer: string;
   startOffset: number;
@@ -41,6 +41,6 @@ export default class SerializedHighlight {
     range.setStart(startContainer, this.data.startOffset);
     range.setEnd(endContainer, this.data.endOffset);
 
-    return new Highlight(range, this.data.content);
+    return new Highlight(range, this.data.content, this.data.meta);
   }
 }
