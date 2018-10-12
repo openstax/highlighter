@@ -1,6 +1,7 @@
 import dom from './dom';
 
-const DATA_ATTR = 'data-highlighted';
+export const TIMESTAMP_ATTR = 'data-timestamp';
+export const DATA_ATTR = 'data-highlighted';
 const NODE_TYPE = {
   ELEMENT_NODE: 1,
   TEXT_NODE: 3
@@ -16,15 +17,17 @@ const IGNORE_TAGS = [
 
 export default function injectHighlightWrappers(highlight, options = {}) {
   const wrapper = createWrapper(Object.assign({
-    timestamp: Date.now(),
     id: highlight.id,
+    timestamp: Date.now(),
   }, options));
 
   const createdHighlights = highlightRange(highlight.range, wrapper);
   const normalizedHighlights = normalizeHighlights(createdHighlights);
 
-  highlight.getRange().setStartBefore(normalizeHighlights[0]);
-  highlight.getRange().setEndAfter(normalizeHighlights[normalizeHighlights.length - 1]);
+  highlight.range.setStartBefore(normalizedHighlights[0]);
+  highlight.range.setEndAfter(normalizedHighlights[normalizedHighlights.length - 1]);
+
+  highlight.elements = normalizedHighlights;
 }
 
 /**
@@ -299,7 +302,7 @@ function createWrapper(options) {
   var span = document.createElement('span');
   span.className = options.className || 'highlight';
   if (options.timestamp) {
-    span.setAttribute(options.timestamp || 'data-timestamp', options.timestamp);
+    span.setAttribute(TIMESTAMP_ATTR, options.timestamp);
   }
   if (options.id) {
     span.setAttribute('data-id', options.id)

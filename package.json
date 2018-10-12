@@ -8,7 +8,7 @@
     "webpack-watch": "webpack --config=webpack.config.js --mode=development --watch",
     "build": "webpack --config=webpack.config.js --mode=production",
     "jest-watch": "jest --watchAll",
-    "watch": "npm-run-all jest-watch webpack-watch"
+    "watch": "npm-run-all jest-watch webpack-watch typescript-watch"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",
@@ -48,5 +48,8 @@
     "moduleDirectories": [
       "node_modules"
     ]
+  },
+  "dependencies": {
+    "serialize-selection": "^1.1.1"
   }
 }

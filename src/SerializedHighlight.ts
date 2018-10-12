@@ -1,46 +1,64 @@
 import Highlight from './Highlight';
 import Highlighter from './Highlighter';
-import {getFirstByXPath} from './xpath';
+import {ISerializationData, serializers} from './serializationStrategies';
 
-interface IData {
-  meta?: object;
-  referenceElementId: string;
-  startContainer: string;
-  startOffset: number;
-  endContainer: string;
-  endOffset: number;
+interface ICommon {
+  id: string;
   content: string;
 }
 
+type IData = ICommon & ISerializationData;
+
 export default class SerializedHighlight {
-  private data: IData;
+  public static defaultSerializer = serializers.TextPositionSelector.serialize;
+
+  private _data: IData;
 
   constructor(data: IData) {
-    this.data = data;
+    this._data = data;
+  }
+
+  public get data(): IData {
+    return this._data;
+  }
+
+  public get id(): string {
+    return this.data.id;
+  }
+
+  public get content(): string {
+    return this.data.content;
   }
 
   public isLoadable(highlighter: Highlighter): boolean {
-    const referenceElement = highlighter.getReferenceElement(this.data.referenceElementId);
 
-    if (!referenceElement) {
-      return false;
-    }
-
-    const startContainer = getFirstByXPath(this.data.startContainer, referenceElement);
-    const endContainer = getFirstByXPath(this.data.endContainer, referenceElement);
-
-    return !!startContainer && !!endContainer;
+    // TODO - this approach is total garbage, find a better way.
+    // it would be nice to do serializers[this.data.type].isLoadable
+    // but typescript can't figure it out
+    return this.data.type === serializers.XpathRangeSelector.discriminator
+        ? serializers.XpathRangeSelector.isLoadable(highlighter, this.data)
+      : this.data.type === serializers.TextPositionSelector.discriminator
+        ? serializers.TextPositionSelector.isLoadable(highlighter, this.data)
+      : ((data: never): null => {
+        console.warn('not a valid serialization', data);
+        return null;
+      })(this.data);
   }
 
   public load(highlighter: Highlighter): Highlight {
-    const range = document.createRange();
-    const referenceElement = highlighter.getReferenceElement(this.data.referenceElementId);
-    const startContainer = getFirstByXPath(this.data.startContainer, referenceElement);
-    const endContainer = getFirstByXPath(this.data.endContainer, referenceElement);
 
-    range.setStart(startContainer, this.data.startOffset);
-    range.setEnd(endContainer, this.data.endOffset);
+    // TODO - this approach is total garbage, find a better way.
+    // it would be nice to do serializers[this.data.type].load
+    // but typescript can't figure it out
+    const range = this.data.type === serializers.XpathRangeSelector.discriminator
+        ? serializers.XpathRangeSelector.load(highlighter, this.data)
+      : this.data.type === serializers.TextPositionSelector.discriminator
+        ? serializers.TextPositionSelector.load(highlighter, this.data)
+      : ((data: never): null => {
+        console.warn('not a valid serialization', data);
+        return null;
+      })(this.data);
 
-    return new Highlight(range, this.data.content, this.data.meta);
+    return new Highlight(this.id, range, this.content);
   }
 }

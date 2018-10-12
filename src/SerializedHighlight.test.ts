@@ -1,6 +1,6 @@
 import SerializedHighlight from './SerializedHighlight';
 import Highlighter from './Highlighter';
-import * as xpath from './xpath';
+import * as xpath from './serializationStrategies/XpathRangeSelector/xpath';
 
 describe('isLoadable', () => {
   let highlighter: Highlighter
@@ -11,6 +11,8 @@ describe('isLoadable', () => {
   beforeEach(() => {
     highlighter = new Highlighter(document.createElement('div'));
     serialized = new SerializedHighlight({
+      type: 'XpathRangeSelector',
+      id: 'id',
       referenceElementId: 'id',
       startContainer: 'start',
       endContainer: 'end',

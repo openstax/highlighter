@@ -1,5 +1,3 @@
-import {evaluate} from './document';
-
 // mostly copied from https://developer.mozilla.org/en-US/docs/Web/XPath/Snippets#getXPathForElement
 export function getXPathForElement(el, reference) {
   var xpath = '';
@@ -28,6 +26,6 @@ export function getXPathForElement(el, reference) {
   return xpath;
 }
 
-export function getFirstByXPath(container, path) {
-  return evaluate(container, path).iterateNext();
+export function getFirstByXPath(path, referenceElement) {
+  return document.evaluate(path, referenceElement).iterateNext();
 }

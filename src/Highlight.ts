@@ -1,28 +1,70 @@
 import dom from './dom';
 import SerializedHighlight from './SerializedHighlight';
-import {getXPathForElement} from './xpath';
+
+export const FOCUS_CSS = 'focus';
 
 export default class Highlight {
-  private range: Range;
-  private content: string;
-  private meta: object;
+  private _id: string;
+  private _content: string;
+  private _range: Range;
+  private _elements: HTMLElement[];
 
-  constructor(range: Range, content: string, meta: object = {}) {
-    this.range = range;
-    this.content = content;
-    this.meta = meta;
+  constructor(range: Range, content: string);
+  constructor(id: string, range: Range, content: string);
+  constructor(arg: any, arg2: any, content?: string) {
+    if (arg instanceof Range) {
+      // TODO - something more random here
+      this._id = (new Date()).getTime().toString();
+      this._range = arg;
+      this._content = arg2;
+    } else {
+      this._id = arg;
+      this._range = arg2;
+      this._content = content;
+    }
   }
 
-  public getRange() {
-    return this.range;
+  public get id(): string {
+    return this._id;
   }
 
-  public updateMeta(meta: object) {
-    Object.assign(this.meta, meta);
+  public get content(): string {
+    return this._content;
   }
 
-  public getMeta() {
-    return this.meta;
+  public get range(): Range {
+    return this._range;
+  }
+
+  public set elements(elements: HTMLElement[]) {
+    if (this.elements) {
+      throw new Error(`Hightlight elements aren't reloadable`);
+    }
+    this._elements = elements;
+  }
+
+  public get elements(): HTMLElement[] {
+    return this._elements;
+  }
+
+  public isAttached(): boolean {
+    // TODO - check and see if these are in the dom
+    return this.elements.length > 0;
+  }
+
+  public scrollTo(handler?: (elements: HTMLElement[]) => void): Highlight {
+    if (!this.isAttached()) {
+      return this;
+    } else if (handler) {
+      handler(this.elements);
+    } else {
+      this.elements[0].scrollIntoView();
+    }
+  }
+
+  public focus(): Highlight {
+    this.elements.forEach((el: HTMLElement) => el.classList.add(FOCUS_CSS));
+    return this;
   }
 
   public intersects(range: Range): boolean {
@@ -38,12 +80,8 @@ export default class Highlight {
 
     return new SerializedHighlight({
       content: this.content,
-      endContainer: getXPathForElement(this.range.endContainer, referenceElement),
-      endOffset: this.range.endOffset,
-      meta: this.meta,
-      referenceElementId: referenceElement.id,
-      startContainer: getXPathForElement(this.range.startContainer, referenceElement),
-      startOffset: this.range.startOffset,
+      id: this.id,
+      ...SerializedHighlight.defaultSerializer(this.range, referenceElement),
     });
   }
 }

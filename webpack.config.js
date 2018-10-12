@@ -39,7 +39,10 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/typescript', '@babel/env'],
+            presets: [
+              '@babel/typescript',
+              ['@babel/env', {useBuiltIns: 'usage'}]
+            ],
             plugins: [
               '@babel/plugin-proposal-object-rest-spread',
               '@babel/plugin-proposal-class-properties',
