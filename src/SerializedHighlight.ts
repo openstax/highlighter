@@ -1,6 +1,7 @@
 import Highlight from './Highlight';
 import Highlighter from './Highlighter';
-import {ISerializationData, serializers} from './serializationStrategies';
+import {getDeserializer, IDeserializer, ISerializationData} from './serializationStrategies';
+import {serialize as defaultSerializer} from './serializationStrategies/TextPositionSelector';
 
 interface ICommon {
   id: string;
@@ -10,12 +11,14 @@ interface ICommon {
 type IData = ICommon & ISerializationData;
 
 export default class SerializedHighlight {
-  public static defaultSerializer = serializers.TextPositionSelector.serialize;
+  public static defaultSerializer = defaultSerializer;
 
   private _data: IData;
+  private deserializer: IDeserializer;
 
   constructor(data: IData) {
     this._data = data;
+    this.deserializer = getDeserializer(data);
   }
 
   public get data(): IData {
@@ -31,34 +34,11 @@ export default class SerializedHighlight {
   }
 
   public isLoadable(highlighter: Highlighter): boolean {
-
-    // TODO - this approach is total garbage, find a better way.
-    // it would be nice to do serializers[this.data.type].isLoadable
-    // but typescript can't figure it out
-    return this.data.type === serializers.XpathRangeSelector.discriminator
-        ? serializers.XpathRangeSelector.isLoadable(highlighter, this.data)
-      : this.data.type === serializers.TextPositionSelector.discriminator
-        ? serializers.TextPositionSelector.isLoadable(highlighter, this.data)
-      : ((data: never): null => {
-        console.warn('not a valid serialization', data);
-        return null;
-      })(this.data);
+    return this.deserializer.isLoadable(highlighter);
   }
 
   public load(highlighter: Highlighter): Highlight {
-
-    // TODO - this approach is total garbage, find a better way.
-    // it would be nice to do serializers[this.data.type].load
-    // but typescript can't figure it out
-    const range = this.data.type === serializers.XpathRangeSelector.discriminator
-        ? serializers.XpathRangeSelector.load(highlighter, this.data)
-      : this.data.type === serializers.TextPositionSelector.discriminator
-        ? serializers.TextPositionSelector.load(highlighter, this.data)
-      : ((data: never): null => {
-        console.warn('not a valid serialization', data);
-        return null;
-      })(this.data);
-
+    const range = this.deserializer.load(highlighter);
     return new Highlight(this.id, range, this.content);
   }
 }
