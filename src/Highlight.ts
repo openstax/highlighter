@@ -7,7 +7,7 @@ export default class Highlight {
   private _id: string;
   private _content: string;
   private _range: Range;
-  private _elements: HTMLElement[];
+  private _elements: HTMLElement[] = [];
 
   constructor(range: Range, content: string);
   constructor(id: string, range: Range, content: string);
@@ -17,11 +17,13 @@ export default class Highlight {
       this._id = (new Date()).getTime().toString();
       this._range = arg;
       this._content = arg2;
-    } else {
+    } else if (content) {
       this._id = arg;
       this._range = arg2;
       this._content = content;
     }
+
+    throw new Error('invalid constructor arguments');
   }
 
   public get id(): string {
@@ -60,6 +62,7 @@ export default class Highlight {
     } else {
       this.elements[0].scrollIntoView();
     }
+    return this;
   }
 
   public focus(): Highlight {

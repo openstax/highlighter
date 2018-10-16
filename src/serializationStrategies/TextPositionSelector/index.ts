@@ -14,6 +14,10 @@ export interface IData {
 export function serialize(range: Range, referenceElement?: HTMLElement): IData {
   referenceElement = referenceElement || dom(range.commonAncestorContainer).closest('[id]');
 
+  if (!referenceElement) {
+    throw new Error('reference element not found');
+  }
+
   // modified copy/paste out of 'serialize-selection' module
   const cloneRange = range.cloneRange();
   const startContainer = cloneRange.startContainer;

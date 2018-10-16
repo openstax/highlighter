@@ -28,8 +28,8 @@ export function getDeserializer(data: ISerializationData): IDeserializer {
       })(data);
 
       return {
-        isLoadable: () => null,
-        load: () => null,
+        isLoadable: () => false,
+        load: (highlighter) => highlighter.document.createRange(),
       };
   }
 }
