@@ -21,9 +21,9 @@ export default class Highlight {
       this._id = arg;
       this._range = arg2;
       this._content = content;
+    } else {
+      throw new Error('invalid constructor arguments');
     }
-
-    throw new Error('invalid constructor arguments');
   }
 
   public get id(): string {
