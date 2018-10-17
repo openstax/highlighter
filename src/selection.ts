@@ -2,7 +2,7 @@ import dom from './dom';
 
 export const getRange = (selection: Selection): Range => {
   if (selection.rangeCount < 1) {
-    return null;
+    throw new Error('selection had no ranges');
   }
 
   // set up range to modify
@@ -22,6 +22,10 @@ interface IOptions {
 
 export const snapSelection = (selection: Selection, options: IOptions): void => {
   const range = getRange(selection);
+
+  if (!range) {
+    return;
+  }
 
   if (options.snapTableRows) {
     if (range.commonAncestorContainer.nodeName === 'TBODY') {
@@ -65,10 +69,12 @@ export const snapSelection = (selection: Selection, options: IOptions): void => 
       targetOffset >= 0 && container.length >= targetOffset && /\S/.test(container.substr(targetOffset, 1));
 
     const shouldGobbleBackward = () => {
-      return shouldGobbleCharacter(range.startContainer.textContent, range.startOffset - 1);
+      return range.startContainer.textContent &&
+        shouldGobbleCharacter(range.startContainer.textContent, range.startOffset - 1);
     };
     const shouldGobbleForward = () => {
-      return shouldGobbleCharacter(range.endContainer.textContent, range.endOffset);
+      return range.endContainer.textContent &&
+        shouldGobbleCharacter(range.endContainer.textContent, range.endOffset);
     };
     const gobbleBackward = () => {
       range.setStart(range.startContainer, range.startOffset - 1);

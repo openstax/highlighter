@@ -16,6 +16,10 @@ export interface IData {
 export function serialize(range: Range, referenceElement?: HTMLElement): IData {
   referenceElement = referenceElement || dom(range.commonAncestorContainer).closest('[id]');
 
+  if (!referenceElement) {
+    throw new Error('reference element not found');
+  }
+
   return {
     endContainer: getXPathForElement(range.endContainer, referenceElement),
     endOffset: range.endOffset,

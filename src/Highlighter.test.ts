@@ -14,6 +14,10 @@ describe('Reference elements', () => {
     const container = document.getElementById('container');
     const reference = document.getElementById('referenceElement2');
 
+    if (!container) {
+      throw new Error('cannot find container');
+    }
+
     const highlighter = new Highlighter(container);
 
     expect(highlighter.getReferenceElement('referenceElement2')).toEqual(reference);
@@ -31,6 +35,11 @@ describe('Reference elements', () => {
     `;
 
     const container = document.getElementById('container');
+
+    if (!container) {
+      throw new Error('can\'t find container');
+    }
+
     const highlighter = new Highlighter(container);
 
     expect(highlighter.getReferenceElement('referenceElement1')).toEqual(null);

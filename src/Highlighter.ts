@@ -11,7 +11,7 @@ interface IOptions {
   snapWords?: boolean;
   className?: string;
   onClick?: (highlight?: Highlight) => void;
-  onSelect?: (highlights: Highlight[], newHighlight: Highlight) => void;
+  onSelect?: (highlights: Highlight[], newHighlight?: Highlight) => void;
 }
 
 export default class Highlighter {
@@ -47,13 +47,13 @@ export default class Highlighter {
     return this.highlights[id];
   }
 
-  public getReferenceElement(id: string): HTMLElement {
+  public getReferenceElement(id: string): HTMLElement | null {
     return this.container.querySelector(`#${id}`);
   }
 
   public clearFocus(): void {
     this.container.querySelectorAll(`.${this.options.className}.${FOCUS_CSS}`)
-      .forEach((el: HTMLElement) => el.classList.remove(FOCUS_CSS));
+      .forEach((el: Element) => el.classList.remove(FOCUS_CSS));
   }
 
   public getHighlights(): Highlight[] {
@@ -67,11 +67,18 @@ export default class Highlighter {
   }
 
   public get document(): Document {
+    if (!this.container.ownerDocument) {
+      throw new Error('highlighter container is not mounted to a document!');
+    }
     return this.container.ownerDocument;
   }
 
   private onMouseup = (): void => {
     const selection = this.document.getSelection();
+
+    if (!selection) {
+      return;
+    }
 
     if (selection.isCollapsed) {
       this.onClick(selection);
@@ -85,8 +92,9 @@ export default class Highlighter {
 
     if (onClick) {
       const range: Range = getRange(selection);
-      const highlight: Highlight = Object.values(this.highlights)
+      const highlight: Highlight | undefined = Object.values(this.highlights)
         .find((other: Highlight) => other.intersects(range));
+
       onClick(highlight);
     }
   }
@@ -101,8 +109,12 @@ export default class Highlighter {
       const highlights: Highlight[] = Object.values(this.highlights)
         .filter((other: Highlight) => other.intersects(range));
 
-      const highlight: Highlight = new Highlight(range, rangeContentsString(range));
-      onSelect(highlights, highlight);
+      if (highlights.length === 0) {
+        const highlight: Highlight = new Highlight(range, rangeContentsString(range));
+        onSelect(highlights, highlight);
+      } else {
+        onSelect(highlights);
+      }
     }
   }
 }

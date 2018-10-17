@@ -3,7 +3,7 @@ import dom from './dom';
 export const rangeContentsString = (range: Range): string => {
   const fragment = cloneRangeContents(range);
   const container = document.createElement('div');
-  const removeAll = (nodes: NodeList) => nodes.forEach((element: HTMLElement) => element.remove());
+  const removeAll = (nodes: NodeListOf<Element>) => nodes.forEach((element: Element) => element.remove());
 
   container.appendChild(fragment);
   removeAll(container.querySelectorAll('.MathJax'));
@@ -11,13 +11,15 @@ export const rangeContentsString = (range: Range): string => {
   removeAll(container.querySelectorAll('.MathJax_Preview'));
   removeAll(container.querySelectorAll('.MJX_Assistive_MathML'));
 
-  container.querySelectorAll('script[type="math/mml"]').forEach((element: HTMLElement) => {
+  container.querySelectorAll('script[type="math/mml"]').forEach((element: Element) => {
     const template = document.createElement('template');
-    template.innerHTML = element.textContent;
+    template.innerHTML = element.textContent || '';
     const math = template.content.firstChild;
 
-    element.parentElement.insertBefore(math, element);
-    element.remove();
+    if (math && element.parentElement) {
+      element.parentElement.insertBefore(math, element);
+      element.remove();
+    }
   });
 
   return container.innerHTML;
@@ -54,16 +56,16 @@ function cloneForRange(element: Node, range: Range, foundStart: boolean = false)
 
   if (element.nodeType === 3 /* #text */) {
     if (element === range.startContainer && element === range.endContainer) {
-      result.textContent = element.textContent.substring(range.startOffset, range.endOffset + 1);
+      result.textContent = (element.textContent || '').substring(range.startOffset, range.endOffset + 1);
     } else if (element === range.startContainer) {
-      result.textContent = element.textContent.substring(range.startOffset);
+      result.textContent = (element.textContent || '').substring(range.startOffset);
     } else if (element === range.endContainer) {
-      result.textContent = element.textContent.substring(0, range.endOffset);
+      result.textContent = (element.textContent || '').substring(0, range.endOffset);
     } else {
       result.textContent = element.textContent;
     }
   } else {
-    let node: Node = element.firstChild;
+    let node: Node | null = element.firstChild;
     let foundEnd;
 
     while (node && !isEnd(node) && !foundEnd) {
