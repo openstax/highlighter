@@ -10,8 +10,8 @@ interface IOptions {
   snapMathJax?: boolean;
   snapWords?: boolean;
   className?: string;
-  onClick?: (highlight?: Highlight | null) => void;
-  onSelect?: (highlights: Highlight[], newHighlight: Highlight) => void;
+  onClick?: (highlight?: Highlight) => void;
+  onSelect?: (highlights: Highlight[], newHighlight?: Highlight) => void;
 }
 
 export default class Highlighter {
@@ -92,9 +92,8 @@ export default class Highlighter {
 
     if (onClick) {
       const range: Range = getRange(selection);
-      const highlight: Highlight | null = Object.values(this.highlights)
-        .find((other: Highlight) => other.intersects(range))
-        || null;
+      const highlight: Highlight | undefined = Object.values(this.highlights)
+        .find((other: Highlight) => other.intersects(range));
 
       onClick(highlight);
     }
@@ -110,8 +109,12 @@ export default class Highlighter {
       const highlights: Highlight[] = Object.values(this.highlights)
         .filter((other: Highlight) => other.intersects(range));
 
-      const highlight: Highlight = new Highlight(range, rangeContentsString(range));
-      onSelect(highlights, highlight);
+      if (highlights.length === 0) {
+        const highlight: Highlight = new Highlight(range, rangeContentsString(range));
+        onSelect(highlights, highlight);
+      } else {
+        onSelect(highlights);
+      }
     }
   }
 }
