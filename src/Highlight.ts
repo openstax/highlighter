@@ -39,7 +39,7 @@ export default class Highlight {
   }
 
   public set elements(elements: HTMLElement[]) {
-    if (this.elements) {
+    if (this.elements.length > 0) {
       throw new Error(`Hightlight elements aren't reloadable`);
     }
     this._elements = elements;
