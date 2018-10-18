@@ -1,5 +1,5 @@
 {
-  "name": "highlighter",
+  "name": "@openstax/highlighter",
   "version": "1.0.0",
   "main": "dist/highlighter.js",
   "license": "MIT",
