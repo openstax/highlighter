@@ -90,14 +90,17 @@ export default class Highlighter {
   private onClick(selection: Selection): void {
     const {onClick} = this.options;
 
-    if (onClick && selection.rangeCount > 0) {
+    const clickedHighlight = (): Highlight | undefined => {
+      if (selection.rangeCount < 1) {
+        return;
+      }
       const range: Range = getRange(selection);
-      const highlight: Highlight | undefined = Object.values(this.highlights)
+      return Object.values(this.highlights)
         .find((other: Highlight) => other.intersects(range));
+    };
 
-      onClick(highlight);
-    } else if (onClick) {
-      onClick();
+    if (onClick) {
+      onClick(clickedHighlight());
     }
   }
 

@@ -5,11 +5,16 @@ const isHighlight = node => node && node.getAttribute && node.getAttribute(DATA_
 const isTextHighlight = node => isHighlight(node) && !findElementChild(node);
 const isText = node => node && node.nodeType === 3;
 const isElement = node => node && node.nodeType === 1;
+const isTextOrElement = node => isText(node) || isElement(node);
+
+const IS_PATH_PART_SELF = /^\.$/;
+const IS_PATH_PART_TEXT = /^text\(\)\[(\d+)\]$/;
+const IS_PATH_PART_ELEMENT = /\*\[name\(\)='(.+)'\]\[(\d)\]/;
 
 // kinda copied from https://developer.mozilla.org/en-US/docs/Web/XPath/Snippets#getXPathForElement
 export function getXPathForElement(targetElement, offset, reference) {
-  var xpath = '';
-  var pos
+  let xpath = '';
+  let pos
     , element = targetElement.previousSibling
     , focus = targetElement;
 
@@ -39,7 +44,7 @@ export function getXPathForElement(targetElement, offset, reference) {
         }
       }
       if (element) {
-        if ([3, 1].indexOf(element.nodeType) !== -1 && !isHighlight(element) && element.nodeName === focus.nodeName) { // If it is ELEMENT_NODE or TEXT_NODE of the same name
+        if (isTextOrElement(element) && !isHighlight(element) && element.nodeName === focus.nodeName) { // If it is ELEMENT_NODE or TEXT_NODE of the same name
           pos += 1;
         }
 
@@ -47,7 +52,7 @@ export function getXPathForElement(targetElement, offset, reference) {
       }
     }
 
-    if (focus.nodeType === 3 /* #text */) {
+    if (isText(focus)) {
       xpath = "text()["+pos+']'+'/'+xpath;
     } else {
       xpath = "*[name()='"+focus.nodeName.toLowerCase()+"']["+pos+']'+'/'+xpath;
@@ -93,9 +98,6 @@ export function getFirstByXPath(path, offset, referenceElement) {
 }
 
 function followPart(node, part) {
-  const self = /^\.$/;
-  const textTest = /^text\(\)\[(\d+)\]$/;
-  const elementTest = /\*\[name\(\)='(.+)'\]\[(\d)\]/;
 
   const findFirst = (nodeList, predicate) =>
     Array.prototype.find.call(nodeList, node => predicate(node) && !isHighlight(node));
@@ -104,30 +106,29 @@ function followPart(node, part) {
     predicate
   );
 
-  if (self.test(part)) {
+  if (IS_PATH_PART_SELF.test(part)) {
     return node;
   }
-  if (textTest.test(part)) {
-    let [, index] = part.match(textTest);
-    const nodeMatches = node => node.nodeType === 3;
-    let text = findFirst(node.childNodes, nodeMatches);
+  if (IS_PATH_PART_TEXT.test(part)) {
+    let [, index] = part.match(IS_PATH_PART_TEXT);
+    let text = findFirst(node.childNodes, isText);
 
     while (text && index > 1) {
       let search = text;
 
-      while (search && (nodeMatches(search) || isHighlight(search))) {
+      while (search && (isText(search) || isHighlight(search))) {
         search = search.nextSibling;
       }
 
       index--;
-      text = findFirstAfter(node.childNodes, search, nodeMatches);
+      text = findFirstAfter(node.childNodes, search, isText);
     }
 
     return text;
   }
-  if (elementTest.test(part)) {
-    let [, type, index] = part.match(elementTest);
-    const nodeMatches = node => node.nodeType === 1 && node.nodeName.toLowerCase() === type.toLowerCase();
+  if (IS_PATH_PART_ELEMENT.test(part)) {
+    let [, type, index] = part.match(IS_PATH_PART_ELEMENT);
+    const nodeMatches = node => isElement(node) && node.nodeName.toLowerCase() === type.toLowerCase();
     let element = findFirst(node.childNodes, nodeMatches);
 
     while (element && index > 1) {
