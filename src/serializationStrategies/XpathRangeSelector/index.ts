@@ -20,12 +20,15 @@ export function serialize(range: Range, referenceElement?: HTMLElement): IData {
     throw new Error('reference element not found');
   }
 
+  const [endContainer, endOffset] = getXPathForElement(range.endContainer, range.endOffset, referenceElement);
+  const [startContainer, startOffset] = getXPathForElement(range.startContainer, range.startOffset, referenceElement);
+
   return {
-    endContainer: getXPathForElement(range.endContainer, referenceElement),
-    endOffset: range.endOffset,
+    endContainer,
+    endOffset,
     referenceElementId: referenceElement.id,
-    startContainer: getXPathForElement(range.startContainer, referenceElement),
-    startOffset: range.startOffset,
+    startContainer,
+    startOffset,
     type: discriminator,
   };
 }
@@ -46,11 +49,12 @@ export function isLoadable(highlighter: Highlighter, data: IData): boolean {
 export function load(highlighter: Highlighter, data: IData): Range {
   const range = highlighter.document.createRange();
   const referenceElement = highlighter.getReferenceElement(data.referenceElementId);
-  const startContainer = getFirstByXPath(data.startContainer, referenceElement);
-  const endContainer = getFirstByXPath(data.endContainer, referenceElement);
 
-  range.setStart(startContainer, data.startOffset);
-  range.setEnd(endContainer, data.endOffset);
+  const [startContainer, startOffset] = getFirstByXPath(data.startContainer, data.startOffset, referenceElement);
+  const [endContainer, endOffset] = getFirstByXPath(data.endContainer, data.endOffset, referenceElement);
+
+  range.setStart(startContainer, startOffset);
+  range.setEnd(endContainer, endOffset);
 
   return range;
 }
