@@ -273,9 +273,9 @@ function flattenNestedHighlights(highlights) {
 function mergeSiblingHighlights(highlights) {
 
   function shouldMerge(current, node) {
-    return node && node.nodeType === NODE_TYPE.ELEMENT_NODE &&
-      haveSameColor(current, node) &&
-      isHighlight(node);
+    return isHighlight(current) && isHighlight(node)
+      && current.data && node.data
+      && current.data.id === node.data.id;
   }
 
   highlights.forEach(function (highlight) {
