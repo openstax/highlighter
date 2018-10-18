@@ -28,7 +28,7 @@ export const snapSelection = (selection: Selection, options: IOptions): void => 
   }
 
   if (options.snapTableRows) {
-    if (range.commonAncestorContainer.nodeName === 'TBODY') {
+    if (['TBODY', 'TR'].indexOf(range.commonAncestorContainer.nodeName) > -1) {
       const startRow = dom(range.startContainer).farthest('tr');
       const endRow = dom(range.endContainer).farthest('tr');
 
