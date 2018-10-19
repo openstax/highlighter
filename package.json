@@ -4,11 +4,15 @@
   "main": "dist/highlighter.js",
   "license": "MIT",
   "scripts": {
-    "typescript-watch": "tsc --noEmit --watch",
-    "webpack-watch": "webpack --config=webpack.config.js --mode=development --watch",
     "build": "webpack --config=webpack.config.js --mode=production",
     "jest-watch": "jest --watchAll",
-    "watch": "npm-run-all jest-watch webpack-watch typescript-watch"
+    "test": "jest --verbose --maxWorkers=2",
+    "type-check": "tsc",
+    "js-lint": "eslint src/**/*.js",
+    "typescript-lint": "tslint -p ./tsconfig.json",
+    "typescript-watch": "tsc --noEmit --watch",
+    "watch": "npm-run-all jest-watch webpack-watch typescript-watch",
+    "webpack-watch": "webpack --config=webpack.config.js --mode=development --watch"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",

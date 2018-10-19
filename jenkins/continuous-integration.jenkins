@@ -1,0 +1,38 @@
+pipeline {
+  agent {
+    docker { image 'node:10-slim' }
+  }
+  stages {
+    stage('Build') {
+      steps {
+        sh 'yarn'
+      }
+    }
+    stage('Test') {
+      parallel {
+        stage('Lint') {
+          steps {
+            sh 'yarn js-lint'
+            sh 'yarn typescript-lint'
+          }
+        }
+        stage('Type Checks') {
+          steps {
+            sh 'yarn type-check'
+          }
+        }
+        stage('Unit Tests') {
+          steps {
+            sh 'yarn jest --coverage --verbose --maxWorkers=2' 
+          }
+        }
+      }
+    }
+  }
+  post {
+    success {
+      sh 'curl -s https://codecov.io/bash | bash'
+    }
+  }
+}
+
