@@ -90,12 +90,17 @@ export default class Highlighter {
   private onClick(selection: Selection): void {
     const {onClick} = this.options;
 
-    if (onClick) {
+    const clickedHighlight = (): Highlight | undefined => {
+      if (selection.rangeCount < 1) {
+        return;
+      }
       const range: Range = getRange(selection);
-      const highlight: Highlight | undefined = Object.values(this.highlights)
+      return Object.values(this.highlights)
         .find((other: Highlight) => other.intersects(range));
+    };
 
-      onClick(highlight);
+    if (onClick) {
+      onClick(clickedHighlight());
     }
   }
 
@@ -104,7 +109,7 @@ export default class Highlighter {
 
     snapSelection(selection, this.options);
 
-    if (onSelect) {
+    if (onSelect && selection.rangeCount > 0) {
       const range: Range = getRange(selection);
       const highlights: Highlight[] = Object.values(this.highlights)
         .filter((other: Highlight) => other.intersects(range));

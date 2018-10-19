@@ -1,7 +1,7 @@
 import Highlight from './Highlight';
 import Highlighter from './Highlighter';
 import {getDeserializer, IDeserializer, ISerializationData} from './serializationStrategies';
-import {serialize as defaultSerializer} from './serializationStrategies/TextPositionSelector';
+import {serialize as defaultSerializer} from './serializationStrategies/XpathRangeSelector';
 
 interface ICommon {
   id: string;
