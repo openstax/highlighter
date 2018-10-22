@@ -94,6 +94,10 @@ export function getFirstByXPath(path, offset, referenceElement) {
     node = null;
   }
 
+  if (isElement(node) && node.childNodes.length < offset) {
+    node = null;
+  }
+
   return [node, offset];
 }
 
@@ -121,7 +125,13 @@ function followPart(node, part) {
       }
 
       index--;
-      text = findFirstAfter(node.childNodes, search, isText);
+
+      if (search) {
+        text = findFirstAfter(node.childNodes, search, isText);
+      } else {
+        text = search;
+      }
+
     }
 
     return text;

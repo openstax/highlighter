@@ -47,6 +47,9 @@
     },
     "moduleDirectories": [
       "node_modules"
+    ],
+    "setupFiles": [
+      "./test/helpers/Range"
     ]
   },
   "dependencies": {
