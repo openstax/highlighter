@@ -1,23 +1,29 @@
 {
-    "defaultSeverity": "error",
-    "extends": [
-        "tslint:recommended"
-    ],
-    "jsRules": {},
-    "rules": {
-      "quotemark": [true, "single"],
-      "variable-name": [true, "check-format", "allow-leading-underscore"],
-      "space-before-function-paren": [true, "never"],
-      "prefer-object-spread": true,
-      "max-line-length": [true, 200],
-      "trailing-comma": [ true, {
-        "multiline": {
-          "objects": "always",
-          "arrays": "always",
-          "functions": "never",
-          "typeLiterals": "ignore"
-        },
-        "esSpecCompliant": true
-      }]
-    }
+  "defaultSeverity": "error",
+  "extends": [
+      "tslint:recommended"
+  ],
+  "jsRules": {},
+  "rules": {
+    "quotemark": [true, "single"],
+    "variable-name": [true, "check-format", "allow-leading-underscore"],
+    "space-before-function-paren": [true, "never"],
+    "prefer-object-spread": true,
+    "max-line-length": [true, 200],
+    "trailing-comma": [ true, {
+      "multiline": {
+        "objects": "always",
+        "arrays": "always",
+        "functions": "never",
+        "typeLiterals": "ignore"
+      },
+      "esSpecCompliant": true
+    }]
+  },
+  "linterOptions": {
+    "exclude": [
+      "node_modules",
+      "**/*.js"
+    ]
+  }
 }

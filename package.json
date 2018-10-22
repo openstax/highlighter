@@ -1,14 +1,19 @@
 {
   "name": "@openstax/highlighter",
-  "version": "1.0.0",
+  "version": "1.1.2",
   "main": "dist/highlighter.js",
   "license": "MIT",
   "scripts": {
-    "typescript-watch": "tsc --noEmit --watch",
-    "webpack-watch": "webpack --config=webpack.config.js --mode=development --watch",
     "build": "webpack --config=webpack.config.js --mode=production",
-    "jest-watch": "jest --watchAll",
-    "watch": "npm-run-all jest-watch webpack-watch typescript-watch"
+    "test": "jest --coverage --verbose --maxWorkers=2",
+    "lint": "npm-run-all lint:js lint:ts lint:ts-types",
+    "lint:js": "eslint src/**/*.js",
+    "lint:ts": "tslint -p ./tsconfig.json",
+    "lint:ts-types": "tsc",
+    "watch": "npm-run-all watch:test watch:build watch:ts",
+    "watch:build": "webpack --config=webpack.config.js --mode=development --watch",
+    "watch:test": "jest --watchAll",
+    "watch:ts": "tsc --noEmit --watch"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",

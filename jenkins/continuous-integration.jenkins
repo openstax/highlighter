@@ -1,0 +1,35 @@
+pipeline {
+  agent {
+    docker { image 'node:10-slim' }
+  }
+  environment {
+    CODECOV_TOKEN = '523afe7a-4620-466f-a26a-d914c18a7c0a'
+  }
+  stages {
+    stage('Build') {
+      steps {
+        sh 'yarn'
+      }
+    }
+    stage('Test') {
+      parallel {
+        stage('Lint') {
+          steps {
+            sh 'yarn lint'
+          }
+        }
+        stage('Unit Tests') {
+          steps {
+            sh 'yarn test' 
+          }
+        }
+      }
+    }
+  }
+  post {
+    success {
+      sh "curl -s https://codecov.io/bash -t ${env.CODECOV_TOKEN} | bash"
+    }
+  }
+}
+

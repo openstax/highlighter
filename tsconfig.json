@@ -15,5 +15,9 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "allowJs": true
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "**/*.js"
+  ]
 }

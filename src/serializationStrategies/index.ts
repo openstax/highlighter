@@ -23,7 +23,7 @@ export function getDeserializer(data: ISerializationData): IDeserializer {
       };
     default:
       ((bad: never): null => {
-        console.warn('not a valid serialization', bad);
+        throw new Error(`not a valid serialization: ${JSON.stringify(bad)}`);
         return null;
       })(data);
 
