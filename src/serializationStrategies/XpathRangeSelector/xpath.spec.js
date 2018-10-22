@@ -401,7 +401,6 @@ describe('getFirstByXPath', () => {
     expect(result.textContent.trim()).toEqual('werewwer');
   });
 
-
   it('if the offset specifies the start boundary of highlight and text, it returns the text', () => {
     document.body.innerHTML = `
       <div id="reference">
@@ -413,5 +412,72 @@ describe('getFirstByXPath', () => {
     const [result] = xpath.getFirstByXPath("./text()[1]", 14, reference);
 
     expect(result.textContent.trim()).toEqual('qwer');
+  });
+
+  it('returns null if the requested text node does not exist', () => {
+    document.body.innerHTML = `
+      <div id="reference">
+        qwer
+      </div>
+    `;
+
+    const reference = document.getElementById('reference');
+    const [result] = xpath.getFirstByXPath("./text()[4]", 0, reference);
+
+    expect(result).toEqual(null);
+  });
+
+  it('returns null if the requested text offset does not exist', () => {
+    document.body.innerHTML = `
+      <div id="reference">qwer</div>
+    `;
+
+    const reference = document.getElementById('reference');
+    const [result] = xpath.getFirstByXPath("./text()[1]", 5, reference);
+
+    expect(result).toEqual(null);
+  });
+
+  it('returns if the requested text offset does exist', () => {
+    document.body.innerHTML = `
+      <div id="reference">qwer</div>
+    `;
+
+    const reference = document.getElementById('reference');
+    const [result] = xpath.getFirstByXPath("./text()[1]", 4, reference);
+
+    expect(result).not.toEqual(null);
+  });
+
+  it('returns null if the requested element offset does not exist', () => {
+    document.body.innerHTML = `
+      <div id="reference">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+    `;
+
+    const reference = document.getElementById('reference');
+    const [result] = xpath.getFirstByXPath("./*[name()='div'][2]", 1, reference);
+
+    expect(result).toEqual(null);
+  });
+
+  it('returns if the requested element offset does exist', () => {
+    document.body.innerHTML = `
+      <div id="reference">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+    `;
+
+    const reference = document.getElementById('reference');
+    const [result] = xpath.getFirstByXPath("./*[name()='div'][2]", 0, reference);
+
+    expect(result).not.toEqual(null);
   });
 });

@@ -40,8 +40,8 @@ export function isLoadable(highlighter: Highlighter, data: IData): boolean {
     return false;
   }
 
-  const startContainer = getFirstByXPath(data.startContainer, referenceElement);
-  const endContainer = getFirstByXPath(data.endContainer, referenceElement);
+  const [startContainer] = getFirstByXPath(data.startContainer, data.startOffset, referenceElement);
+  const [endContainer] = getFirstByXPath(data.endContainer, data.endOffset, referenceElement);
 
   return !!startContainer && !!endContainer;
 }
