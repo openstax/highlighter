@@ -34,6 +34,7 @@ export function serialize(range: Range, referenceElement?: HTMLElement): IData {
 }
 
 export function isLoadable(highlighter: Highlighter, data: IData): boolean {
+  console.log(Highlighter);
   const referenceElement = highlighter.getReferenceElement(data.referenceElementId);
 
   if (!referenceElement) {

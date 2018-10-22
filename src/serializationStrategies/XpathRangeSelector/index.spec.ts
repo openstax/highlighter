@@ -1,28 +1,26 @@
-import Highlighter from '../../Highlighter';
 import * as serializer from '.';
+import Highlighter from '../../Highlighter';
 
 describe('load', () => {
   it('returns a range', () => {
     document.body.innerHTML = `
       <div id="highlighter">
         <div id="referenceElement">
-          asdfasdfasdlf aklsdfj l;dksfj as;ldfkjals;d fjas;ldkfj as;ldfkj 
+          asdfasdfasdlf aklsdfj l;dksfj as;ldfkjals;d fjas;ldkfj as;ldfkj
         </div>
       </div>
     `;
 
     const highligherEl = document.getElementById('highlighter')!;
-
     const highlighter = new Highlighter(highligherEl);
-
     const result = serializer.load(highlighter, {
-      type: 'XpathRangeSelector',
+      endContainer: './text()[1]',
+      endOffset: 10,
       referenceElementId: 'referenceElement',
       startContainer: './text()[1]',
       startOffset: 0,
-      endContainer: './text()[1]',
-      endOffset: 10,
-    })
+      type: 'XpathRangeSelector',
+    });
 
     expect(result).toBeInstanceOf(Range);
   });
@@ -33,23 +31,21 @@ describe('isLoadable', () => {
     document.body.innerHTML = `
       <div id="highlighter">
         <div id="referenceElement">
-          asdfasdfasdlf aklsdfj l;dksfj as;ldfkjals;d fjas;ldkfj as;ldfkj 
+          asdfasdfasdlf aklsdfj l;dksfj as;ldfkjals;d fjas;ldkfj as;ldfkj
         </div>
       </div>
     `;
 
     const highligherEl = document.getElementById('highlighter')!;
-
     const highlighter = new Highlighter(highligherEl);
-
     const result = serializer.isLoadable(highlighter, {
-      type: 'XpathRangeSelector',
+      endContainer: './text()[1]',
+      endOffset: 10,
       referenceElementId: 'referenceElement',
       startContainer: './text()[1]',
       startOffset: 0,
-      endContainer: './text()[1]',
-      endOffset: 10,
-    })
+      type: 'XpathRangeSelector',
+    });
 
     expect(result).toEqual(true);
   });
@@ -58,23 +54,21 @@ describe('isLoadable', () => {
     document.body.innerHTML = `
       <div id="highlighter">
         <div id="referenceElement">
-          asdfasdfasdlf aklsdfj l;dksfj as;ldfkjals;d fjas;ldkfj as;ldfkj 
+          asdfasdfasdlf aklsdfj l;dksfj as;ldfkjals;d fjas;ldkfj as;ldfkj
         </div>
       </div>
     `;
 
     const highligherEl = document.getElementById('highlighter')!;
-
     const highlighter = new Highlighter(highligherEl);
-
     const result = serializer.isLoadable(highlighter, {
-      type: 'XpathRangeSelector',
+      endContainer: './text()[1]',
+      endOffset: 10,
       referenceElementId: 'doesnt exist',
       startContainer: './text()[1]',
       startOffset: 0,
-      endContainer: './text()[1]',
-      endOffset: 10,
-    })
+      type: 'XpathRangeSelector',
+    });
 
     expect(result).toEqual(false);
   });
@@ -83,23 +77,21 @@ describe('isLoadable', () => {
     document.body.innerHTML = `
       <div id="highlighter">
         <div id="referenceElement">
-          asdfasdfasdlf aklsdfj l;dksfj as;ldfkjals;d fjas;ldkfj as;ldfkj 
+          asdfasdfasdlf aklsdfj l;dksfj as;ldfkjals;d fjas;ldkfj as;ldfkj
         </div>
       </div>
     `;
 
     const highligherEl = document.getElementById('highlighter')!;
-
     const highlighter = new Highlighter(highligherEl);
-
     const result = serializer.isLoadable(highlighter, {
-      type: 'XpathRangeSelector',
+      endContainer: './text()[1]',
+      endOffset: 10,
       referenceElementId: 'referenceElement',
       startContainer: './text()[8]',
       startOffset: 0,
-      endContainer: './text()[1]',
-      endOffset: 10,
-    })
+      type: 'XpathRangeSelector',
+    });
 
     expect(result).toEqual(false);
   });
@@ -108,23 +100,21 @@ describe('isLoadable', () => {
     document.body.innerHTML = `
       <div id="highlighter">
         <div id="referenceElement">
-          asdfasdfasdlf aklsdfj l;dksfj as;ldfkjals;d fjas;ldkfj as;ldfkj 
+          asdfasdfasdlf aklsdfj l;dksfj as;ldfkjals;d fjas;ldkfj as;ldfkj
         </div>
       </div>
     `;
 
     const highligherEl = document.getElementById('highlighter')!;
-
     const highlighter = new Highlighter(highligherEl);
-
     const result = serializer.isLoadable(highlighter, {
-      type: 'XpathRangeSelector',
+      endContainer: './text()[8]',
+      endOffset: 10,
       referenceElementId: 'referenceElement',
       startContainer: './text()[0]',
       startOffset: 0,
-      endContainer: './text()[8]',
-      endOffset: 10,
-    })
+      type: 'XpathRangeSelector',
+    });
 
     expect(result).toEqual(false);
   });
