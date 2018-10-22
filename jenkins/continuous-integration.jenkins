@@ -15,18 +15,12 @@ pipeline {
       parallel {
         stage('Lint') {
           steps {
-            sh 'yarn js-lint'
-            sh 'yarn typescript-lint'
-          }
-        }
-        stage('Type Checks') {
-          steps {
-            sh 'yarn type-check'
+            sh 'yarn lint'
           }
         }
         stage('Unit Tests') {
           steps {
-            sh 'yarn jest --coverage --verbose --maxWorkers=2' 
+            sh 'yarn test' 
           }
         }
       }
@@ -34,7 +28,7 @@ pipeline {
   }
   post {
     success {
-      sh "curl -s https://codecov.io/bash -t $(env.CODECOV_TOKEN) | bash"
+      sh "curl -s https://codecov.io/bash -t ${env.CODECOV_TOKEN} | bash"
     }
   }
 }
