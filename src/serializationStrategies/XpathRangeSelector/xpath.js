@@ -9,7 +9,7 @@ const isTextOrElement = node => isText(node) || isElement(node);
 
 const IS_PATH_PART_SELF = /^\.$/;
 const IS_PATH_PART_TEXT = /^text\(\)\[(\d+)\]$/;
-const IS_PATH_PART_ELEMENT = /\*\[name\(\)='(.+)'\]\[(\d)\]/;
+const IS_PATH_PART_ELEMENT = /\*\[name\(\)='(.+)'\]\[(\d+)\]/;
 
 // kinda copied from https://developer.mozilla.org/en-US/docs/Web/XPath/Snippets#getXPathForElement
 export function getXPathForElement(targetElement, offset, reference) {
