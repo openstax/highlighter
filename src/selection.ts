@@ -20,7 +20,7 @@ interface IOptions {
   snapWords?: boolean;
 }
 
-export const snapSelection = (selection: Selection, options: IOptions): void => {
+export const snapSelection = (selection: Selection, options: IOptions): Range | undefined => {
   const range = getRange(selection);
 
   if (!range) {
@@ -96,4 +96,6 @@ export const snapSelection = (selection: Selection, options: IOptions): void => 
 
   selection.removeAllRanges();
   selection.addRange(range);
+
+  return range;
 };

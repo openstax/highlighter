@@ -15,7 +15,7 @@ interface IOptions {
 }
 
 export default class Highlighter {
-  private container: HTMLElement;
+  public readonly container: HTMLElement;
   private highlights: {[key: string]: Highlight} = {};
   private options: IOptions;
 
@@ -107,10 +107,9 @@ export default class Highlighter {
   private onSelect(selection: Selection): void {
     const {onSelect} = this.options;
 
-    snapSelection(selection, this.options);
+    const range = snapSelection(selection, this.options);
 
-    if (onSelect && selection.rangeCount > 0) {
-      const range: Range = getRange(selection);
+    if (onSelect && range) {
       const highlights: Highlight[] = Object.values(this.highlights)
         .filter((other: Highlight) => other.intersects(range));
 
