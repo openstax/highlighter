@@ -15,18 +15,14 @@ interface IOptions {
 }
 
 export default class Highlighter {
-  private _container: HTMLElement;
+  public readonly container: HTMLElement;
   private highlights: {[key: string]: Highlight} = {};
   private options: IOptions;
 
   constructor(container: HTMLElement, options: IOptions = {}) {
-    this._container = container;
+    this.container = container;
     this.options = options;
     this.container.addEventListener('mouseup', this.onMouseup);
-  }
-
-  get container() {
-    return this._container;
   }
 
   public unmount(): void {
