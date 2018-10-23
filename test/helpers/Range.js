@@ -1,4 +1,5 @@
 class Range {
+  cloneRange = () => new Range();
   setEnd = () => {};
   setStart = () => {};
   getBoundingClientRect = () => {};

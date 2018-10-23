@@ -53,8 +53,13 @@
     "moduleDirectories": [
       "node_modules"
     ],
+    "testPathIgnorePatterns": [
+      "<rootDir>/dist/",
+      "<rootDir>/node_modules/"
+    ],
     "setupFiles": [
-      "./test/helpers/Range"
+      "./test/helpers/Range",
+      "./test/helpers/Selection"
     ]
   },
   "dependencies": {

@@ -1,4 +1,7 @@
+import Highlight from './Highlight';
 import Highlighter from './Highlighter';
+import * as rangeContents from './rangeContents';
+import * as selection from './selection';
 
 describe('Reference elements', () => {
 
@@ -43,5 +46,56 @@ describe('Reference elements', () => {
     const highlighter = new Highlighter(container);
 
     expect(highlighter.getReferenceElement('referenceElement1')).toEqual(null);
+  });
+});
+
+describe('onSelect', () => {
+  let getSelectionSpy: jest.SpyInstance;
+  let snapSelectionSpy: jest.SpyInstance;
+  let rangeContentsStringSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    getSelectionSpy = jest.spyOn(document, 'getSelection');
+    snapSelectionSpy = jest.spyOn(selection, 'snapSelection');
+    rangeContentsStringSpy = jest.spyOn(rangeContents, 'rangeContentsString');
+
+    rangeContentsStringSpy.mockImplementation(() => '');
+  });
+
+  afterEach(() => {
+    getSelectionSpy.mockRestore();
+    snapSelectionSpy.mockRestore();
+    rangeContentsStringSpy.mockRestore();
+  });
+
+  it('returns a highlight with the snapped range, even if document selection returns something completely different (looking at you safari)', () => {
+    let highlight: Highlight | undefined;
+
+    const highlighter = new Highlighter(
+      document.createElement('div'),
+      {onSelect: (_: Highlight[], newHighlight?: Highlight) => highlight = newHighlight}
+    );
+
+    const inputSelection = new Selection();
+    const selectionRange = new Range();
+    const snappedRange = new Range();
+
+    Object.defineProperty(inputSelection, 'isCollapsed', {value: false});
+
+    inputSelection.getRangeAt = jest.fn(() => selectionRange);
+    snapSelectionSpy.mockImplementation(() => snappedRange);
+
+    getSelectionSpy.mockImplementation(() => inputSelection);
+
+    const e = document.createEvent('MouseEvents');
+    e.initEvent('mouseup', true, true);
+    highlighter.container.dispatchEvent(e);
+
+    if (highlight === undefined) {
+      expect(highlight).toBeDefined();
+    } else {
+      expect(highlight.range).not.toEqual(selectionRange);
+      expect(highlight.range).toEqual(snappedRange);
+    }
   });
 });
