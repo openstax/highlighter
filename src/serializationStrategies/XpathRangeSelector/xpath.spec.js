@@ -259,7 +259,7 @@ describe('getFirstByXPath', () => {
       <div id="reference">
         <div></div>
         <span></span>
-        <div></div>
+        ${'<div></div>'.repeat(50)}
         <div>
           <div>
             <section>
@@ -273,7 +273,7 @@ describe('getFirstByXPath', () => {
 
     const reference = document.getElementById('reference');
     const target = document.getElementById('target');
-    const [result] = xpath.getFirstByXPath("./*[name()='div'][3]/*[name()='div'][1]/*[name()='section'][1]/*[name()='div'][1]", 0, reference);
+    const [result] = xpath.getFirstByXPath("./*[name()='div'][52]/*[name()='div'][1]/*[name()='section'][1]/*[name()='div'][1]", 0, reference);
 
     expect(result).toEqual(target);
   });
