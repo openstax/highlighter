@@ -1,17 +1,18 @@
 {
   "name": "@openstax/highlighter",
-  "version": "1.1.2",
+  "version": "1.1.0",
   "main": "dist/highlighter.js",
   "license": "MIT",
   "scripts": {
+    "clean": "rm -rf dist",
     "build": "webpack --config=webpack.config.js --mode=production",
+    "build:clean": "npm-run-all clean build",
     "test": "jest --coverage --verbose --maxWorkers=2",
     "lint": "npm-run-all lint:js lint:ts lint:ts-types",
     "lint:js": "eslint src/**/*.js",
     "lint:ts": "tslint -p ./tsconfig.json",
     "lint:ts-types": "tsc",
-    "watch": "npm-run-all watch:test watch:build watch:ts",
-    "watch:build": "webpack --config=webpack.config.js --mode=development --watch",
+    "watch": "webpack --config=webpack.config.js --mode=development --watch",
     "watch:test": "jest --watchAll",
     "watch:ts": "tsc --noEmit --watch"
   },
