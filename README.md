@@ -48,11 +48,8 @@ yarn watch
 # do build
 yarn build:clean
 
-# increment version (this updates package.json and makes a git tag)
-yarn version [--minor|--major|--patch]
-
-# push to npm
-yarn publish
+# push to npm (this updates package.json and makes a git tag)
+yarn publish [--minor|--major|--patch]
 
 # push to github
 git push origin v$(yarn -s current)
