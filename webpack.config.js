@@ -2,6 +2,9 @@ var path = require('path');
 
 module.exports = {
   entry: './src/index.js',
+  optimization: {
+    minimize: false // disable minimazation since it's a library
+  },
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'highlighter.js',
