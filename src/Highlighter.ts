@@ -48,7 +48,7 @@ export default class Highlighter {
   }
 
   public getReferenceElement(id: string): HTMLElement | null {
-    return this.container.querySelector(`#${id}`);
+    return this.container.querySelector(`[id="${id}"]`);
   }
 
   public clearFocus(): void {
