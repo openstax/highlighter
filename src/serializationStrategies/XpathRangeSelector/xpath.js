@@ -4,8 +4,9 @@ const findElementChild = node => Array.prototype.find.call(node.childNodes, node
 const isHighlight = node => node && node.getAttribute && node.getAttribute(DATA_ATTR) !== null;
 const isTextHighlight = node => isHighlight(node) && !findElementChild(node);
 const isText = node => node && node.nodeType === 3;
+const isTextOrTextHighlight = node => isText(node) || isTextHighlight(node);
 const isElement = node => node && node.nodeType === 1;
-const isTextOrElement = node => isText(node) || isElement(node);
+const isElementNotHighlight = node => isElement(node) && !isHighlight(node);
 
 const IS_PATH_PART_SELF = /^\.$/;
 const IS_PATH_PART_TEXT = /^text\(\)\[(\d+)\]$/;
@@ -13,6 +14,14 @@ const IS_PATH_PART_ELEMENT = /\*\[name\(\)='(.+)'\]\[(\d+)\]/;
 
 // kinda copied from https://developer.mozilla.org/en-US/docs/Web/XPath/Snippets#getXPathForElement
 export function getXPathForElement(targetElement, offset, reference) {
+
+  // if the range offset designates text or a text highlight we need to move the target
+  // so text offset stuff will work
+  if (isElement(targetElement) && isTextOrTextHighlight(targetElement.childNodes[offset])) {
+    targetElement = targetElement.childNodes[offset];
+    offset = 0;
+  }
+
   let xpath = '';
   let pos
     , element = targetElement.previousSibling
@@ -20,16 +29,37 @@ export function getXPathForElement(targetElement, offset, reference) {
 
   // for a text target, highlights might have broken up the text node,
   // look for preceeding nodes that need to be combined into this one
-  // and modify the range offset accordingly
+  // and modify the range offset accordingly. only have to look at one
+  // previous sibling because text nodes cannot be siblings
   if (isText(focus) && isTextHighlight(element)) {
-    while(element && (isText(element) || isTextHighlight(element))) {
+    while(isText(element) || isTextHighlight(element)) {
+      offset += element.textContent.length;
+      element = element.previousSibling;
+    }
+  // if target is text highlight, treat it like its text
+  } else if (isTextHighlight(focus) && isTextOrTextHighlight(element)) {
+    offset = 0;
+
+    while(isText(element) || isTextHighlight(element)) {
       offset += element.textContent.length;
       element = element.previousSibling;
     }
   // for element targets, highlight children might be artifically
   // inflating the range offset, fix.
   } else if (isElement(focus)) {
-    offset -= Array.prototype.filter.call(Array.prototype.slice.call(focus.childNodes, 0, offset), isHighlight).length;
+    let search = focus.childNodes[offset];
+
+    while (search) {
+      if (isTextOrTextHighlight(search)) {
+        search = search.previousSibling;
+
+        while(isTextOrTextHighlight(search)) {
+          offset--;
+          search = search.previousSibling;
+        }
+      }
+      search = search ? search.previousSibling : null;
+    }
   }
 
   while(focus !== reference) {
@@ -38,21 +68,20 @@ export function getXPathForElement(targetElement, offset, reference) {
     while(element) {
       // highlights in text change the number of nodes in the nodelist,
       // compensate by gobbling adjacent highlights and text
-      if (isText(focus) && isTextHighlight(element)) {
-        while(element && (isText(element) || isTextHighlight(element))) {
+      if (isTextOrTextHighlight(focus) && isTextOrTextHighlight(element)) {
+        while(isTextOrTextHighlight(element)) {
           element = element.previousSibling;
         }
-      }
-      if (element) {
-        if (isTextOrElement(element) && !isHighlight(element) && element.nodeName === focus.nodeName) { // If it is ELEMENT_NODE or TEXT_NODE of the same name
+        pos += 1;
+      } else {
+        if (isElementNotHighlight(focus) && isElementNotHighlight(element) && element.nodeName === focus.nodeName) {
           pos += 1;
         }
-
         element = element.previousSibling;
       }
     }
 
-    if (isText(focus)) {
+    if (isText(focus) || isTextHighlight(focus)) {
       xpath = "text()["+pos+']'+'/'+xpath;
     } else {
       xpath = "*[name()='"+focus.nodeName.toLowerCase()+"']["+pos+']'+'/'+xpath;
@@ -79,15 +108,18 @@ export function getFirstByXPath(path, offset, referenceElement) {
     part = parts.shift();
   }
 
-  const highlightOrText = node => isHighlight(node) || isText(node);
-
+  // the part following is greedy, so walk back to the first matching
+  // textish node before computing offset
+  while (isTextOrTextHighlight(node) && isTextOrTextHighlight(node.previousSibling)) {
+    node = node.previousSibling;
+  }
   // highligts split up text nodes that should be treated as one, iterate through
   // until we find the text node that the offset specifies, modifying the offset
   // as we go. prefer leaving highlights if we have the option to deal with
   // adjacent highlights.
-  while ((isHighlight(node) && offset >= node.textContent.length) || (isText(node) && offset > node.textContent.length)) {
+  while ((isTextHighlight(node) && offset >= node.textContent.length) || (isText(node) && offset > node.textContent.length)) {
     offset -= node.textContent.length;
-    node = highlightOrText(node.nextSibling) ? node.nextSibling : null;
+    node = isTextOrTextHighlight(node.nextSibling) ? node.nextSibling : null;
   }
 
   if (node && isHighlight(node)) {
@@ -120,7 +152,7 @@ function followPart(node, part) {
     while (text && index > 1) {
       let search = text;
 
-      while (search && (isText(search) || isHighlight(search))) {
+      while (isTextOrTextHighlight(search)) {
         search = search.nextSibling;
       }
 

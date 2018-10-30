@@ -32,9 +32,10 @@ describe('getXPathForElement', () => {
 
     const reference = document.getElementById('reference');
     const text = reference.firstChild;
-    const [result] = xpath.getXPathForElement(text, 0, reference);
+    const [result, offset] = xpath.getXPathForElement(text, 3, reference);
 
     expect(result).toEqual("./text()[1]");
+    expect(offset).toEqual(3);
   });
 
   it('creates path to nested element', () => {
@@ -79,10 +80,10 @@ describe('getXPathForElement', () => {
     `;
 
     const reference = document.getElementById('reference');
-    const text = document.getElementById('target').previousSibling;
+    const text = document.getElementById('target').nextSibling;
     const [result] = xpath.getXPathForElement(text, 0, reference);
 
-    expect(result).toEqual("./*[name()='div'][3]/*[name()='div'][1]/*[name()='section'][1]/text()[1]");
+    expect(result).toEqual("./*[name()='div'][3]/*[name()='div'][1]/*[name()='section'][1]/text()[2]");
   });
 
   it('doesn\'t count highlights between elements', () => {
@@ -112,26 +113,37 @@ describe('getXPathForElement', () => {
 
   it('doesn\'t count highlights between previous text', () => {
     document.body.innerHTML = `
+      <div id="reference">qwer<span ${DATA_ATTR}>asdf</span><div id="target"></div><span ${DATA_ATTR}>as</span>asdfasdf</div>
+    `;
+
+    const reference = document.getElementById('reference');
+
+    const text = document.getElementById('target').nextSibling;
+    const [result, offset] = xpath.getXPathForElement(reference, 4, reference);
+
+    expect(result).toEqual("./text()[2]");
+    expect(offset).toEqual(2);
+  });
+
+  it('does count highlights in offsets without adjacent text', () => {
+    document.body.innerHTML = `
       <div id="reference">
         <div></div>
         <div></div>
         <div>
           werwerwerwer
-          <div>
-            qwer <span ${DATA_ATTR}>asdf</span> werewwer
-            <div id="target"></div>
-            asdfasdf
-          </div>
+          <div id="target"><span ${DATA_ATTR}>asdf</span></div>
         </div>
         <div></div>
       </div>
     `;
 
     const reference = document.getElementById('reference');
-    const text = document.getElementById('target').nextSibling;
-    const [result] = xpath.getXPathForElement(text, 0, reference);
+    const element = document.getElementById('target');
+    const [result, offset] = xpath.getXPathForElement(element, 1, reference);
 
-    expect(result).toEqual("./*[name()='div'][3]/*[name()='div'][1]/text()[2]");
+    expect(result).toEqual("./*[name()='div'][3]/*[name()='div'][1]");
+    expect(offset).toEqual(1);
   });
 
   it('doesn\'t count highlights between current text', () => {
@@ -196,6 +208,42 @@ describe('getXPathForElement', () => {
     expect(offset).toEqual(3);
   });
 
+  it('if target specifies the beginning of a highlight, move it ', () => {
+    document.body.innerHTML = `
+      <div id="reference">asdf<span></span>qwer <span ${DATA_ATTR}>asdf</span> werewwer</div>
+    `;
+
+    const reference = document.getElementById('reference');
+    const [result, offset] = xpath.getXPathForElement(reference, 3, reference);
+
+    expect(result).toEqual("./text()[2]");
+    expect(offset).toEqual(5);
+  });
+
+  it('if target is between two highlights, move it ', () => {
+    document.body.innerHTML = `
+      <div id="reference">qwer <span ${DATA_ATTR}>zxcv </span><span ${DATA_ATTR}>asdf</span> werewwer</div>
+    `;
+
+    const reference = document.getElementById('reference');
+    const [result, offset] = xpath.getXPathForElement(reference, 2, reference);
+
+    expect(result).toEqual("./text()[1]");
+    expect(offset).toEqual(10);
+  });
+
+  it('if target specifies the end of a highlight, move it ', () => {
+    document.body.innerHTML = `
+      <div id="reference">qwer <span ${DATA_ATTR}>asdf</span> werewwer</div>
+    `;
+
+    const reference = document.getElementById('reference');
+    const [result, offset] = xpath.getXPathForElement(reference, 2, reference);
+
+    expect(result).toEqual("./text()[1]");
+    expect(offset).toEqual(9);
+  });
+
   it('modifies offset for element target when treating text nodes separated by highlight as one', () => {
     document.body.innerHTML = `
       <div id="reference">
@@ -211,7 +259,7 @@ describe('getXPathForElement', () => {
     const [result, offset] = xpath.getXPathForElement(element, 3, reference);
 
     expect(result).toEqual("./*[name()='div'][1]");
-    expect(offset).toEqual(2);
+    expect(offset).toEqual(1);
   });
 });
 
