@@ -117,8 +117,6 @@ describe('getXPathForElement', () => {
     `;
 
     const reference = document.getElementById('reference');
-
-    const text = document.getElementById('target').nextSibling;
     const [result, offset] = xpath.getXPathForElement(reference, 4, reference);
 
     expect(result).toEqual("./text()[2]");
