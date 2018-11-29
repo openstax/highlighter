@@ -1,0 +1,15 @@
+version: '3.5'
+services:
+  build:
+    command: yarn build
+    image: node:10
+    working_dir: /code
+    volumes:
+      - .:/code
+  serve:
+    image: 'nginx'
+    volumes:
+      - ./dist:/usr/share/nginx/dist
+      - ./examples:/usr/share/nginx/html
+    ports:
+      - "8080:80"
