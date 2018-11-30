@@ -6,6 +6,7 @@ module.exports = {
     minimize: false // disable minimazation since it's a library
   },
   output: {
+    globalObject: "typeof self !== 'undefined' ? self : this",
     path: path.resolve(__dirname, 'dist'),
     filename: 'highlighter.js',
     library: 'highlighter',
