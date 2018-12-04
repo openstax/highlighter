@@ -57,3 +57,14 @@ git push origin v$(yarn -s current)
 # PR the version bump back into master (skip this for weirdo beta or release candidate tags)
 open https://github.com/openstax/highlighter/compare/master...v$(yarn -s current)?expand=1
 ```
+
+## Running the examples with docker
+
+```bash
+
+# builds the library for the examples to use
+docker-compose run build
+
+# runs the test server on port 8080
+docker-compose up serve
+```

@@ -1,0 +1,71 @@
+<html>
+  <head>
+    <style>
+      .highlight {
+        background: yellow;
+      }
+    </style>
+    <script src="/dist/highlighter.js"></script>
+    <script>
+      const HIGHLIGHT_KEY = 'highlight-basic-example';
+      const Highlighter = highlighter.default;
+      const SerializedHighlight = highlighter.SerializedHighlight;
+
+      window.onload = () => {
+        const manager = new Highlighter(document.documentElement, {
+          snapTableRows: true,
+          snapMathJax: true,
+          snapWords: true,
+          onClick: onClickHighlight,
+          onSelect: onSelectHighlight,
+        });
+
+        (JSON.parse(window.localStorage.getItem(HIGHLIGHT_KEY)) || [])
+          .map(data => new SerializedHighlight(data))
+          .forEach(serialized => manager.highlight(serialized))
+        ;
+
+        function onClickHighlight(highlight) {
+          if (highlight) {
+            manager.erase(highlight);
+          }
+          saveHighlights();
+        }
+
+        function onSelectHighlight(highlights, highlight) {
+          if (highlights.length > 0) {
+            return;
+          }
+          manager.highlight(highlight);
+          document.getSelection().removeAllRanges();
+
+          saveHighlights();
+        }
+
+        function saveHighlights() {
+          const highlights = manager.getHighlights();
+          const data = highlights.map(highlight => highlight.serialize().data);
+
+          window.localStorage.setItem(HIGHLIGHT_KEY, JSON.stringify(data));
+        }
+      };
+    </script>
+  </head>
+  <body id="basic-example">
+    <p>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. In ut nibh justo. Proin nunc leo, iaculis quis sodales volutpat, iaculis in est. Nulla eget tempus diam. Nullam metus elit, sodales vitae felis et, viverra consequat urna. Vestibulum porta auctor faucibus. Suspendisse pulvinar ipsum in ex accumsan molestie. Cras feugiat varius dolor eu gravida. Sed dictum elementum blandit. Donec tincidunt mollis sem, ut egestas ante egestas vel. Quisque bibendum mollis lectus, vel molestie magna sodales vel. Praesent at purus non sem laoreet dictum. Nunc vehicula condimentum diam, ac pulvinar mauris accumsan quis. Vivamus finibus semper purus et bibendum.
+    </p>
+    <p>
+      Nullam a aliquet ante, quis eleifend tellus. Aliquam erat volutpat. Integer posuere, enim a accumsan eleifend, arcu lacus condimentum libero, vel interdum arcu nulla a dolor. Fusce eget nunc elementum nibh laoreet convallis. Nam erat dui, imperdiet at aliquet ut, porta a urna. Suspendisse efficitur mauris vel justo laoreet mollis. Sed pellentesque est mi, ac facilisis libero placerat non. Praesent elementum eu ligula non convallis. Maecenas consequat leo dolor, eu finibus enim imperdiet id. Vestibulum ut tellus nec nisl venenatis faucibus vitae eu mi. Maecenas tempus in lectus et iaculis. Donec convallis elit ut lorem ullamcorper venenatis. Integer rhoncus leo nisi, a scelerisque erat pharetra non. Duis non consequat sapien, ut tristique augue. Nullam rhoncus orci nec venenatis consequat. In justo felis, accumsan imperdiet nulla non, varius ultricies nulla.
+    </p>
+    <p>
+      Vivamus placerat vel ligula sit amet ultrices. Donec quam dui, commodo ut volutpat at, cursus vel est. Quisque id cursus tellus. In magna dui, tempor et sapien vitae, viverra faucibus sem. Nam et dolor ut lorem fermentum vulputate. Cras consectetur leo vitae turpis suscipit, nec auctor mauris mollis. Ut id mi velit. Aenean elit ipsum, rutrum eu sodales sed, semper sed ligula. Fusce congue mi non mollis blandit. Fusce lorem ipsum, vestibulum vel eros vitae, sagittis mollis nisl. Vivamus vitae hendrerit libero. Sed nec neque imperdiet, volutpat neque id, aliquet felis.
+    </p>
+    <p>
+      Nulla nec diam a lorem pharetra placerat nec eget neque. Vestibulum ultrices, tortor sed volutpat pharetra, lorem mi ornare purus, non pellentesque lectus tortor id neque. Nullam non sem at turpis laoreet efficitur non eget felis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Proin in massa dui. Suspendisse porta tortor nec lorem rutrum, eget hendrerit eros ultricies. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam condimentum volutpat luctus. Nulla ullamcorper eu dolor dapibus lobortis.
+    </p>
+    <p>
+      Etiam elementum lacus eget tortor consequat imperdiet. Cras elementum tortor vitae fringilla pellentesque. Quisque et pulvinar libero, non posuere urna. Aenean cursus ligula leo, eget gravida sem ultrices at. Nunc imperdiet sem sed consectetur fringilla. Ut pretium, tellus id volutpat rutrum, elit sapien ornare dui, non tristique nisi diam in magna. Ut tortor dolor, pellentesque vel metus a, cursus vestibulum enim.
+    </p>
+  </body>
+</html>
