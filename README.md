@@ -68,3 +68,9 @@ docker-compose run build
 # runs the test server on port 8080
 docker-compose up serve
 ```
+
+## Deploy examples to gh-pages 
+
+```bash
+yarn build:clean && yarn deploy:examples
+```
