@@ -1,7 +1,7 @@
 {
   "name": "@openstax/highlighter",
   "version": "1.1.9",
-  "main": "dist/highlighter.js",
+  "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
     "current": "node -e \"console.log(require('./package.json').version)\"",
