@@ -13,8 +13,8 @@
     "lint:js": "eslint src/**/*.js",
     "lint:ts": "tslint -p ./tsconfig.json",
     "lint:ts-types": "tsc",
-    "watch:test": "jest --watchAll",
-    "watch:ts": "tsc --noEmit --watch"
+    "watch": "tsc --noEmit --watch",
+    "watch:test": "jest --watchAll"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",
