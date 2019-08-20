@@ -1,1 +1,1 @@
-declare module "serialize-selection"; 
+declare module 'serialize-selection';

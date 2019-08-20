@@ -53,8 +53,10 @@ export function load(highlighter: Highlighter, data: IData): Range {
   const [startContainer, startOffset] = getFirstByXPath(data.startContainer, data.startOffset, referenceElement);
   const [endContainer, endOffset] = getFirstByXPath(data.endContainer, data.endOffset, referenceElement);
 
-  range.setStart(startContainer, startOffset);
-  range.setEnd(endContainer, endOffset);
+  if (startContainer && endContainer) {
+    range.setStart(startContainer, startOffset);
+    range.setEnd(endContainer, endOffset);
+  }
 
   return range;
 }
