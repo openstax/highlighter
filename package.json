@@ -1,6 +1,6 @@
 {
   "name": "@openstax/highlighter",
-  "version": "1.1.9",
+  "version": "1.2.0-beta.1",
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
@@ -8,8 +8,6 @@
     "clean": "rm -rf dist",
     "build": "tsc -m es6 --outDir dist",
     "build:clean": "npm-run-all clean build",
-    "clean": "rm -rf dist",
-    "current": "node -e \"console.log(require('./package.json').version)\"",
     "deploy:examples": "gh-pages -d examples",
     "lint": "npm-run-all lint:js lint:ts lint:ts-types",
     "lint:js": "eslint src/**/*.js",
