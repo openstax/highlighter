@@ -1,6 +1,6 @@
 {
   "name": "@openstax/highlighter",
-  "version": "1.2.0-beta.1",
+  "version": "1.2.0-beta.2",
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
@@ -38,6 +38,9 @@
     "typescript": "^3.1.1",
     "typescript-babel-jest": "^1.0.5"
   },
+  "files": [
+    "dist"
+  ],
   "resolutions": {
     "babel-core": "7.0.0-bridge.0"
   },
