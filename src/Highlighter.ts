@@ -29,7 +29,11 @@ export default class Highlighter {
     this.container.removeEventListener('mouseup', this.onMouseup);
   }
 
-  public erase(highlight: Highlight): void {
+  public eraseAll = (): void => {
+    this.getHighlights().forEach(this.erase);
+  }
+
+  public erase = (highlight: Highlight): void => {
     removeHighlightWrappers(highlight);
     delete this.highlights[highlight.id];
   }
