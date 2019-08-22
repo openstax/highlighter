@@ -1,10 +1,12 @@
+// tslint:disable
 import dom from './dom';
+import Highlight from './Highlight';
 
 export const DATA_ATTR = 'data-highlighted';
 
 const NODE_TYPE = {
   ELEMENT_NODE: 1,
-  TEXT_NODE: 3
+  TEXT_NODE: 3,
 };
 
 /**
@@ -12,32 +14,32 @@ const NODE_TYPE = {
  * If no element is given, all highlights all removed.
  * @param {HTMLElement} [element] - element to remove highlights from
  */
-export default function(highlight) {
+export default function(highlight: Highlight) {
   highlight.elements.forEach(removeHighlightElement);
 }
 
-function removeHighlightElement(element) {
-  var container = element,
+function removeHighlightElement(element: HTMLElement) {
+  const container = element,
     highlights = getHighlights(container);
 
-  function mergeSiblingTextNodes(textNode) {
-    var prev = textNode.previousSibling,
+  function mergeSiblingTextNodes(textNode: Text) {
+    const prev = textNode.previousSibling,
       next = textNode.nextSibling;
 
     if (prev && prev.nodeType === NODE_TYPE.TEXT_NODE) {
-      textNode.nodeValue = prev.nodeValue + textNode.nodeValue;
+      textNode.nodeValue = prev!.nodeValue + textNode.nodeValue!;
       dom(prev).remove();
     }
     if (next && next.nodeType === NODE_TYPE.TEXT_NODE) {
-      textNode.nodeValue = textNode.nodeValue + next.nodeValue;
+      textNode.nodeValue = textNode!.nodeValue + next.nodeValue!;
       dom(next).remove();
     }
   }
 
-  function removeHighlight(highlight) {
-    var textNodes = dom(highlight).unwrap();
+  function removeHighlight(highlight: HTMLElement) {
+    const textNodes = dom(highlight).unwrap();
 
-    textNodes.forEach(function (node) {
+    textNodes.forEach(function(node: Text) {
       mergeSiblingTextNodes(node);
     });
   }
@@ -52,8 +54,8 @@ function removeHighlightElement(element) {
  * @param {HTMLElement} container - return highlights from this element
  * @returns {Array} - array of highlights.
  */
-function getHighlights(container) {
-  var nodeList = container.querySelectorAll('[' + DATA_ATTR + ']'),
+function getHighlights(container: HTMLElement) {
+  const nodeList = container.querySelectorAll('[' + DATA_ATTR + ']'),
     highlights = Array.prototype.slice.call(nodeList);
 
   if (container.hasAttribute(DATA_ATTR)) {
@@ -68,9 +70,8 @@ function getHighlights(container) {
  * @param {HTMLElement[]} arr - array to sort.
  * @param {boolean} descending - order of sort.
  */
-function sortByDepth(arr, descending) {
-  arr.sort(function (a, b) {
+function sortByDepth(arr: HTMLElement[], descending: boolean) {
+  arr.sort(function(a, b) {
     return dom(descending ? b : a).parents().length - dom(descending ? a : b).parents().length;
   });
 }
-
