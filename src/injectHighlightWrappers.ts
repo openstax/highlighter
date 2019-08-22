@@ -1,10 +1,12 @@
+// tslint:disable
 import dom from './dom';
+import Highlight from './Highlight';
 
 export const TIMESTAMP_ATTR = 'data-timestamp';
 export const DATA_ATTR = 'data-highlighted';
 const NODE_TYPE = {
   ELEMENT_NODE: 1,
-  TEXT_NODE: 3
+  TEXT_NODE: 3,
 };
 /**
  * Don't highlight content of these tags.
@@ -15,11 +17,18 @@ const IGNORE_TAGS = [
   'VIDEO', 'AUDIO', 'CANVAS', 'EMBED', 'PARAM', 'METER', 'PROGRESS',
 ];
 
-export default function injectHighlightWrappers(highlight, options = {}) {
-  const wrapper = createWrapper(Object.assign({
+interface IOptions {
+  id?: string;
+  timestamp?: number;
+  className?: string;
+}
+
+export default function injectHighlightWrappers(highlight: Highlight, options: IOptions = {}) {
+  const wrapper = createWrapper({
     id: highlight.id,
     timestamp: Date.now(),
-  }, options));
+    ...options
+  });
 
   const createdHighlights = highlightRange(highlight.range, wrapper);
   const normalizedHighlights = normalizeHighlights(createdHighlights);
@@ -38,22 +47,22 @@ export default function injectHighlightWrappers(highlight, options = {}) {
  * @returns {Array} - array of normalized highlights. Order and number of returned highlights may be different than
  * input highlights.
  */
-function normalizeHighlights(highlights) {
-  var normalizedHighlights;
+function normalizeHighlights(highlights: Node[]) {
+  let normalizedHighlights;
 
   flattenNestedHighlights(highlights);
   mergeSiblingHighlights(highlights);
 
   // omit removed nodes
-  normalizedHighlights = highlights.filter(function (hl) {
+  normalizedHighlights = highlights.filter(function(hl) {
     return hl.parentElement ? hl : null;
   });
 
   normalizedHighlights = unique(normalizedHighlights);
-  normalizedHighlights.sort(function (a, b) {
-    if( !a.compareDocumentPosition) {
+  normalizedHighlights.sort(function(a: Node, b: Node) {
+    if ( !a.compareDocumentPosition) {
       // support for IE8 and below
-      return a.sourceIndex - b.sourceIndex;
+      return (a as any).sourceIndex - (b as any).sourceIndex;
     }
     const position = a.compareDocumentPosition(b);
     if (position & Node.DOCUMENT_POSITION_FOLLOWING || position & Node.DOCUMENT_POSITION_CONTAINED_BY) {
@@ -75,40 +84,40 @@ function normalizeHighlights(highlights) {
  * @param {HTMLElement} wrapper
  * @returns {Array} - array of created highlights.
  */
-function highlightRange(range, wrapper) {
+function highlightRange(range: Range, wrapper: HTMLElement) {
   if (!range || range.collapsed) {
     return [];
   }
 
-  var result = refineRangeBoundaries(range),
+  let result = refineRangeBoundaries(range),
     startContainer = result.startContainer,
     endContainer = result.endContainer,
     goDeeper = result.goDeeper,
     done = false,
     node = startContainer,
-    highlights = [],
+    highlights = [] as HTMLElement[],
     highlight,
     wrapperClone;
 
-  const highlightNode = node => {
-    wrapperClone = wrapper.cloneNode(true);
-    wrapperClone.setAttribute(DATA_ATTR, true);
+  const highlightNode = (node: HTMLElement) => {
+    wrapperClone = wrapper.cloneNode(true) as HTMLElement;
+    wrapperClone.setAttribute(DATA_ATTR, 'true');
 
     highlight = dom(node).wrap(wrapperClone);
     highlights.push(highlight);
   };
 
   do {
-    if(!node) { done = true; }
+    if (!node) { done = true; }
 
     if (dom(node).matches('.MathJax,img')) {
-      highlightNode(node);
+      highlightNode(node as HTMLElement);
       goDeeper = false;
     }
     if (goDeeper && node.nodeType === NODE_TYPE.TEXT_NODE) {
 
-      if (IGNORE_TAGS.indexOf(node.parentNode.tagName) === -1 && node.nodeValue.trim() !== '') {
-        highlightNode(node);
+      if (IGNORE_TAGS.indexOf((node.parentNode as HTMLElement).tagName) === -1 && node.nodeValue!.trim() !== '') {
+        highlightNode(node as HTMLElement);
       }
 
       goDeeper = false;
@@ -117,7 +126,7 @@ function highlightRange(range, wrapper) {
       done = true;
     }
 
-    if (node.tagName && IGNORE_TAGS.indexOf(node.tagName) > -1) {
+    if ((node as HTMLElement).tagName && IGNORE_TAGS.indexOf((node as HTMLElement).tagName) > -1) {
 
       if (endContainer.parentNode === node) {
         done = true;
@@ -125,12 +134,12 @@ function highlightRange(range, wrapper) {
       goDeeper = false;
     }
     if (goDeeper && node.hasChildNodes()) {
-      node = node.firstChild;
+      node = node.firstChild as HTMLElement;
     } else if (node.nextSibling) {
       node = node.nextSibling;
       goDeeper = true;
     } else {
-      node = node.parentNode;
+      node = node.parentNode as HTMLElement;
       goDeeper = false;
     }
   } while (!done);
@@ -143,29 +152,29 @@ function highlightRange(range, wrapper) {
  * @param range
  * @returns {object} refined boundaries and initial state of highlighting algorithm.
  */
-function refineRangeBoundaries(range) {
-  var startContainer = range.startContainer,
+function refineRangeBoundaries(range: Range) {
+  let startContainer = range.startContainer,
     endContainer = range.endContainer,
     ancestor = range.commonAncestorContainer,
     goDeeper = true;
 
   if (range.endOffset === 0) {
     while (!endContainer.previousSibling && endContainer.parentNode !== ancestor) {
-      endContainer = endContainer.parentNode;
+      endContainer = endContainer.parentNode as HTMLElement;
     }
-    endContainer = endContainer.previousSibling;
+    endContainer = endContainer.previousSibling as HTMLElement;
   } else if (endContainer.nodeType === NODE_TYPE.TEXT_NODE) {
-    if (range.endOffset < endContainer.nodeValue.length) {
-      endContainer.splitText(range.endOffset);
+    if (range.endOffset < endContainer.nodeValue!.length) {
+      (endContainer as Text).splitText(range.endOffset);
     }
   } else if (range.endOffset > 0) {
     endContainer = endContainer.childNodes.item(range.endOffset - 1);
   }
   if (startContainer.nodeType === NODE_TYPE.TEXT_NODE) {
-    if (range.startOffset === startContainer.nodeValue.length) {
+    if (range.startOffset === (startContainer as Text).nodeValue!.length) {
       goDeeper = false;
     } else if (range.startOffset > 0) {
-      startContainer = startContainer.splitText(range.startOffset);
+      startContainer = (startContainer as Text).splitText(range.startOffset);
       if (endContainer === startContainer.previousSibling) {
         endContainer = startContainer;
       }
@@ -173,11 +182,11 @@ function refineRangeBoundaries(range) {
   } else if (range.startOffset < startContainer.childNodes.length) {
     startContainer = startContainer.childNodes.item(range.startOffset);
   } else {
-    startContainer = startContainer.nextSibling;
+    startContainer = startContainer.nextSibling as Node;
   }
 
   // BEGIN this might not be necessary, test removing it
-  const getMath = node => {
+  const getMath = (node: Node) => {
     const mathjax = dom(node).farthest('.MathJax');
     if (mathjax) {
       return mathjax;
@@ -205,9 +214,9 @@ function refineRangeBoundaries(range) {
   // END this might not be necessary, test removing it
 
   return {
-    startContainer: startContainer,
-    endContainer: endContainer,
-    goDeeper: goDeeper
+    startContainer,
+    endContainer,
+    goDeeper,
   };
 }
 
@@ -216,18 +225,18 @@ function refineRangeBoundaries(range) {
  * Note: this method changes input highlights - their order and number after calling this method may change.
  * @param {Array} highlights - highlights to flatten.
  */
-function flattenNestedHighlights(highlights) {
-  var again;
+function flattenNestedHighlights(highlights: Node[]) {
+  let again;
 
   sortByDepth(highlights, true);
 
   function flattenOnce() {
-    var again = false;
+    let again = false;
 
-    highlights.forEach(function (hl, i) {
-      var parent = hl.parentElement,
-        parentPrev = parent.previousSibling,
-        parentNext = parent.nextSibling;
+    highlights.forEach(function(hl, i) {
+      const parent = hl.parentElement!,
+        parentPrev = parent!.previousSibling,
+        parentNext = parent!.nextSibling;
 
       if (isHighlight(parent)) {
 
@@ -248,7 +257,7 @@ function flattenNestedHighlights(highlights) {
           }
 
         } else {
-          parent.replaceChild(hl.firstChild, hl);
+          parent.replaceChild(hl.firstChild!, hl);
           highlights[i] = parent;
           again = true;
         }
@@ -270,24 +279,24 @@ function flattenNestedHighlights(highlights) {
  * Note: this method changes input highlights - their order and number after calling this method may change.
  * @param highlights
  */
-function mergeSiblingHighlights(highlights) {
+function mergeSiblingHighlights(highlights: Node[]) {
 
-  function shouldMerge(current, node) {
+  function shouldMerge(current: any, node: any) {
     return isHighlight(current) && isHighlight(node)
-      && current.data && node.data
-      && current.data.id === node.data.id;
+      && (current as any).data && (node as any).data
+      && (current as any).data.id === (node as any).data.id;
   }
 
-  highlights.forEach(function (highlight) {
-    var prev = highlight.previousSibling,
+  highlights.forEach(function(highlight) {
+    const prev = highlight.previousSibling,
       next = highlight.nextSibling;
 
     if (shouldMerge(highlight, prev)) {
-      dom(highlight).prepend(prev.childNodes);
+      dom(highlight).prepend(prev!.childNodes);
       dom(prev).remove();
     }
     if (shouldMerge(highlight, next)) {
-      dom(highlight).append(next.childNodes);
+      dom(highlight).append(next!.childNodes);
       dom(next).remove();
     }
 
@@ -298,29 +307,29 @@ function mergeSiblingHighlights(highlights) {
 /**
  * Creates wrapper for highlights.
  */
-function createWrapper(options) {
-  var span = document.createElement('span');
+function createWrapper(options: any) {
+  const span = document.createElement('span');
   span.className = options.className || 'highlight';
   if (options.timestamp) {
     span.setAttribute(TIMESTAMP_ATTR, options.timestamp);
   }
   if (options.id) {
-    span.setAttribute('data-id', options.id)
+    span.setAttribute('data-id', options.id);
   }
   return span;
 }
 
-function isHighlight(el) {
+function isHighlight(el: any): el is HTMLElement {
   return el && el.nodeType === NODE_TYPE.ELEMENT_NODE && el.hasAttribute(DATA_ATTR);
 }
 
-function sortByDepth(arr, descending) {
-  arr.sort(function (a, b) {
+function sortByDepth(arr: Node[], descending: boolean) {
+  arr.sort(function(a, b) {
     return dom(descending ? b : a).parents().length - dom(descending ? a : b).parents().length;
   });
 }
 
-function haveSameColor() {
+function haveSameColor(_: Node, __: Node) {
   return true;
 }
 
@@ -329,8 +338,8 @@ function haveSameColor() {
  * @param {Array} arr
  * @returns {Array}
  */
-function unique(arr) {
-  return arr.filter(function (value, idx, self) {
+function unique(arr: any[]) {
+  return arr.filter(function(value, idx, self) {
     return self.indexOf(value) === idx;
   });
 }
