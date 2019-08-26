@@ -1,10 +1,12 @@
 {
   "name": "@openstax/highlighter",
   "version": "1.1.9",
-  "main": "dist/highlighter.js",
+  "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "webpack --config=webpack.config.js --mode=production",
+    "current": "node -e \"console.log(require('./package.json').version)\"",
+    "clean": "rm -rf dist",
+    "build": "tsc -m es6 --outDir dist",
     "build:clean": "npm-run-all clean build",
     "clean": "rm -rf dist",
     "current": "node -e \"console.log(require('./package.json').version)\"",
@@ -14,9 +16,8 @@
     "lint:ts": "tslint -p ./tsconfig.json",
     "lint:ts-types": "tsc",
     "test": "jest --coverage --verbose --maxWorkers=2",
-    "watch": "webpack --config=webpack.config.js --mode=development --watch",
-    "watch:test": "jest --watchAll",
-    "watch:ts": "tsc --noEmit --watch"
+    "watch": "tsc --noEmit --watch",
+    "watch:test": "jest --watchAll"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",
@@ -37,9 +38,7 @@
     "tslint": "^5.11.0",
     "tslint-loader": "^3.6.0",
     "typescript": "^3.1.1",
-    "typescript-babel-jest": "^1.0.5",
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2"
+    "typescript-babel-jest": "^1.0.5"
   },
   "resolutions": {
     "babel-core": "7.0.0-bridge.0"

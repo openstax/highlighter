@@ -1,13 +1,14 @@
+// tslint:disable
 /**
  * Utility functions to make DOM manipulation easier.
  */
 
 const NODE_TYPE = {
   ELEMENT_NODE: 1,
-  TEXT_NODE: 3
+  TEXT_NODE: 3,
 };
 
-export default function dom(el) {
+export default function dom(el: any) {
 
   return {
 
@@ -18,7 +19,7 @@ export default function dom(el) {
      * Adds class to element.
      * @param {string} className
      */
-    addClass(className) {
+    addClass(className: any) {
       if (el.classList) {
         el.classList.add(className);
       } else {
@@ -30,7 +31,7 @@ export default function dom(el) {
      * Removes class from element.
      * @param {string} className
      */
-    removeClass(className) {
+    removeClass(className: any) {
       if (el.classList) {
         el.classList.remove(className);
       } else {
@@ -44,8 +45,8 @@ export default function dom(el) {
      * Prepends child nodes to base element.
      * @param {Node[]} nodesToPrepend
      */
-    prepend(nodesToPrepend) {
-      var nodes = Array.prototype.slice.call(nodesToPrepend),
+    prepend(nodesToPrepend: any) {
+      let nodes = Array.prototype.slice.call(nodesToPrepend),
         i = nodes.length;
 
       while (i--) {
@@ -57,10 +58,10 @@ export default function dom(el) {
      * Appends child nodes to base element.
      * @param {Node[]} nodesToAppend
      */
-    append(nodesToAppend) {
-      var nodes = Array.prototype.slice.call(nodesToAppend);
+    append(nodesToAppend: any) {
+      const nodes = Array.prototype.slice.call(nodesToAppend);
 
-      for (var i = 0, len = nodes.length; i < len; ++i) {
+      for (let i = 0, len = nodes.length; i < len; ++i) {
         el.appendChild(nodes[i]);
       }
     },
@@ -70,7 +71,7 @@ export default function dom(el) {
      * @param {Node} refEl - node after which base element will be inserted
      * @returns {Node} - inserted element
      */
-    insertAfter(refEl) {
+    insertAfter(refEl: any) {
       return refEl.parentNode.insertBefore(el, refEl.nextSibling);
     },
 
@@ -79,7 +80,7 @@ export default function dom(el) {
      * @param {Node} refEl - node before which base element will be inserted
      * @returns {Node} - inserted element
      */
-    insertBefore(refEl) {
+    insertBefore(refEl: any) {
       return refEl.parentNode.insertBefore(el, refEl);
     },
 
@@ -96,7 +97,7 @@ export default function dom(el) {
      * @param {Node|HTMLElement} child
      * @returns {boolean}
      */
-    contains(child) {
+    contains(child: any) {
       return el !== child && el.contains(child);
     },
 
@@ -105,7 +106,7 @@ export default function dom(el) {
      * @param {HTMLElement} wrapper
      * @returns {HTMLElement} wrapper element
      */
-    wrap(wrapper) {
+    wrap(wrapper: any) {
       if (el.parentNode) {
         el.parentNode.insertBefore(wrapper, el);
       }
@@ -119,10 +120,10 @@ export default function dom(el) {
      * @returns {Node[]} - child nodes of unwrapped element.
      */
     unwrap() {
-      var nodes = Array.prototype.slice.call(el.childNodes),
+      let nodes = Array.prototype.slice.call(el.childNodes),
         wrapper;
 
-      nodes.forEach(function (node) {
+      nodes.forEach(function(node: any) {
         wrapper = node.parentNode;
         dom(node).insertBefore(node.parentNode);
         dom(wrapper).remove();
@@ -136,7 +137,7 @@ export default function dom(el) {
      * @returns {HTMLElement[]}
      */
     parents() {
-      var parent, path = [];
+      let parent, path = [];
       while ((parent = el.parentNode)) {
         path.push(parent);
         el = parent;
@@ -170,8 +171,8 @@ export default function dom(el) {
      * @param {string} html
      * @returns {NodeList}
      */
-    fromHTML(html) {
-      var div = document.createElement('div');
+    fromHTML(html: any) {
+      const div = document.createElement('div');
       div.innerHTML = html;
       return div.childNodes;
     },
@@ -181,7 +182,7 @@ export default function dom(el) {
      * @returns {Range}
      */
     getRange() {
-      var selection = dom(el).getSelection(),
+      let selection = dom(el).getSelection(),
         range;
 
       if (selection.rangeCount > 0) {
@@ -195,7 +196,7 @@ export default function dom(el) {
      * Removes all ranges of the window of base element.
      */
     removeAllRanges() {
-      var selection = dom(el).getSelection();
+      const selection = dom(el).getSelection();
       selection.removeAllRanges();
     },
 
@@ -224,12 +225,12 @@ export default function dom(el) {
       return el.ownerDocument || el;
     },
 
-    matches(selector) {
+    matches(selector: any) {
       const method = el.matches || el.mozMatchesSelector || el.msMatchesSelector || el.oMatchesSelector || el.webkitMatchesSelector;
       return (method != null ? method.call(el, selector) : undefined);
     },
 
-    isParent(node, options) {
+    isParent(node: any, options?: any) {
       if (options == null) { options = { matchSame: true }; }
       if (!parent) { return false; }
       if (options.matchSame && (node === el)) { return true; }
@@ -241,7 +242,7 @@ export default function dom(el) {
       return false;
     },
 
-    closest(selector) {
+    closest(selector: any): any {
       if (this.matches(selector)) {
         return el;
       } else {
@@ -249,7 +250,7 @@ export default function dom(el) {
       }
     },
 
-    farthest(selector) {
+    farthest(selector: any): any {
       const thisMatches = this.matches(selector);
 
       if (el.parentNode && thisMatches) {
