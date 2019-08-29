@@ -9,7 +9,7 @@
   "scripts": {
     "current": "node -e \"console.log(require('./package.json').version)\"",
     "clean": "rm -rf dist",
-    "build": "tsc -m es6 --outDir dist",
+    "build": "tsc --outDir dist",
     "build:clean": "npm-run-all clean build",
     "deploy:examples": "gh-pages -d examples",
     "lint": "npm-run-all lint:js lint:ts lint:ts-types",
