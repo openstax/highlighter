@@ -12,7 +12,7 @@
     "alwaysStrict": true,
     "strict": true,
     "declaration": true,
-    "module": "es6",
+    "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true
   },
