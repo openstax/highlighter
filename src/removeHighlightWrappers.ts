@@ -14,6 +14,10 @@ const NODE_TYPE = {
  * If no element is given, all highlights all removed.
  * @param {HTMLElement} [element] - element to remove highlights from
  */
+export function removeAllHighlights(element: HTMLElement) {
+  getHighlights(element).forEach(removeHighlightElement);
+}
+
 export default function(highlight: Highlight) {
   highlight.elements.forEach(removeHighlightElement);
 }

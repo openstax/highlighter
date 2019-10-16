@@ -1,9 +1,11 @@
 // tslint:disable
 import {DATA_ATTR} from '../../injectHighlightWrappers';
 
-const findElementChild = (node: Node) => Array.prototype.find.call(node.childNodes, (node: Node) => node.nodeType === 1);
+const findNonTextChild = (node: Node) => Array.prototype.find.call(node.childNodes,
+  (node: Node) => node.nodeType === Node.ELEMENT_NODE && !isTextHighlight(node)
+);
 const isHighlight = (node: Node): node is HTMLElement => node && (node as Element).getAttribute && (node as Element).getAttribute(DATA_ATTR) !== null;
-const isTextHighlight = (node: Node): node is HTMLElement => isHighlight(node) && !findElementChild(node);
+const isTextHighlight = (node: Node): node is HTMLElement => isHighlight(node) && !findNonTextChild(node);
 const isText = (node: Node): node is Text => node && node.nodeType === 3;
 const isTextOrTextHighlight = (node: Node | HTMLElement) => isText(node) || isTextHighlight(node);
 const isElement = (node: Node): node is HTMLElement => node && node.nodeType === 1;
@@ -84,13 +86,12 @@ export function getXPathForElement(targetElement: Node, offset: number, referenc
 
     if (isText(focus) || isTextHighlight(focus)) {
       xpath = 'text()[' + pos + ']' + '/' + xpath;
-    } else {
+    } else if (!isHighlight(focus)) {
       xpath = '*[name()=\'' + focus.nodeName.toLowerCase() + '\'][' + pos + ']' + '/' + xpath;
     }
 
     focus = focus.parentNode!;
     element = focus.previousSibling!;
-
   }
 
   xpath = './' + xpath;
