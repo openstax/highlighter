@@ -47,7 +47,7 @@ export default class Highlighter {
     }
   }
 
-  public getHighlight(id: string): Highlight {
+  public getHighlight(id: string): Highlight | undefined {
     return this.highlights[id];
   }
 
