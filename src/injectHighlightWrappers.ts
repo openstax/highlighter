@@ -50,7 +50,7 @@ export default function injectHighlightWrappers(highlight: Highlight, options: I
 function normalizeHighlights(highlights: Node[]) {
   let normalizedHighlights;
 
-  flattenNestedHighlights(highlights);
+  //flattenNestedHighlights(highlights);
   mergeSiblingHighlights(highlights);
 
   // omit removed nodes
@@ -225,6 +225,7 @@ function refineRangeBoundaries(range: Range) {
  * Note: this method changes input highlights - their order and number after calling this method may change.
  * @param {Array} highlights - highlights to flatten.
  */
+// @ts-ignore
 function flattenNestedHighlights(highlights: Node[]) {
   let again;
 
