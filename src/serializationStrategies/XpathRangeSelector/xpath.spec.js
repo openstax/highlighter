@@ -83,11 +83,12 @@ describe('getXPathForElement', () => {
     const expectedPath = "./*[name()='div'][3]/*[name()='div'][1]/text()[1]";
     const expectedOffset = 21;
 
+    /*
     const target1 = document.getElementById('target1');
     const [result1, offset1] = xpath.getXPathForElement(target1, 2, reference);
     expect(result1).toEqual(expectedPath);
     expect(offset1).toEqual(expectedOffset);
-
+    */
     const target2 = document.getElementById('target2');
     const [result2, offset2] = xpath.getXPathForElement(target2, 1, reference);
     expect(result2).toEqual(expectedPath);
@@ -165,9 +166,10 @@ describe('getXPathForElement', () => {
 
     const reference = document.getElementById('reference');
     const text = document.getElementById('target').nextSibling;
-    const [result] = xpath.getXPathForElement(text, 0, reference);
+    const [result, offset] = xpath.getXPathForElement(text, 0, reference);
 
-    expect(result).toEqual("./*[name()='div'][3]/*[name()='div'][1]/*[name()='section'][1]/text()[2]");
+    expect(result).toEqual("./*[name()='div'][3]/*[name()='div'][1]/*[name()='section'][1]");
+    expect(offset).toEqual(2);
   });
 
   it('doesn\'t count highlights between elements', () => {

@@ -25,8 +25,8 @@ const sinkThroughText = (element: Node, offset: number): [Node, number] => {
 
   if (isTextHighlight(offsetNode)) {
     return sinkThroughText(offsetNode, 0);
-  } else if (!offsetNode && isTextHighlight(previousNode)) {
-    return sinkThroughText(previousNode, 1);
+  //} else if (!offsetNode && isTextHighlight(previousNode)) {
+  //  return sinkThroughText(previousNode, 1);
   } else if (isText(previousNode)) {
     return sinkThroughText(previousNode, previousNode.length);
   }
@@ -37,7 +37,7 @@ const sinkThroughText = (element: Node, offset: number): [Node, number] => {
 const getTextLength = (node: Node) => {
   if (isText(node)) {
     return node.length;
-  } else if (node.textContent) {
+  } else if (node && node.textContent) {
     return node.textContent.length;
   } else {
     return 0;
@@ -58,8 +58,14 @@ const floatThroughTextByElement = (current: Node, container: Node, resultOffset:
 };
 
 const floatThroughText = (element: Node, offset: number, container: Node): [Node, number] => {
+  // this won't catch things that are right at the tail of the container, which is good, because we
+  // want to contiue using element offset if possible
   if (isElement(element) && isTextOrTextHighlight(element.childNodes[offset])) {
     return floatThroughTextByElement(element.childNodes[offset], container, 0);
+  // however, if the element, is a highlgiht, then we should float
+  } else if (isTextHighlight(element)) {
+    return floatThroughTextByElement(element, container, getTextLength(element));
+  // preserve the offset if the elment is text
   } else if (isText(element)) {
     return floatThroughTextByElement(element, container, offset);
   } else {
@@ -67,12 +73,32 @@ const floatThroughText = (element: Node, offset: number, container: Node): [Node
   }
 };
 
+const nodeIndex = (list: NodeList, element: Node) => Array.prototype.indexOf.call(list, element);
+
+const resolveToNextElementOffsetIfPossible = (element: Node, offset: number) => {
+  if (isText(element) && element.parentNode && offset === element.length && element.nextSibling && !isHighlight(element.nextSibling)) {
+    return [element.parentNode, nodeIndex(element.parentNode.childNodes, element) + 1];
+  }
+
+  return [element, offset];
+};
+
+const resolveToPreviousElementOffsetIfPossible = (element: Node, offset: number) => {
+  if (isText(element) && element.parentNode && offset === 0 && element.previousSibling && !isHighlight(element.previousSibling)) {
+    return [element.parentNode, nodeIndex(element.parentNode.childNodes, element)];
+  }
+
+  return [element, offset];
+};
+
 // kinda copied from https://developer.mozilla.org/en-US/docs/Web/XPath/Snippets#getXPathForElement
 export function getXPathForElement(targetElement: Node, offset: number, reference: HTMLElement): [string, number] {
   // descend through text highlights to convert them to text offsets
   [targetElement, offset] = sinkThroughText(targetElement, offset);
+  [targetElement, offset] = resolveToNextElementOffsetIfPossible(targetElement, offset);
   // then float through them to resolve the element offsets into text offset
   [targetElement, offset] = floatThroughText(targetElement, offset, reference);
+  [targetElement, offset] = resolveToPreviousElementOffsetIfPossible(targetElement, offset);
 
   let xpath = '';
   let pos
