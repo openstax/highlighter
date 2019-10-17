@@ -15,15 +15,64 @@ const IS_PATH_PART_SELF = /^\.$/;
 const IS_PATH_PART_TEXT = /^text\(\)\[(\d+)\]$/;
 const IS_PATH_PART_ELEMENT = /\*\[name\(\)='(.+)'\]\[(\d+)\]/;
 
+const sinkThroughText = (element: Node, offset: number): [Node, number] => {
+  if (!isElement(element)) {
+    return [element, offset];
+  }
+
+  const offsetNode = element.childNodes[offset];
+  const previousNode = element.childNodes[offset - 1];
+
+  if (isTextHighlight(offsetNode)) {
+    return sinkThroughText(offsetNode, 0);
+  } else if (!offsetNode && isTextHighlight(previousNode)) {
+    return sinkThroughText(previousNode, 1);
+  } else if (isText(previousNode)) {
+    return sinkThroughText(previousNode, previousNode.length);
+  }
+
+  return [element, offset];
+};
+
+const getTextLength = (node: Node) => {
+  if (isText(node)) {
+    return node.length;
+  } else if (node.textContent) {
+    return node.textContent.length;
+  } else {
+    return 0;
+  }
+};
+
+const floatThroughTextByElement = (current: Node, container: Node, resultOffset: number): [Node, number] => {
+  // we don't count the current, we count the previous
+  const previous = current.previousSibling;
+
+  if (previous && isTextOrTextHighlight(previous)) {
+    return floatThroughTextByElement(previous, container, resultOffset + getTextLength(previous));
+  } else if (current.parentNode && isTextHighlight(current.parentNode)) {
+    return floatThroughTextByElement(current.parentNode, container, resultOffset);
+  } else {
+    return [current, resultOffset];
+  }
+};
+
+const floatThroughText = (element: Node, offset: number, container: Node): [Node, number] => {
+  if (isElement(element) && isTextOrTextHighlight(element.childNodes[offset])) {
+    return floatThroughTextByElement(element.childNodes[offset], container, 0);
+  } else if (isText(element)) {
+    return floatThroughTextByElement(element, container, offset);
+  } else {
+    return [element, offset];
+  }
+};
+
 // kinda copied from https://developer.mozilla.org/en-US/docs/Web/XPath/Snippets#getXPathForElement
 export function getXPathForElement(targetElement: Node, offset: number, reference: HTMLElement): [string, number] {
-
-  // if the range offset designates text or a text highlight we need to move the target
-  // so text offset stuff will work
-  if (isElement(targetElement) && isTextOrTextHighlight(targetElement.childNodes[offset])) {
-    targetElement = targetElement.childNodes[offset];
-    offset = 0;
-  }
+  // descend through text highlights to convert them to text offsets
+  [targetElement, offset] = sinkThroughText(targetElement, offset);
+  // then float through them to resolve the element offsets into text offset
+  [targetElement, offset] = floatThroughText(targetElement, offset, reference);
 
   let xpath = '';
   let pos
@@ -34,22 +83,22 @@ export function getXPathForElement(targetElement: Node, offset: number, referenc
   // look for preceeding nodes that need to be combined into this one
   // and modify the range offset accordingly. only have to look at one
   // previous sibling because text nodes cannot be siblings
-  if (isText(focus) && isTextHighlight(element)) {
-    while (isText(element) || isTextHighlight(element)) {
+  /*if (isTextOrTextHighlight(focus) && isTextOrTextHighlight(element)) {
+    while (isTextOrTextHighlight(element) && focus !== reference) {
       offset += element.textContent!.length;
+      focus = element;
       element = element.previousSibling!;
-    }
-  // if target is text highlight, treat it like its text
-  } else if (isTextHighlight(focus) && isTextOrTextHighlight(element)) {
-    offset = 0;
 
-    while (isText(element) || isTextHighlight(element)) {
-      offset += element.textContent!.length;
-      element = element.previousSibling!;
+      // when we get to the beginning of the container, if the
+      // container is a text highlight, keep going
+      while (!element && isTextHighlight(focus.parentNode!)) {
+        focus = focus.parentNode!;
+        element = focus.previousSibling!;
+      }
     }
   // for element targets, highlight children might be artifically
   // inflating the range offset, fix.
-  } else if (isElement(focus)) {
+  } else */if (isElement(focus)) {
     let search: Node | null = focus.childNodes[offset];
 
     while (search) {
