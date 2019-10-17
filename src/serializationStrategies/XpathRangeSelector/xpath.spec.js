@@ -61,6 +61,34 @@ describe('getXPathForElement', () => {
     expect(result).toEqual("./*[name()='div'][3]/*[name()='div'][1]/*[name()='section'][1]/*[name()='div'][1]");
   });
 
+  it('removes unnecesary text node (trailing)', () => {
+    document.body.innerHTML = `
+      <div id="reference">
+        <div id="target">asdf</div>
+      </div>
+    `;
+
+    const reference = document.getElementById('reference');
+    const text = document.getElementById('target').childNodes[0];
+    const [result, offset] = xpath.getXPathForElement(text, 4, reference);
+    expect(result).toEqual("./*[name()='div'][1]");
+    expect(offset).toEqual(1);
+  });
+
+  it('removes unnecesary text node (leading)', () => {
+    document.body.innerHTML = `
+      <div id="reference">
+        <div id="target">asdf</div>
+      </div>
+    `;
+
+    const reference = document.getElementById('reference');
+    const text = document.getElementById('target').childNodes[0];
+    const [result, offset] = xpath.getXPathForElement(text, 0, reference);
+    expect(result).toEqual("./*[name()='div'][1]");
+    expect(offset).toEqual(0);
+  });
+
   it('creates path through nested text highlights (on trailing edge)', () => {
     document.body.innerHTML = `
       <div id="reference">
@@ -83,12 +111,11 @@ describe('getXPathForElement', () => {
     const expectedPath = "./*[name()='div'][3]/*[name()='div'][1]/text()[1]";
     const expectedOffset = 21;
 
-    /*
     const target1 = document.getElementById('target1');
     const [result1, offset1] = xpath.getXPathForElement(target1, 2, reference);
     expect(result1).toEqual(expectedPath);
     expect(offset1).toEqual(expectedOffset);
-    */
+
     const target2 = document.getElementById('target2');
     const [result2, offset2] = xpath.getXPathForElement(target2, 1, reference);
     expect(result2).toEqual(expectedPath);
@@ -192,9 +219,10 @@ describe('getXPathForElement', () => {
 
     const reference = document.getElementById('reference');
     const text = document.getElementById('target').previousSibling;
-    const [result] = xpath.getXPathForElement(text, 0, reference);
+    const [result, offset] = xpath.getXPathForElement(text, 0, reference);
 
-    expect(result).toEqual("./*[name()='span'][1]/*[name()='div'][1]/*[name()='section'][1]/text()[1]");
+    expect(result).toEqual("./*[name()='span'][1]/*[name()='div'][1]/*[name()='section'][1]");
+    expect(offset).toEqual(0);
   });
 
   it('doesn\'t count highlights between previous text', () => {

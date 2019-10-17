@@ -25,8 +25,6 @@ const sinkThroughText = (element: Node, offset: number): [Node, number] => {
 
   if (isTextHighlight(offsetNode)) {
     return sinkThroughText(offsetNode, 0);
-  //} else if (!offsetNode && isTextHighlight(previousNode)) {
-  //  return sinkThroughText(previousNode, 1);
   } else if (isText(previousNode)) {
     return sinkThroughText(previousNode, previousNode.length);
   }
@@ -76,7 +74,7 @@ const floatThroughText = (element: Node, offset: number, container: Node): [Node
 const nodeIndex = (list: NodeList, element: Node) => Array.prototype.indexOf.call(list, element);
 
 const resolveToNextElementOffsetIfPossible = (element: Node, offset: number) => {
-  if (isText(element) && element.parentNode && offset === element.length && element.nextSibling && !isHighlight(element.nextSibling)) {
+  if (isText(element) && element.parentNode && offset === element.length && (!element.nextSibling || !isHighlight(element.nextSibling))) {
     return [element.parentNode, nodeIndex(element.parentNode.childNodes, element) + 1];
   }
 
@@ -84,7 +82,7 @@ const resolveToNextElementOffsetIfPossible = (element: Node, offset: number) => 
 };
 
 const resolveToPreviousElementOffsetIfPossible = (element: Node, offset: number) => {
-  if (isText(element) && element.parentNode && offset === 0 && element.previousSibling && !isHighlight(element.previousSibling)) {
+  if (isText(element) && element.parentNode && offset === 0 && (!element.previousSibling || !isHighlight(element.previousSibling))) {
     return [element.parentNode, nodeIndex(element.parentNode.childNodes, element)];
   }
 
