@@ -101,26 +101,9 @@ export function getXPathForElement(targetElement: Node, offset: number, referenc
     , element = targetElement.previousSibling!
     , focus = targetElement;
 
-  // for a text target, highlights might have broken up the text node,
-  // look for preceeding nodes that need to be combined into this one
-  // and modify the range offset accordingly. only have to look at one
-  // previous sibling because text nodes cannot be siblings
-  /*if (isTextOrTextHighlight(focus) && isTextOrTextHighlight(element)) {
-    while (isTextOrTextHighlight(element) && focus !== reference) {
-      offset += element.textContent!.length;
-      focus = element;
-      element = element.previousSibling!;
-
-      // when we get to the beginning of the container, if the
-      // container is a text highlight, keep going
-      while (!element && isTextHighlight(focus.parentNode!)) {
-        focus = focus.parentNode!;
-        element = focus.previousSibling!;
-      }
-    }
   // for element targets, highlight children might be artifically
   // inflating the range offset, fix.
-  } else */if (isElement(focus)) {
+  if (isElement(focus)) {
     let search: Node | null = focus.childNodes[offset];
 
     while (search) {
