@@ -173,16 +173,13 @@ describe('getXPathForElement', () => {
     expect(offset4).toEqual(expectedOffset);
   });
 
-  it('remove unnecessary text nodes wht nested text highlights (on trailing edge)', () => {
+  it('remove unnecessary text nodes with nested text highlights (on trailing edge)', () => {
     document.body.innerHTML = `
       <div id="reference">
         <div></div>
         <div></div>
         <span></span>
-        <div>
-          werwerwerwer
-          <div id="target1"><span id="target2" ${DATA_ATTR}><span id="target3" ${DATA_ATTR}>asdfasdf</span></span></div>
-        </div>
+        <div><div id="target1"><span id="target2" ${DATA_ATTR}><span id="target3" ${DATA_ATTR}>asdfasdf</span></span></div></div>
         <div></div>
       </div>
     `;
@@ -211,16 +208,13 @@ describe('getXPathForElement', () => {
     expect(offset4).toEqual(expectedOffset);
   });
 
-  it('remove unnecessary text nodes wht nested text highlights (on leading edge)', () => {
+  it('remove unnecessary text nodes with nested text highlights (on leading edge)', () => {
     document.body.innerHTML = `
       <div id="reference">
         <div></div>
         <div></div>
         <span></span>
-        <div>
-          werwerwerwer
-          <div id="target1"><span id="target2" ${DATA_ATTR}><span id="target3" ${DATA_ATTR}>asdfasdf</span></span></div>
-        </div>
+        <div><div id="target1"><span id="target2" ${DATA_ATTR}><span id="target3" ${DATA_ATTR}>asdfasdf</span></span></div></div>
         <div></div>
       </div>
     `;
