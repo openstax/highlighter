@@ -1,4 +1,5 @@
 import dom from './dom';
+import { removeAllHighlights } from './removeHighlightWrappers';
 
 export const rangeContentsString = (range: Range): string => {
   const fragment = cloneRangeContents(range);
@@ -10,6 +11,8 @@ export const rangeContentsString = (range: Range): string => {
   removeAll(container.querySelectorAll('.MathJax_Display'));
   removeAll(container.querySelectorAll('.MathJax_Preview'));
   removeAll(container.querySelectorAll('.MJX_Assistive_MathML'));
+
+  removeAllHighlights(container);
 
   container.querySelectorAll('script[type="math/mml"]').forEach((element: Element) => {
     const template = document.createElement('template');

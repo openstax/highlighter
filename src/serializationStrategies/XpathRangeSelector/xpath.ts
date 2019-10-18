@@ -1,53 +1,109 @@
 // tslint:disable
 import {DATA_ATTR} from '../../injectHighlightWrappers';
 
-const findElementChild = (node: Node) => Array.prototype.find.call(node.childNodes, (node: Node) => node.nodeType === 1);
+const findNonTextChild = (node: Node) => Array.prototype.find.call(node.childNodes,
+  (node: Node) => node.nodeType === Node.ELEMENT_NODE && !isTextHighlight(node)
+);
 const isHighlight = (node: Node): node is HTMLElement => node && (node as Element).getAttribute && (node as Element).getAttribute(DATA_ATTR) !== null;
-const isTextHighlight = (node: Node): node is HTMLElement => isHighlight(node) && !findElementChild(node);
+const isTextHighlight = (node: Node): node is HTMLElement => isHighlight(node) && !findNonTextChild(node);
 const isText = (node: Node): node is Text => node && node.nodeType === 3;
 const isTextOrTextHighlight = (node: Node | HTMLElement) => isText(node) || isTextHighlight(node);
 const isElement = (node: Node): node is HTMLElement => node && node.nodeType === 1;
 const isElementNotHighlight = (node: Node) => isElement(node) && !isHighlight(node);
+const nodeIndex = (list: NodeList, element: Node) => Array.prototype.indexOf.call(list, element);
 
 const IS_PATH_PART_SELF = /^\.$/;
 const IS_PATH_PART_TEXT = /^text\(\)\[(\d+)\]$/;
 const IS_PATH_PART_ELEMENT = /\*\[name\(\)='(.+)'\]\[(\d+)\]/;
 
+const getTextLength = (node: Node) => {
+  if (isText(node)) {
+    return node.length;
+  } else if (node && node.textContent) {
+    return node.textContent.length;
+  } else {
+    return 0;
+  }
+};
+const getMaxOffset = (node: Node) => {
+  if (isText(node)) {
+    return node.length;
+  } else {
+    return node.childNodes.length;
+  }
+};
+
+const recurseBackwardsThroughText = (current: Node, container: Node, resultOffset: number): [Node, number] => {
+  // we don't count the current, we count the previous
+  const previous = current.previousSibling;
+
+  if (previous && isTextOrTextHighlight(previous)) {
+    return recurseBackwardsThroughText(previous, container, resultOffset + getTextLength(previous));
+  } else if (current.parentNode && isTextHighlight(current.parentNode)) {
+    return recurseBackwardsThroughText(current.parentNode, container, resultOffset);
+  } else {
+    return [current, resultOffset];
+  }
+};
+
+const resolveTextHighlightsToTextOffset = (element: Node, offset: number, container: Node): [Node, number] => {
+  // this won't catch things that are right at the tail of the container, which is good, because we
+  // want to contiue using element offset if possible
+  if (isElement(element) && isTextOrTextHighlight(element.childNodes[offset])) {
+    return recurseBackwardsThroughText(element.childNodes[offset], container, 0);
+  // however, if the element, is a highlgiht, then we should float
+  } else if (isTextHighlight(element)) {
+    return recurseBackwardsThroughText(element, container, getTextLength(element));
+  // preserve the offset if the elment is text
+  } else if (isText(element)) {
+    return recurseBackwardsThroughText(element, container, offset);
+  } else {
+    return [element, offset];
+  }
+};
+
+const floatThroughText = (element: Node, offset: number, container: Node): [Node, number] => {
+  if (isTextOrTextHighlight(element) && offset === 0 && element.parentNode && element.parentNode !== container) {
+    return floatThroughText(element.parentNode, nodeIndex(element.parentNode.childNodes, element), container);
+  } else if (isTextOrTextHighlight(element) && offset === getMaxOffset(element) && element.parentNode && element.parentNode !== container) {
+    return floatThroughText(element.parentNode, nodeIndex(element.parentNode.childNodes, element) + 1, container);
+  } else {
+    return [element, offset];
+  }
+};
+
+const resolveToNextElementOffsetIfPossible = (element: Node, offset: number) => {
+  if (isTextOrTextHighlight(element) && element.parentNode && offset === getMaxOffset(element) && (!element.nextSibling || !isHighlight(element.nextSibling))) {
+    return [element.parentNode, nodeIndex(element.parentNode.childNodes, element) + 1];
+  }
+
+  return [element, offset];
+};
+
+const resolveToPreviousElementOffsetIfPossible = (element: Node, offset: number) => {
+
+  if (isTextOrTextHighlight(element) && element.parentNode && offset === 0 && (!element.previousSibling || !isHighlight(element.previousSibling))) {
+    return [element.parentNode, nodeIndex(element.parentNode.childNodes, element)];
+  }
+
+  return [element, offset];
+};
+
 // kinda copied from https://developer.mozilla.org/en-US/docs/Web/XPath/Snippets#getXPathForElement
 export function getXPathForElement(targetElement: Node, offset: number, reference: HTMLElement): [string, number] {
-
-  // if the range offset designates text or a text highlight we need to move the target
-  // so text offset stuff will work
-  if (isElement(targetElement) && isTextOrTextHighlight(targetElement.childNodes[offset])) {
-    targetElement = targetElement.childNodes[offset];
-    offset = 0;
-  }
+  [targetElement, offset] = floatThroughText(targetElement, offset, reference);
+  [targetElement, offset] = resolveToNextElementOffsetIfPossible(targetElement, offset);
+  [targetElement, offset] = resolveTextHighlightsToTextOffset(targetElement, offset, reference);
+  [targetElement, offset] = resolveToPreviousElementOffsetIfPossible(targetElement, offset);
 
   let xpath = '';
   let pos
     , element = targetElement.previousSibling!
     , focus = targetElement;
 
-  // for a text target, highlights might have broken up the text node,
-  // look for preceeding nodes that need to be combined into this one
-  // and modify the range offset accordingly. only have to look at one
-  // previous sibling because text nodes cannot be siblings
-  if (isText(focus) && isTextHighlight(element)) {
-    while (isText(element) || isTextHighlight(element)) {
-      offset += element.textContent!.length;
-      element = element.previousSibling!;
-    }
-  // if target is text highlight, treat it like its text
-  } else if (isTextHighlight(focus) && isTextOrTextHighlight(element)) {
-    offset = 0;
-
-    while (isText(element) || isTextHighlight(element)) {
-      offset += element.textContent!.length;
-      element = element.previousSibling!;
-    }
   // for element targets, highlight children might be artifically
   // inflating the range offset, fix.
-  } else if (isElement(focus)) {
+  if (isElement(focus)) {
     let search: Node | null = focus.childNodes[offset];
 
     while (search) {
@@ -84,13 +140,12 @@ export function getXPathForElement(targetElement: Node, offset: number, referenc
 
     if (isText(focus) || isTextHighlight(focus)) {
       xpath = 'text()[' + pos + ']' + '/' + xpath;
-    } else {
+    } else if (!isHighlight(focus)) {
       xpath = '*[name()=\'' + focus.nodeName.toLowerCase() + '\'][' + pos + ']' + '/' + xpath;
     }
 
     focus = focus.parentNode!;
     element = focus.previousSibling!;
-
   }
 
   xpath = './' + xpath;

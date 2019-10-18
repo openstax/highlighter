@@ -33,6 +33,10 @@ export default function injectHighlightWrappers(highlight: Highlight, options: I
   const createdHighlights = highlightRange(highlight.range, wrapper);
   const normalizedHighlights = normalizeHighlights(createdHighlights);
 
+  if (normalizedHighlights.length === 0) {
+    return;
+  }
+
   highlight.range.setStartBefore(normalizedHighlights[0]);
   highlight.range.setEndAfter(normalizedHighlights[normalizedHighlights.length - 1]);
 
