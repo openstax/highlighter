@@ -192,7 +192,7 @@ export function getFirstByXPath(path: string, offset: number, referenceElement: 
 function followPart(node: Node, part: string) {
 
   const findFirst = (nodeList: NodeList, predicate: (node: Node) => boolean) =>
-    Array.prototype.find.call(nodeList, (node: Node) => predicate(node) && !isHighlight(node));
+    Array.prototype.find.call(nodeList, (node: Node) => predicate(node));
   const findFirstAfter = (nodeList: NodeList, afterThis: Node, predicate: (node: Node) => boolean) => findFirst(
     Array.prototype.slice.call(nodeList, Array.prototype.indexOf.call(nodeList, afterThis) + 1),
     predicate
@@ -203,7 +203,7 @@ function followPart(node: Node, part: string) {
   }
   if (IS_PATH_PART_TEXT.test(part)) {
     let [, index] = part.match(IS_PATH_PART_TEXT) as any;
-    let text = findFirst(node.childNodes, isText);
+    let text = findFirst(node.childNodes, isTextOrTextHighlight);
 
     while (text && index > 1) {
       let search = text;
@@ -215,7 +215,7 @@ function followPart(node: Node, part: string) {
       index--;
 
       if (search) {
-        text = findFirstAfter(node.childNodes, search, isText);
+        text = findFirstAfter(node.childNodes, search, isTextOrTextHighlight);
       } else {
         text = search;
       }
@@ -226,7 +226,7 @@ function followPart(node: Node, part: string) {
   }
   if (IS_PATH_PART_ELEMENT.test(part)) {
     let [, type, index] = part.match(IS_PATH_PART_ELEMENT) as any;
-    const nodeMatches = (node: Node) => isElement(node) && node.nodeName.toLowerCase() === type.toLowerCase();
+    const nodeMatches = (node: Node) => isElement(node) && node.nodeName.toLowerCase() === type.toLowerCase() && !isHighlight(node);
     let element = findFirst(node.childNodes, nodeMatches);
 
     while (element && index > 1) {
