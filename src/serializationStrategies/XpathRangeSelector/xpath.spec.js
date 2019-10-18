@@ -173,6 +173,82 @@ describe('getXPathForElement', () => {
     expect(offset4).toEqual(expectedOffset);
   });
 
+  it('remove unnecessary text nodes wht nested text highlights (on trailing edge)', () => {
+    document.body.innerHTML = `
+      <div id="reference">
+        <div></div>
+        <div></div>
+        <span></span>
+        <div>
+          werwerwerwer
+          <div id="target1"><span id="target2" ${DATA_ATTR}><span id="target3" ${DATA_ATTR}>asdfasdf</span></span></div>
+        </div>
+        <div></div>
+      </div>
+    `;
+
+    const reference = document.getElementById('reference');
+    const expectedPath = "./*[name()='div'][3]/*[name()='div'][1]";
+    const expectedOffset = 1;
+
+    const target1 = document.getElementById('target1');
+    const [result1, offset1] = xpath.getXPathForElement(target1, 1, reference);
+    expect(result1).toEqual(expectedPath);
+    expect(offset1).toEqual(expectedOffset);
+
+    const target2 = document.getElementById('target2');
+    const [result2, offset2] = xpath.getXPathForElement(target2, 1, reference);
+    expect(result2).toEqual(expectedPath);
+    expect(offset2).toEqual(expectedOffset);
+
+    const target3 = document.getElementById('target3');
+    const [result3, offset3] = xpath.getXPathForElement(target3, 1, reference);
+    expect(result3).toEqual(expectedPath);
+    expect(offset3).toEqual(expectedOffset);
+
+    const [result4, offset4] = xpath.getXPathForElement(target3.childNodes[0], 8, reference);
+    expect(result4).toEqual(expectedPath);
+    expect(offset4).toEqual(expectedOffset);
+  });
+
+  it('remove unnecessary text nodes wht nested text highlights (on leading edge)', () => {
+    document.body.innerHTML = `
+      <div id="reference">
+        <div></div>
+        <div></div>
+        <span></span>
+        <div>
+          werwerwerwer
+          <div id="target1"><span id="target2" ${DATA_ATTR}><span id="target3" ${DATA_ATTR}>asdfasdf</span></span></div>
+        </div>
+        <div></div>
+      </div>
+    `;
+
+    const reference = document.getElementById('reference');
+    const expectedPath = "./*[name()='div'][3]/*[name()='div'][1]";
+    const expectedOffset = 0;
+
+    const target1 = document.getElementById('target1');
+    const [result1, offset1] = xpath.getXPathForElement(target1, 0, reference);
+    expect(result1).toEqual(expectedPath);
+    expect(offset1).toEqual(expectedOffset);
+
+    const target2 = document.getElementById('target2');
+    const [result2, offset2] = xpath.getXPathForElement(target2, 0, reference);
+    expect(result2).toEqual(expectedPath);
+    expect(offset2).toEqual(expectedOffset);
+
+    const target3 = document.getElementById('target3');
+    const [result3, offset3] = xpath.getXPathForElement(target3, 0, reference);
+    expect(result3).toEqual(expectedPath);
+    expect(offset3).toEqual(expectedOffset);
+
+    const [result4, offset4] = xpath.getXPathForElement(target3.childNodes[0], 0, reference);
+    expect(result4).toEqual(expectedPath);
+    expect(offset4).toEqual(expectedOffset);
+  });
+
   it('creates path to nested text element', () => {
     document.body.innerHTML = `
       <div id="reference">
