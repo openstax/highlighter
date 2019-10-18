@@ -15,23 +15,6 @@ const IS_PATH_PART_SELF = /^\.$/;
 const IS_PATH_PART_TEXT = /^text\(\)\[(\d+)\]$/;
 const IS_PATH_PART_ELEMENT = /\*\[name\(\)='(.+)'\]\[(\d+)\]/;
 
-const sinkThroughText = (element: Node, offset: number): [Node, number] => {
-  if (!isElement(element)) {
-    return [element, offset];
-  }
-
-  const offsetNode = element.childNodes[offset];
-  const previousNode = element.childNodes[offset - 1];
-
-  if (isTextHighlight(offsetNode)) {
-    return sinkThroughText(offsetNode, 0);
-  } else if (isText(previousNode)) {
-    return sinkThroughText(previousNode, previousNode.length);
-  }
-
-  return [element, offset];
-};
-
 const getTextLength = (node: Node) => {
   if (isText(node)) {
     return node.length;
@@ -91,10 +74,8 @@ const resolveToPreviousElementOffsetIfPossible = (element: Node, offset: number)
 
 // kinda copied from https://developer.mozilla.org/en-US/docs/Web/XPath/Snippets#getXPathForElement
 export function getXPathForElement(targetElement: Node, offset: number, reference: HTMLElement): [string, number] {
-  // descend through text highlights to convert them to text offsets
-  [targetElement, offset] = sinkThroughText(targetElement, offset);
   [targetElement, offset] = resolveToNextElementOffsetIfPossible(targetElement, offset);
-  // then float through them to resolve the element offsets into text offset
+  // resolve element offset into text offset
   [targetElement, offset] = floatThroughText(targetElement, offset, reference);
   [targetElement, offset] = resolveToPreviousElementOffsetIfPossible(targetElement, offset);
 
