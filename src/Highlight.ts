@@ -3,39 +3,20 @@ import SerializedHighlight from './SerializedHighlight';
 
 export const FOCUS_CSS = 'focus';
 
-export default class Highlight {
-  private _id: string;
-  private _content: string;
-  private _range: Range;
-  private _elements: HTMLElement[] = [];
+export interface IHighlightData {
+  style?: string;
+  id: string;
+  content: string;
+}
 
-  constructor(range: Range, content: string);
-  constructor(id: string, range: Range, content: string);
-  constructor(arg: any, arg2: any, content?: string) {
-    if (arg instanceof Range) {
-      // TODO - something more random here
-      this._id = (new Date()).getTime().toString();
-      this._range = arg;
-      this._content = arg2;
-    } else if (content) {
-      this._id = arg;
-      this._range = arg2;
-      this._content = content;
-    } else {
-      throw new Error('invalid constructor arguments');
-    }
-  }
+export default class Highlight {
 
   public get id(): string {
-    return this._id;
+    return this.data.id;
   }
 
   public get content(): string {
-    return this._content;
-  }
-
-  public get range(): Range {
-    return this._range;
+    return this.data.content;
   }
 
   public set elements(elements: HTMLElement[]) {
@@ -43,10 +24,41 @@ export default class Highlight {
       throw new Error(`Hightlight elements aren't reloadable`);
     }
     this._elements = elements;
+    this.loadStyle();
   }
 
   public get elements(): HTMLElement[] {
     return this._elements;
+  }
+  public readonly range: Range;
+  private data: IHighlightData;
+  private _elements: HTMLElement[] = [];
+
+  constructor(range: Range, data: Pick<IHighlightData, Exclude<keyof IHighlightData, 'id'>> & Partial<Pick<IHighlightData, 'id'>>) {
+    this.range = range;
+    this.data = {
+      ...data,
+      // TODO - something more random here
+      id: data.id || (new Date()).getTime().toString(),
+    };
+  }
+
+  public setStyle(style: string) {
+    this.removeStyle();
+    this.data.style = style;
+    this.loadStyle();
+  }
+
+  public getStyle() {
+    return this.data.style;
+  }
+
+  public removeStyle() {
+    const {style} = this.data;
+    if (style) {
+      this.elements.forEach((element) => element.classList.remove(style));
+      delete this.data.style;
+    }
   }
 
   public isAttached(): boolean {
@@ -82,9 +94,14 @@ export default class Highlight {
     referenceElement = referenceElement || dom(this.range.commonAncestorContainer).closest('[id]');
 
     return new SerializedHighlight({
-      content: this.content,
-      id: this.id,
+      ...this.data,
       ...SerializedHighlight.defaultSerializer(this.range, referenceElement),
     });
+  }
+  private loadStyle() {
+    const {style} = this.data;
+    if (style) {
+      this.elements.forEach((element) => element.classList.add(style));
+    }
   }
 }

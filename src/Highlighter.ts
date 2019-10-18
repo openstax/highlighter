@@ -118,7 +118,7 @@ export default class Highlighter {
         .filter((other: Highlight) => other.intersects(range));
 
       if (highlights.length === 0) {
-        const highlight: Highlight = new Highlight(range, rangeContentsString(range));
+        const highlight: Highlight = new Highlight(range, {content: rangeContentsString(range)});
         onSelect(highlights, highlight);
       } else {
         onSelect(highlights);

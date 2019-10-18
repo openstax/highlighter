@@ -1,14 +1,9 @@
-import Highlight from './Highlight';
+import Highlight, {IHighlightData} from './Highlight';
 import Highlighter from './Highlighter';
 import {getDeserializer, IDeserializer, ISerializationData} from './serializationStrategies';
 import {serialize as defaultSerializer} from './serializationStrategies/XpathRangeSelector';
 
-interface ICommon {
-  id: string;
-  content: string;
-}
-
-type IData = ICommon & ISerializationData;
+type IData = IHighlightData & ISerializationData;
 
 export default class SerializedHighlight {
   public static defaultSerializer = defaultSerializer;
@@ -39,6 +34,6 @@ export default class SerializedHighlight {
 
   public load(highlighter: Highlighter): Highlight {
     const range = this.deserializer.load(highlighter);
-    return new Highlight(this.id, range, this.content);
+    return new Highlight(range, this.data);
   }
 }
