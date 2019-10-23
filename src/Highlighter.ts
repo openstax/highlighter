@@ -21,7 +21,10 @@ export default class Highlighter {
 
   constructor(container: HTMLElement, options: IOptions = {}) {
     this.container = container;
-    this.options = options;
+    this.options = {
+      className: 'highlight',
+      ...options,
+    };
     this.container.addEventListener('mouseup', this.onMouseup);
   }
 
@@ -61,6 +64,10 @@ export default class Highlighter {
   }
 
   public getHighlights(): Highlight[] {
+    return Object.values(this.highlights);
+  }
+
+  public getOrderedHighlights(): Highlight[] {
     const highlights = Object.values(this.highlights);
 
     highlights.sort((a, b) => {

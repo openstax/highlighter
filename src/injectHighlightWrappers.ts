@@ -314,7 +314,7 @@ function mergeSiblingHighlights(highlights: Node[]) {
  */
 function createWrapper(options: any) {
   const span = document.createElement('span');
-  span.className = options.className || 'highlight';
+  span.className = options.className;
   if (options.timestamp) {
     span.setAttribute(TIMESTAMP_ATTR, options.timestamp);
   }

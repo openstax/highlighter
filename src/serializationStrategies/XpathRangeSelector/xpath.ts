@@ -104,7 +104,7 @@ export function getXPathForElement(targetElement: Node, offset: number, referenc
   // for element targets, highlight children might be artifically
   // inflating the range offset, fix.
   if (isElement(focus)) {
-    let search: Node | null = focus.childNodes[offset];
+    let search: Node | null = focus.childNodes[offset - 1];
 
     while (search) {
       if (isTextOrTextHighlight(search)) {
@@ -176,6 +176,24 @@ export function getFirstByXPath(path: string, offset: number, referenceElement: 
   while ((isTextHighlight(node!) && offset >= node!.textContent!.length) || (isText(node!) && offset > node!.textContent!.length)) {
     offset -= node!.textContent!.length;
     node = isTextOrTextHighlight(node!.nextSibling!) ? node!.nextSibling as HTMLElement : null;
+  }
+
+  // for element targets, highlight children might be artifically
+  // inflating the range offset, fix.
+  if (node && isElement(node)) {
+    let search: Node | null = node.childNodes[offset - 1];
+
+    while (search) {
+      if (isTextOrTextHighlight(search)) {
+        search = search.nextSibling;
+
+        while (isTextOrTextHighlight(search!)) {
+          offset++;
+          search = search!.nextSibling;
+        }
+      }
+      search = search ? search.nextSibling : null;
+    }
   }
 
   if (node && isHighlight(node)) {
