@@ -4,6 +4,7 @@ import Highlight from './Highlight';
 
 export const TIMESTAMP_ATTR = 'data-timestamp';
 export const DATA_ATTR = 'data-highlighted';
+export const DATA_ID_ATTR = 'data-highlight-id';
 const NODE_TYPE = {
   ELEMENT_NODE: 1,
   TEXT_NODE: 3,
@@ -64,7 +65,7 @@ function normalizeHighlights(highlights: Node[]) {
 
   normalizedHighlights = unique(normalizedHighlights);
   normalizedHighlights.sort(function(a: Node, b: Node) {
-    if ( !a.compareDocumentPosition) {
+    if (!a.compareDocumentPosition) {
       // support for IE8 and below
       return (a as any).sourceIndex - (b as any).sourceIndex;
     }
@@ -319,7 +320,7 @@ function createWrapper(options: any) {
     span.setAttribute(TIMESTAMP_ATTR, options.timestamp);
   }
   if (options.id) {
-    span.setAttribute('data-id', options.id);
+    span.setAttribute(DATA_ID_ATTR, options.id);
   }
   return span;
 }

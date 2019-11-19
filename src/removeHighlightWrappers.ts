@@ -1,8 +1,7 @@
 // tslint:disable
 import dom from './dom';
 import Highlight from './Highlight';
-
-export const DATA_ATTR = 'data-highlighted';
+import { DATA_ATTR } from './injectHighlightWrappers';
 
 const NODE_TYPE = {
   ELEMENT_NODE: 1,
