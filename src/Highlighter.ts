@@ -1,4 +1,4 @@
-import dom from './dom';
+import dom, { isHtmlElement } from './dom';
 import Highlight, { FOCUS_CSS } from './Highlight';
 import injectHighlightWrappers, { DATA_ATTR, DATA_ID_ATTR } from './injectHighlightWrappers';
 import { rangeContentsString } from './rangeContents';
@@ -86,23 +86,25 @@ export default class Highlighter {
     }
 
     if (selection.isCollapsed) {
-      this.onClick(ev.target as HTMLElement);
+      this.onClick(ev.target);
     } else {
       this.onSelect(selection);
     }
   }
 
-  private onClick(el: HTMLElement): void {
+  private onClick(el: any): void {
     const { onClick } = this.options;
     if (!onClick) { return; }
 
-    const hlEl = dom(el).closest('[' + DATA_ATTR + ']');
-    if (hlEl) {
-      const id = hlEl.getAttribute(DATA_ID_ATTR) as string;
-      const highlight = this.highlights[id];
-      if (highlight) {
-        onClick(highlight);
-        return;
+    if (isHtmlElement(el)) {
+      const hlEl = dom(el).closest('[' + DATA_ATTR + ']');
+      if (hlEl) {
+        const id = hlEl.getAttribute(DATA_ID_ATTR) as string;
+        const highlight = this.highlights[id];
+        if (highlight) {
+          onClick(highlight);
+          return;
+        }
       }
     }
     onClick();
