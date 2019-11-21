@@ -22,7 +22,10 @@ export default class Highlighter {
 
   constructor(container: HTMLElement, options: IOptions = {}) {
     this.container = container;
-    this.options = options;
+    this.options = {
+      className: 'highlight',
+      ...options,
+    };
     this.container.addEventListener('mouseup', this.onMouseup);
   }
 
@@ -62,6 +65,10 @@ export default class Highlighter {
   }
 
   public getHighlights(): Highlight[] {
+    return Object.values(this.highlights);
+  }
+
+  public getOrderedHighlights(): Highlight[] {
     const highlights = Object.values(this.highlights);
 
     highlights.sort((a, b) => {
@@ -124,7 +131,7 @@ export default class Highlighter {
         .filter((other: Highlight) => other.intersects(range));
 
       if (highlights.length === 0) {
-        const highlight: Highlight = new Highlight(range, rangeContentsString(range));
+        const highlight: Highlight = new Highlight(range, {content: rangeContentsString(range)});
         onSelect(highlights, highlight);
       } else {
         onSelect(highlights);
