@@ -96,16 +96,17 @@ export default class Highlighter {
     const { onClick } = this.options;
     if (!onClick) { return; }
 
-    const el = dom(target);
-    if (el.isHtmlElement) {
-      const hlEl = el.closest('[' + DATA_ATTR + ']');
-      if (hlEl) {
-        const id = hlEl.getAttribute(DATA_ID_ATTR) as string;
-        const highlight = this.highlights[id];
-        if (highlight) {
-          onClick(highlight);
-          return;
+    if (dom(target).isHtmlElement) {
+      target = dom(target);
+      while (target.isHtmlElement) {
+        if (target.matches(DATA_ATTR_SELECTOR)) {
+          const highlight = this.highlights[target.el.getAttribute(DATA_ID_ATTR)];
+          if (highlight) {
+            onClick(highlight);
+            return;
+          }
         }
+        target = dom(target.el.parentElement);
       }
     }
     onClick();
