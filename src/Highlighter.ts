@@ -1,6 +1,6 @@
 import dom from './dom';
 import Highlight, { FOCUS_CSS } from './Highlight';
-import injectHighlightWrappers, { DATA_ATTR_SELECTOR, DATA_ID_ATTR } from './injectHighlightWrappers';
+import injectHighlightWrappers, { DATA_ATTR, DATA_ID_ATTR } from './injectHighlightWrappers';
 import { rangeContentsString } from './rangeContents';
 import removeHighlightWrappers from './removeHighlightWrappers';
 import { snapSelection } from './selection';
@@ -99,7 +99,9 @@ export default class Highlighter {
     if (dom(target).isHtmlElement) {
       target = dom(target);
       while (target.isHtmlElement) {
-        if (target.matches(DATA_ATTR_SELECTOR)) {
+        if (target.el.getAttribute(DATA_ATTR)) {
+          // there may be multiple highlighters active on the same document,
+          // check if the found highlight is known to this instance
           const highlight = this.highlights[target.el.getAttribute(DATA_ID_ATTR)];
           if (highlight) {
             onClick(highlight);
