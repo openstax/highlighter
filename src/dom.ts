@@ -262,5 +262,16 @@ export default function dom(el: any) {
       }
     },
 
-  };
+    get isHtmlElement(): boolean {
+      return typeof el === 'object'
+        && el !== null
+        && el.nodeType === 1
+        && el.title !== undefined
+        && typeof el.nodeName === 'string'
+        ;
+    },
+  }
 }
+
+export const isHtmlElement = (thing: any): thing is HTMLElement =>
+  dom(thing).isHtmlElement;

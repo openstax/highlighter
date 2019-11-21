@@ -1,8 +1,9 @@
-import Highlight, {FOCUS_CSS} from './Highlight';
-import injectHighlightWrappers from './injectHighlightWrappers';
-import {rangeContentsString} from './rangeContents';
+import dom from './dom';
+import Highlight, { FOCUS_CSS } from './Highlight';
+import injectHighlightWrappers, { DATA_ATTR, DATA_ID_ATTR } from './injectHighlightWrappers';
+import { rangeContentsString } from './rangeContents';
 import removeHighlightWrappers from './removeHighlightWrappers';
-import {getRange, snapSelection} from './selection';
+import { snapSelection } from './selection';
 import SerializedHighlight from './SerializedHighlight';
 
 interface IOptions {
@@ -16,7 +17,7 @@ interface IOptions {
 
 export default class Highlighter {
   public readonly container: HTMLElement;
-  private highlights: {[key: string]: Highlight} = {};
+  private highlights: { [key: string]: Highlight } = {};
   private options: IOptions;
 
   constructor(container: HTMLElement, options: IOptions = {}) {
@@ -77,7 +78,7 @@ export default class Highlighter {
     return this.container.ownerDocument;
   }
 
-  private onMouseup = (): void => {
+  private onMouseup = (ev: MouseEvent): void => {
     const selection = this.document.getSelection();
 
     if (!selection) {
@@ -85,31 +86,36 @@ export default class Highlighter {
     }
 
     if (selection.isCollapsed) {
-      this.onClick(selection);
+      this.onClick(ev.target);
     } else {
       this.onSelect(selection);
     }
   }
 
-  private onClick(selection: Selection): void {
-    const {onClick} = this.options;
+  private onClick(target: any): void {
+    const { onClick } = this.options;
+    if (!onClick) { return; }
 
-    const clickedHighlight = (): Highlight | undefined => {
-      if (selection.rangeCount < 1) {
-        return;
+    if (dom(target).isHtmlElement) {
+      target = dom(target);
+      while (target.isHtmlElement) {
+        if (target.el.getAttribute(DATA_ATTR)) {
+          // there may be multiple highlighters active on the same document,
+          // check if the found highlight is known to this instance
+          const highlight = this.highlights[target.el.getAttribute(DATA_ID_ATTR)];
+          if (highlight) {
+            onClick(highlight);
+            return;
+          }
+        }
+        target = dom(target.el.parentElement);
       }
-      const range: Range = getRange(selection);
-      return Object.values(this.highlights)
-        .find((other: Highlight) => other.intersects(range));
-    };
-
-    if (onClick) {
-      onClick(clickedHighlight());
     }
+    onClick();
   }
 
   private onSelect(selection: Selection): void {
-    const {onSelect} = this.options;
+    const { onSelect } = this.options;
 
     const range = snapSelection(selection, this.options);
 
