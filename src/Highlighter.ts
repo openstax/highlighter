@@ -37,6 +37,11 @@ export default class Highlighter {
     this.getHighlights().forEach(this.erase);
   }
 
+  public teardown = (): void => {
+    this.eraseAll();
+    this.unmount();
+  }
+
   public erase = (highlight: Highlight): void => {
     removeHighlightWrappers(highlight);
     delete this.highlights[highlight.id];
@@ -131,7 +136,7 @@ export default class Highlighter {
         .filter((other: Highlight) => other.intersects(range));
 
       if (highlights.length === 0) {
-        const highlight: Highlight = new Highlight(range, {content: rangeContentsString(range)});
+        const highlight: Highlight = new Highlight(range, { content: rangeContentsString(range) });
         onSelect(highlights, highlight);
       } else {
         onSelect(highlights);
