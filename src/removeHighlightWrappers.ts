@@ -1,7 +1,7 @@
 // tslint:disable
 import dom from './dom';
 import Highlight from './Highlight';
-import { DATA_ATTR } from './injectHighlightWrappers';
+import { DATA_ATTR_SELECTOR } from './injectHighlightWrappers';
 
 const NODE_TYPE = {
   ELEMENT_NODE: 1,
@@ -58,10 +58,10 @@ function removeHighlightElement(element: HTMLElement) {
  * @returns {Array} - array of highlights.
  */
 function getHighlights(container: HTMLElement) {
-  const nodeList = container.querySelectorAll('[' + DATA_ATTR + ']'),
+  const nodeList = container.querySelectorAll(DATA_ATTR_SELECTOR),
     highlights = Array.prototype.slice.call(nodeList);
 
-  if (container.hasAttribute(DATA_ATTR)) {
+  if (container.matches(DATA_ATTR_SELECTOR)) {
     highlights.push(container);
   }
 

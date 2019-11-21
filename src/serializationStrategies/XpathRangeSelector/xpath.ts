@@ -1,5 +1,5 @@
 // tslint:disable
-import {DATA_ATTR} from '../../injectHighlightWrappers';
+import { DATA_ATTR } from '../../injectHighlightWrappers';
 
 const findNonTextChild = (node: Node) => Array.prototype.find.call(node.childNodes,
   (node: Node) => node.nodeType === Node.ELEMENT_NODE && !isTextHighlight(node)
@@ -51,10 +51,10 @@ const resolveTextHighlightsToTextOffset = (element: Node, offset: number, contai
   // want to contiue using element offset if possible
   if (isElement(element) && isTextOrTextHighlight(element.childNodes[offset])) {
     return recurseBackwardsThroughText(element.childNodes[offset], container, 0);
-  // however, if the element, is a highlgiht, then we should float
+    // however, if the element, is a highlgiht, then we should float
   } else if (isTextHighlight(element)) {
     return recurseBackwardsThroughText(element, container, getTextLength(element));
-  // preserve the offset if the elment is text
+    // preserve the offset if the elment is text
   } else if (isText(element)) {
     return recurseBackwardsThroughText(element, container, offset);
   } else {

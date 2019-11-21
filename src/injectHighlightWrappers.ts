@@ -4,6 +4,7 @@ import Highlight from './Highlight';
 
 export const TIMESTAMP_ATTR = 'data-timestamp';
 export const DATA_ATTR = 'data-highlighted';
+export const DATA_ATTR_SELECTOR = '[' + DATA_ATTR + ']';
 export const DATA_ID_ATTR = 'data-highlight-id';
 const NODE_TYPE = {
   ELEMENT_NODE: 1,
@@ -326,7 +327,7 @@ function createWrapper(options: any) {
 }
 
 function isHighlight(el: any): el is HTMLElement {
-  return el && el.nodeType === NODE_TYPE.ELEMENT_NODE && el.hasAttribute(DATA_ATTR);
+  return el && el.nodeType === NODE_TYPE.ELEMENT_NODE && el.matches(DATA_ATTR_SELECTOR);
 }
 
 function sortByDepth(arr: Node[], descending: boolean) {
