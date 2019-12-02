@@ -6,6 +6,9 @@ if [ -d "./node_modules/@openstax/highlights-client" ]; then
   exit 0
 fi
 
+if [ -d "./highlights-client" ]; then
+  exit 0
+fi
 
 swagger_url="https://highlights-dev1.sandbox.openstax.org/highlights/api/v0/swagger"
 

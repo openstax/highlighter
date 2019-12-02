@@ -1,8 +1,13 @@
-import {Highlight as ApiHighlight, NewHighlight as NewApiHighlight} from './api';
+import {camelCase, snakeCase} from 'change-case';
+import {Highlight as ApiHighlight, NewHighlight as NewApiHighlight, styleIsColor } from './api';
 import Highlight, {IHighlightData} from './Highlight';
 import Highlighter from './Highlighter';
 import {getDeserializer, IDeserializer, ISerializationData} from './serializationStrategies';
 import {serialize as defaultSerializer} from './serializationStrategies/XpathRangeSelector';
+
+const mapKeys = (transform: (key: string) => string, obj: {[key: string]: any}) => Object.keys(obj).reduce((result, key) => ({
+  ...result, [transform(key)]: obj[key],
+}), {});
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
@@ -29,6 +34,12 @@ export default class SerializedHighlight {
   /*
    * when (if?) tutor starts using the api, remove this method and
    * pull these property names down through the rest of the logic
+   *
+   * TODO - support more better api interaction when above
+   * refactor happens:
+   *   - loop over locationStrategies and pick the best one instead of
+   *     the first one
+   *   - use location strategy bindings instead of arbitrary mapKeys
    */
   public static fromApiResponse(highlight: ApiHighlight) {
 
@@ -43,7 +54,7 @@ export default class SerializedHighlight {
     }
 
     return new SerializedHighlight({
-      ...highlight.locationStrategies[0] as ISerializationData,
+      ...mapKeys(camelCase, highlight.locationStrategies[0]) as ISerializationData,
       annotation: highlight.annotation,
       content: highlight.highlightedContent,
       id: highlight.id,
@@ -73,6 +84,9 @@ export default class SerializedHighlight {
     if (!style) {
       throw new Error('a style is requred to create an api payload');
     }
+    if (!styleIsColor(style)) {
+      throw new Error(`style ${style} doesn't match an api color`);
+    }
 
     return {
       anchor: referenceElementId,
@@ -80,7 +94,7 @@ export default class SerializedHighlight {
       color: style,
       highlightedContent: content,
       id,
-      locationStrategies: [serializationData],
+      locationStrategies: [mapKeys(snakeCase, serializationData)],
       nextHighlightId: thisIndex < highlights.length - 1 ? highlights[thisIndex + 1].id : undefined,
       prevHighlightId: thisIndex > 0 ? highlights[thisIndex - 1].id : undefined,
 

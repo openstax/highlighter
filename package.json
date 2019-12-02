@@ -19,8 +19,11 @@
     "test": "jest --coverage --verbose --maxWorkers=2",
     "watch": "tsc --noEmit --watch",
     "watch:test": "jest --watchAll",
-    "preinstall": "./script/build-client.bash",
-    "prepublish": "npm-run-all lint build:clean"
+    "preinstall": "npm-run-all client:build",
+    "client:clean": "rm -rf 'node_modules/@openstax/highlights-client' highlights-client",
+    "client:build": "./script/build-client.bash",
+    "client:install": "yarn add ./highlights-client",
+    "client:rebuild": "npm-run-all client:clean client:build client:install"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",
@@ -70,7 +73,8 @@
     ]
   },
   "dependencies": {
-    "@openstax/highlights-client": "./highlights-client/",
+    "@openstax/highlights-client": "./highlights-client",
+    "change-case": "^4.0.0",
     "serialize-selection": "^1.1.1",
     "uuid": "^3.3.3"
   }
