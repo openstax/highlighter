@@ -80,12 +80,14 @@ export default class Highlighter {
 
   public getHighlightBefore(target: Highlight) {
     return this.getOrderedHighlights().filter((highlight) =>
+      highlight.id !== target.id &&
       highlight.range.compareBoundaryPoints(Range.START_TO_START, target.range) < 0
     ).pop();
   }
 
   public getHighlightAfter(target: Highlight) {
     return this.getOrderedHighlights().filter((highlight) =>
+      highlight.id !== target.id &&
       highlight.range.compareBoundaryPoints(Range.START_TO_START, target.range) >= 0
     ).shift();
   }
