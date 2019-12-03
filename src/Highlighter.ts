@@ -78,6 +78,18 @@ export default class Highlighter {
     return highlights;
   }
 
+  public getHighlightBefore(target: Highlight) {
+    return this.getOrderedHighlights().filter((highlight) =>
+      highlight.range.compareBoundaryPoints(Range.START_TO_START, target.range) < 0
+    ).pop();
+  }
+
+  public getHighlightAfter(target: Highlight) {
+    return this.getOrderedHighlights().filter((highlight) =>
+      highlight.range.compareBoundaryPoints(Range.START_TO_START, target.range) >= 0
+    ).shift();
+  }
+
   public get document(): Document {
     if (!this.container.ownerDocument) {
       throw new Error('highlighter container is not mounted to a document!');

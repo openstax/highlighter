@@ -75,11 +75,11 @@ export default class SerializedHighlight {
    * when (if?) tutor starts using the api, rename these fields in the rest of the code
    * so that less mapping is necessary
    */
-  public getApiPayload(highlighter: Highlighter): Omit<NewApiHighlight, 'sourceType' | 'sourceId'> & {id: string} {
+  public getApiPayload(highlighter: Highlighter, highlight: Highlight): Omit<NewApiHighlight, 'sourceType' | 'sourceId'> & {id: string} {
     const {id, content, style, annotation, referenceElementId, ...serializationData} = this.data;
 
-    const highlights = highlighter.getHighlights();
-    const thisIndex = highlights.findIndex((search) => search.id === id);
+    const prevHighlight = highlighter.getHighlightBefore(highlight);
+    const nextHighlight = highlighter.getHighlightAfter(highlight);
 
     if (!style) {
       throw new Error('a style is requred to create an api payload');
@@ -95,8 +95,8 @@ export default class SerializedHighlight {
       highlightedContent: content,
       id,
       locationStrategies: [mapKeys(snakeCase, serializationData)],
-      nextHighlightId: thisIndex < highlights.length - 1 ? highlights[thisIndex + 1].id : undefined,
-      prevHighlightId: thisIndex > 0 ? highlights[thisIndex - 1].id : undefined,
+      nextHighlightId: nextHighlight && nextHighlight.id,
+      prevHighlightId: prevHighlight && prevHighlight.id,
 
     };
   }
