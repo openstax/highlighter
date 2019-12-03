@@ -1,6 +1,6 @@
 {
   "name": "@openstax/highlighter",
-  "version": "1.4.1-fix6",
+  "version": "1.4.1-fix7",
   "main": "dist/index.js",
   "license": "MIT",
   "files": [
@@ -20,7 +20,6 @@
     "test": "jest --coverage --verbose --maxWorkers=2",
     "watch": "tsc --noEmit --watch",
     "watch:test": "jest --watchAll",
-    "preinstall": "yarn client:build",
     "client:clean": "rm -rf 'node_modules/@openstax/highlights-client' highlights-client",
     "client:build": "./script/build-client.bash",
     "client:install": "yarn add ./highlights-client",
