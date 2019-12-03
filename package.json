@@ -1,6 +1,6 @@
 {
   "name": "@openstax/highlighter",
-  "version": "1.4.1-fix1",
+  "version": "1.4.1-fix2",
   "main": "dist/index.js",
   "license": "MIT",
   "files": [
@@ -23,7 +23,7 @@
     "preinstall": "yarn client:build",
     "client:clean": "rm -rf 'node_modules/@openstax/highlights-client' highlights-client",
     "client:build": "./script/build-client.bash",
-    "client:install": "yarn add ./highlights-client",
+    "client:install": "mkdir -p node_modules/\\@openstax/highlights-client && cp -r highlights-client node_modules/\\@openstax",
     "client:rebuild": "npm-run-all client:clean client:build client:install"
   },
   "devDependencies": {
@@ -74,7 +74,6 @@
     ]
   },
   "dependencies": {
-    "@openstax/highlights-client": "./highlights-client",
     "change-case": "^4.0.0",
     "serialize-selection": "^1.1.1",
     "uuid": "^3.3.3"
