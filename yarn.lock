@@ -642,9 +642,6 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
-"@openstax/highlights-client@./highlights-client":
-  version "0.1.0"
-
 "@types/jest@^23.3.7":
   version "23.3.7"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-23.3.7.tgz#77f9a4332ccf8db680a31818ade3ee454c831a79"
