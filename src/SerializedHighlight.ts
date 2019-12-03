@@ -40,6 +40,8 @@ export default class SerializedHighlight {
    *   - loop over locationStrategies and pick the best one instead of
    *     the first one
    *   - use location strategy bindings instead of arbitrary mapKeys
+   *     or revise swagger definition to properly use oneOf so that it
+   *     does it automatically
    */
   public static fromApiResponse(highlight: ApiHighlight) {
 
