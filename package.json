@@ -1,6 +1,6 @@
 {
   "name": "@openstax/highlighter",
-  "version": "1.4.1-fix7",
+  "version": "1.4.1-fix9",
   "main": "dist/index.js",
   "license": "MIT",
   "files": [
@@ -20,10 +20,9 @@
     "test": "jest --coverage --verbose --maxWorkers=2",
     "watch": "tsc --noEmit --watch",
     "watch:test": "jest --watchAll",
-    "client:clean": "rm -rf 'node_modules/@openstax/highlights-client' highlights-client",
+    "client:clean": "rm -rf highlights-client",
     "client:build": "./script/build-client.bash",
-    "client:install": "yarn add ./highlights-client",
-    "client:rebuild": "npm-run-all client:clean client:build client:install"
+    "client:rebuild": "npm-run-all client:clean client:build"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",
@@ -73,7 +72,6 @@
     ]
   },
   "dependencies": {
-    "@openstax/highlights-client": "file:highlights-client",
     "change-case": "^4.0.0",
     "serialize-selection": "^1.1.1",
     "uuid": "^3.3.3"
