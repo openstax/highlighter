@@ -1,11 +1,11 @@
 {
   "name": "@openstax/highlighter",
-  "version": "1.4.1-fix3",
+  "version": "1.4.1-fix4",
   "main": "dist/index.js",
   "license": "MIT",
   "files": [
     "dist",
-    "highlights-client"
+    "node_modules/@openstax/highlights-client"
   ],
   "scripts": {
     "current": "node -e \"console.log(require('./package.json').version)\"",
