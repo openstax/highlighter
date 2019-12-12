@@ -11,6 +11,7 @@ interface IOptions {
   snapMathJax?: boolean;
   snapWords?: boolean;
   className?: string;
+  skipIDsBy?: RegExp[];
   onClick?: (highlight?: Highlight) => void;
   onSelect?: (highlights: Highlight[], newHighlight?: Highlight) => void;
 }
@@ -145,7 +146,11 @@ export default class Highlighter {
         .filter((other: Highlight) => other.intersects(range));
 
       if (highlights.length === 0) {
-        const highlight: Highlight = new Highlight(range, {content: rangeContentsString(range)});
+        const highlight: Highlight = new Highlight(
+          range,
+          { content: rangeContentsString(range) },
+          { skipIDsBy: this.options.skipIDsBy }
+        );
         onSelect(highlights, highlight);
       } else {
         onSelect(highlights);
