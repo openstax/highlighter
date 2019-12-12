@@ -54,7 +54,7 @@ export default class Highlight {
   }
 
   public removeStyle() {
-    const {style} = this.data;
+    const { style } = this.data;
     if (style) {
       this.elements.forEach((element) => element.classList.remove(style));
       delete this.data.style;
@@ -91,17 +91,46 @@ export default class Highlight {
   }
 
   public serialize(referenceElement?: HTMLElement): SerializedHighlight {
-    referenceElement = referenceElement || dom(this.range.commonAncestorContainer).closest('[id]');
+    const validReferenceElement = this.getValidReferenceElement(referenceElement);
+
+    if (!validReferenceElement) {
+      throw new Error('reference element not found');
+    }
 
     return new SerializedHighlight({
       ...this.data,
-      ...SerializedHighlight.defaultSerializer(this.range, referenceElement),
+      ...SerializedHighlight.defaultSerializer(this.range, validReferenceElement),
     });
   }
   private loadStyle() {
-    const {style} = this.data;
+    const { style } = this.data;
     if (style) {
       this.elements.forEach((element) => element.classList.add(style));
+    }
+  }
+
+  private checkReferenceElement(referenceElement?: HTMLElement): boolean {
+    if (!referenceElement || !referenceElement.id) {
+      return false;
+    }
+
+    const regexps = ['^term', '^\\d+$'];
+    return !regexps.some((regexp) => {
+      return new RegExp(regexp).test(referenceElement.id);
+    });
+  }
+
+  private getValidReferenceElement(referenceElement?: HTMLElement): HTMLElement | null {
+    if (!referenceElement) {
+      referenceElement = dom(this.range.commonAncestorContainer).closest('[id]');
+    }
+    if (this.checkReferenceElement(referenceElement)) {
+      return referenceElement as HTMLElement;
+    } else if (referenceElement && referenceElement.parentElement) {
+      const nextReferenceElement = dom(referenceElement.parentElement).closest('[id]');
+      return this.getValidReferenceElement(nextReferenceElement);
+    } else {
+      return null;
     }
   }
 }

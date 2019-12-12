@@ -1,6 +1,5 @@
-import dom from '../../dom';
 import Highlighter from '../../Highlighter';
-import {getFirstByXPath, getXPathForElement} from './xpath';
+import { getFirstByXPath, getXPathForElement } from './xpath';
 
 export const discriminator = 'XpathRangeSelector';
 
@@ -13,12 +12,7 @@ export interface IData {
   endOffset: number;
 }
 
-export function serialize(range: Range, referenceElement?: HTMLElement): IData {
-  referenceElement = referenceElement || dom(range.commonAncestorContainer).closest('[id]');
-
-  if (!referenceElement) {
-    throw new Error('reference element not found');
-  }
+export function serialize(range: Range, referenceElement: HTMLElement): IData {
 
   const [endContainer, endOffset] = getXPathForElement(range.endContainer, range.endOffset, referenceElement);
   const [startContainer, startOffset] = getXPathForElement(range.startContainer, range.startOffset, referenceElement);
@@ -35,7 +29,6 @@ export function serialize(range: Range, referenceElement?: HTMLElement): IData {
 
 export function isLoadable(highlighter: Highlighter, data: IData): boolean {
   const referenceElement = highlighter.getReferenceElement(data.referenceElementId);
-
   if (!referenceElement) {
     return false;
   }
