@@ -1,3 +1,4 @@
+import * as uuid from 'uuid/v4';
 import dom from './dom';
 import SerializedHighlight from './SerializedHighlight';
 
@@ -38,8 +39,7 @@ export default class Highlight {
     this.range = range;
     this.data = {
       ...data,
-      // TODO - something more random here
-      id: data.id || (new Date()).getTime().toString(),
+      id: data.id || uuid(),
     };
   }
 
