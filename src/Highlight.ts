@@ -11,7 +11,7 @@ export interface IHighlightData {
 }
 
 export interface IOptions {
-  skipIDsBy?: RegExp[];
+  skipIDsBy?: RegExp;
 }
 
 export default class Highlight {
@@ -43,7 +43,8 @@ export default class Highlight {
   constructor(
     range: Range,
     data: Pick<IHighlightData, Exclude<keyof IHighlightData, 'id'>> & Partial<Pick<IHighlightData, 'id'>>,
-    options?: IOptions) {
+    options?: IOptions
+  ) {
     this.range = range;
     this.options = options || {};
     this.data = {
@@ -100,9 +101,7 @@ export default class Highlight {
   }
 
   public serialize(referenceElement?: HTMLElement): SerializedHighlight {
-    const validReferenceElement = this.getValidReferenceElement(
-      this.options.skipIDsBy, referenceElement
-    );
+    const validReferenceElement = this.getValidReferenceElement(referenceElement);
 
     if (!validReferenceElement) {
       throw new Error('reference element not found');
@@ -120,26 +119,28 @@ export default class Highlight {
     }
   }
 
-  private checkReferenceElement(validatingRegexps: RegExp[], referenceElement?: HTMLElement): boolean {
+  private checkReferenceElement(referenceElement?: HTMLElement): boolean {
     if (!referenceElement || !referenceElement.id) {
       return false;
     }
 
-    return !validatingRegexps.some((regexp) => {
-      return new RegExp(regexp).test(referenceElement.id);
-    });
+    if (!this.options.skipIDsBy) {
+      return true;
+    } else {
+      return this.options.skipIDsBy.test(referenceElement.id)
+    }
   }
 
-  private getValidReferenceElement(validatingRegexps: RegExp[] = [], referenceElement?: HTMLElement): HTMLElement | null {
+  private getValidReferenceElement(referenceElement?: HTMLElement): HTMLElement | null {
     if (!referenceElement) {
       referenceElement = dom(this.range.commonAncestorContainer).closest('[id]');
     }
 
-    if (this.checkReferenceElement(validatingRegexps, referenceElement)) {
+    if (this.checkReferenceElement(referenceElement)) {
       return referenceElement as HTMLElement;
     } else if (referenceElement && referenceElement.parentElement) {
       const nextReferenceElement = dom(referenceElement.parentElement).closest('[id]');
-      return this.getValidReferenceElement(validatingRegexps, nextReferenceElement);
+      return this.getValidReferenceElement(nextReferenceElement);
     } else {
       return null;
     }

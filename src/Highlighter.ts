@@ -1,5 +1,5 @@
 import dom from './dom';
-import Highlight, { FOCUS_CSS } from './Highlight';
+import Highlight, { FOCUS_CSS, IOptions as HighlightOptions } from './Highlight';
 import injectHighlightWrappers, { DATA_ATTR, DATA_ID_ATTR } from './injectHighlightWrappers';
 import { rangeContentsString } from './rangeContents';
 import removeHighlightWrappers from './removeHighlightWrappers';
@@ -11,7 +11,7 @@ interface IOptions {
   snapMathJax?: boolean;
   snapWords?: boolean;
   className?: string;
-  skipIDsBy?: RegExp[];
+  skipIDsBy?: RegExp;
   onClick?: (highlight?: Highlight) => void;
   onSelect?: (highlights: Highlight[], newHighlight?: Highlight) => void;
 }
@@ -67,6 +67,14 @@ export default class Highlighter {
 
   public getHighlights(): Highlight[] {
     return Object.values(this.highlights);
+  }
+
+  public getHighlightOptions(): HighlightOptions {
+    const { skipIDsBy } = this.options;
+
+    return {
+      skipIDsBy,
+    };
   }
 
   public getOrderedHighlights(): Highlight[] {
@@ -137,6 +145,7 @@ export default class Highlighter {
   }
 
   private onSelect(selection: Selection): void {
+    console.log(selection)
     const { onSelect } = this.options;
 
     const range = snapSelection(selection, this.options);

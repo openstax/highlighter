@@ -109,6 +109,8 @@ export default class SerializedHighlight {
 
   public load(highlighter: Highlighter): Highlight {
     const range = this.deserializer.load(highlighter);
-    return new Highlight(range, this.data);
+    const highlightOptions = highlighter.getHighlightOptions();
+
+    return new Highlight(range, this.data, highlightOptions);
   }
 }
