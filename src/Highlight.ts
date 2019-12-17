@@ -119,7 +119,7 @@ export default class Highlight {
     }
   }
 
-  private checkReferenceElement(referenceElement?: HTMLElement): boolean {
+  private checkReferenceElement(referenceElement?: HTMLElement): referenceElement is HTMLElement {
     if (!referenceElement || !referenceElement.id) {
       return false;
     }
@@ -127,7 +127,7 @@ export default class Highlight {
     if (!this.options.skipIDsBy) {
       return true;
     } else {
-      return this.options.skipIDsBy.test(referenceElement.id)
+      return !this.options.skipIDsBy.test(referenceElement.id);
     }
   }
 
@@ -136,10 +136,12 @@ export default class Highlight {
       referenceElement = dom(this.range.commonAncestorContainer).closest('[id]');
     }
 
+    const parentElement = referenceElement && referenceElement.parentElement;
+
     if (this.checkReferenceElement(referenceElement)) {
-      return referenceElement as HTMLElement;
-    } else if (referenceElement && referenceElement.parentElement) {
-      const nextReferenceElement = dom(referenceElement.parentElement).closest('[id]');
+      return referenceElement;
+    } else if (parentElement) {
+      const nextReferenceElement = dom(parentElement).closest('[id]');
       return this.getValidReferenceElement(nextReferenceElement);
     } else {
       return null;

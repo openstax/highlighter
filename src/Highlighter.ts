@@ -145,7 +145,6 @@ export default class Highlighter {
   }
 
   private onSelect(selection: Selection): void {
-    console.log(selection)
     const { onSelect } = this.options;
 
     const range = snapSelection(selection, this.options);
@@ -158,7 +157,7 @@ export default class Highlighter {
         const highlight: Highlight = new Highlight(
           range,
           { content: rangeContentsString(range) },
-          { skipIDsBy: this.options.skipIDsBy }
+          this.getHighlightOptions()
         );
         onSelect(highlights, highlight);
       } else {
