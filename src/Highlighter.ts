@@ -1,5 +1,5 @@
 import dom from './dom';
-import Highlight, { FOCUS_CSS } from './Highlight';
+import Highlight, { FOCUS_CSS, IOptions as HighlightOptions } from './Highlight';
 import injectHighlightWrappers, { DATA_ATTR, DATA_ID_ATTR } from './injectHighlightWrappers';
 import { rangeContentsString } from './rangeContents';
 import removeHighlightWrappers from './removeHighlightWrappers';
@@ -11,6 +11,7 @@ interface IOptions {
   snapMathJax?: boolean;
   snapWords?: boolean;
   className?: string;
+  skipIDsBy?: RegExp;
   onClick?: (highlight?: Highlight) => void;
   onSelect?: (highlights: Highlight[], newHighlight?: Highlight) => void;
 }
@@ -66,6 +67,14 @@ export default class Highlighter {
 
   public getHighlights(): Highlight[] {
     return Object.values(this.highlights);
+  }
+
+  public getHighlightOptions(): HighlightOptions {
+    const { skipIDsBy } = this.options;
+
+    return {
+      skipIDsBy,
+    };
   }
 
   public getOrderedHighlights(): Highlight[] {
@@ -145,7 +154,11 @@ export default class Highlighter {
         .filter((other: Highlight) => other.intersects(range));
 
       if (highlights.length === 0) {
-        const highlight: Highlight = new Highlight(range, {content: rangeContentsString(range)});
+        const highlight: Highlight = new Highlight(
+          range,
+          { content: rangeContentsString(range) },
+          this.getHighlightOptions()
+        );
         onSelect(highlights, highlight);
       } else {
         onSelect(highlights);

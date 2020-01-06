@@ -1,5 +1,4 @@
 import serializeSelection from 'serialize-selection';
-import dom from '../../dom';
 import Highlighter from '../../Highlighter';
 
 export const discriminator = 'TextPositionSelector';
@@ -11,12 +10,7 @@ export interface IData {
   end: number;
 }
 
-export function serialize(range: Range, referenceElement?: HTMLElement): IData {
-  referenceElement = referenceElement || dom(range.commonAncestorContainer).closest('[id]');
-
-  if (!referenceElement) {
-    throw new Error('reference element not found');
-  }
+export function serialize(range: Range, referenceElement: HTMLElement): IData {
 
   // modified copy/paste out of 'serialize-selection' module
   const cloneRange = range.cloneRange();

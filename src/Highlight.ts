@@ -10,6 +10,10 @@ export interface IHighlightData {
   content: string;
 }
 
+export interface IOptions {
+  skipIDsBy?: RegExp;
+}
+
 export default class Highlight {
 
   public get id(): string {
@@ -32,11 +36,17 @@ export default class Highlight {
     return this._elements;
   }
   public readonly range: Range;
+  public readonly options: IOptions;
   private data: IHighlightData;
   private _elements: HTMLElement[] = [];
 
-  constructor(range: Range, data: Pick<IHighlightData, Exclude<keyof IHighlightData, 'id'>> & Partial<Pick<IHighlightData, 'id'>>) {
+  constructor(
+    range: Range,
+    data: Pick<IHighlightData, Exclude<keyof IHighlightData, 'id'>> & Partial<Pick<IHighlightData, 'id'>>,
+    options?: IOptions
+  ) {
     this.range = range;
+    this.options = options || {};
     this.data = {
       ...data,
       id: data.id || uuid(),
@@ -54,7 +64,7 @@ export default class Highlight {
   }
 
   public removeStyle() {
-    const {style} = this.data;
+    const { style } = this.data;
     if (style) {
       this.elements.forEach((element) => element.classList.remove(style));
       delete this.data.style;
@@ -91,17 +101,50 @@ export default class Highlight {
   }
 
   public serialize(referenceElement?: HTMLElement): SerializedHighlight {
-    referenceElement = referenceElement || dom(this.range.commonAncestorContainer).closest('[id]');
+    const validReferenceElement = this.getValidReferenceElement(referenceElement);
+
+    if (!validReferenceElement) {
+      throw new Error('reference element not found');
+    }
 
     return new SerializedHighlight({
       ...this.data,
-      ...SerializedHighlight.defaultSerializer(this.range, referenceElement),
+      ...SerializedHighlight.defaultSerializer(this.range, validReferenceElement),
     });
   }
   private loadStyle() {
-    const {style} = this.data;
+    const { style } = this.data;
     if (style) {
       this.elements.forEach((element) => element.classList.add(style));
+    }
+  }
+
+  private checkReferenceElement(referenceElement?: HTMLElement): referenceElement is HTMLElement {
+    if (!referenceElement || !referenceElement.id) {
+      return false;
+    }
+
+    if (!this.options.skipIDsBy) {
+      return true;
+    } else {
+      return !this.options.skipIDsBy.test(referenceElement.id);
+    }
+  }
+
+  private getValidReferenceElement(referenceElement?: HTMLElement): HTMLElement | null {
+    if (!referenceElement) {
+      referenceElement = dom(this.range.commonAncestorContainer).closest('[id]');
+    }
+
+    const parentElement = referenceElement && referenceElement.parentElement;
+
+    if (this.checkReferenceElement(referenceElement)) {
+      return referenceElement;
+    } else if (parentElement) {
+      const nextReferenceElement = dom(parentElement).closest('[id]');
+      return this.getValidReferenceElement(nextReferenceElement);
+    } else {
+      return null;
     }
   }
 }
