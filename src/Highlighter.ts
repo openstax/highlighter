@@ -38,6 +38,11 @@ export default class Highlighter {
     this.getHighlights().forEach(this.erase);
   }
 
+  public teardown = (): void => {
+    this.eraseAll();
+    this.unmount();
+  }
+
   public erase = (highlight: Highlight): void => {
     removeHighlightWrappers(highlight);
     delete this.highlights[highlight.id];
