@@ -181,20 +181,28 @@ export function getFirstByXPath(path: string, offset: number, referenceElement: 
   // for element targets, highlight children might be artifically
   // inflating the range offset, fix.
   if (node && isElement(node)) {
-    let search: Node | null = node.childNodes[offset - 1];
+    let search: Node | null = node.childNodes[0];
+    let offsetElementsFound = 0;
+    let modifyOffset = 0;
 
-    while (search) {
+    while (search && offsetElementsFound < offset) {
+      offsetElementsFound++;
+
       if (isTextOrTextHighlight(search)) {
         search = search.nextSibling;
 
         while (isTextOrTextHighlight(search!)) {
-          offset++;
+          modifyOffset++;
           search = search!.nextSibling;
         }
+      } else {
+        search = search ? search.nextSibling : null;
       }
-      search = search ? search.nextSibling : null;
     }
+
+    offset+=modifyOffset;
   }
+
 
   if (node && isHighlight(node)) {
     node = null;
