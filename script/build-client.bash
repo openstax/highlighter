@@ -10,7 +10,7 @@ if [ -d "./highlights-client" ]; then
   exit 0
 fi
 
-swagger_url="https://highlights-dev1.sandbox.openstax.org/highlights/api/v0/swagger"
+swagger_url="https://openstax.org/highlights/api/v0/swagger"
 
 tmp_file=$(mktemp -t highlights-client.XXXXX)
 download_url=$(curl -H "Content-type: application/json" -s \
