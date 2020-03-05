@@ -16,14 +16,14 @@ const NODE_TYPE = {
  */
 const IGNORE_TAGS = [
   'SCRIPT', 'STYLE', 'SELECT', 'OPTION', 'BUTTON', 'OBJECT', 'APPLET',
-  'VIDEO', 'AUDIO', 'CANVAS', 'EMBED', 'PARAM', 'METER', 'PROGRESS',
+  'AUDIO', 'CANVAS', 'EMBED', 'PARAM', 'METER', 'PROGRESS',
 ];
 /**
  * Highlights can be created around these block and text elements.
  */
 const BLOCK_ELEMENTS = ['img', 'video', 'iframe'];
 const TEXT_ELEMENTS = ['.MathJax'];
-const ALLOWED_ELEMENT = BLOCK_ELEMENTS.concat(TEXT_ELEMENTS);
+const ALLOWED_ELEMENTS = BLOCK_ELEMENTS.concat(TEXT_ELEMENTS).join(',');
 
 interface IOptions {
   id?: string;
@@ -153,7 +153,7 @@ function highlightRange(range: Range, wrapper: HTMLElement) {
   do {
     if (!node) { done = true; }
 
-    if (dom(node).matches(ALLOWED_ELEMENT.join(','))) {
+    if (dom(node).matches(ALLOWED_ELEMENTS)) {
       highlightNode(node as HTMLElement);
       goDeeper = false;
     }
