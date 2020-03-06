@@ -21,7 +21,7 @@ const IGNORE_TAGS = [
 /**
  * Highlights can be created around these block and text elements.
  */
-const BLOCK_ELEMENTS = ['img', 'video', 'iframe'];
+const BLOCK_ELEMENTS = ['img', 'iframe'];
 const TEXT_ELEMENTS = ['.MathJax'];
 const ALLOWED_ELEMENTS = BLOCK_ELEMENTS.concat(TEXT_ELEMENTS).join(',');
 
@@ -61,8 +61,8 @@ export default function injectHighlightWrappers(highlight: Highlight, options: I
  * @returns {Array} - array of normalized highlights. Order and number of returned highlights may be different than
  * input highlights.
  */
-function normalizeHighlights(highlights: Node[]) {
-  let normalizedHighlights;
+function normalizeHighlights(highlights: HTMLElement[]) {
+  let normalizedHighlights: HTMLElement[];
 
   //flattenNestedHighlights(highlights);
   mergeSiblingHighlights(highlights);
@@ -88,7 +88,7 @@ function normalizeHighlights(highlights: Node[]) {
     }
   });
 
-  for (const [index, node] of (normalizedHighlights as HTMLElement[]).entries()) {
+  for (const [index, node] of normalizedHighlights.entries()) {
     if (index === 0) {
       node.classList.add('first')
     }
@@ -109,15 +109,12 @@ function normalizeHighlights(highlights: Node[]) {
 
 /**
  * Check if there are block elements inside node.
- * Block elements are: img, video and iframe.
+ * Block elements are: img and iframe.
  * @param {HTMLElement} node
  * @returns {boolean}
  */
 function hasBlockContent(node: HTMLElement) {
-  for (const block of BLOCK_ELEMENTS) {
-    if (node.querySelector(block)) { return true; }
-  }
-  return false;
+  return !!node.querySelector(BLOCK_ELEMENTS.join(','));
 }
 
 /**
