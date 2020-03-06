@@ -642,6 +642,11 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
+"@openstax/highlights-client@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@openstax/highlights-client/-/highlights-client-0.1.0.tgz#fe146cc20b57c262fc5175378d77c5ac070f1993"
+  integrity sha512-PmEuPqBK1bPsOuZG/Apq+XUA1YbxV22wY+8X4Pq1dc53zks3PCPvQ4oJRr4opv72Aea7hK4wYeID3GQRLnNLvw==
+
 "@types/jest@^23.3.7":
   version "23.3.7"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-23.3.7.tgz#77f9a4332ccf8db680a31818ade3ee454c831a79"
