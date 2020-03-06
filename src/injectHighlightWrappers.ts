@@ -16,8 +16,14 @@ const NODE_TYPE = {
  */
 const IGNORE_TAGS = [
   'SCRIPT', 'STYLE', 'SELECT', 'OPTION', 'BUTTON', 'OBJECT', 'APPLET',
-  'VIDEO', 'AUDIO', 'CANVAS', 'EMBED', 'PARAM', 'METER', 'PROGRESS',
+  'AUDIO', 'CANVAS', 'EMBED', 'PARAM', 'METER', 'PROGRESS',
 ];
+/**
+ * Highlights can be created around these block and text elements.
+ */
+const BLOCK_ELEMENTS = ['img', 'iframe'];
+const TEXT_ELEMENTS = ['.MathJax'];
+const ALLOWED_ELEMENTS = BLOCK_ELEMENTS.concat(TEXT_ELEMENTS).join(',');
 
 interface IOptions {
   id?: string;
@@ -49,12 +55,14 @@ export default function injectHighlightWrappers(highlight: Highlight, options: I
  * Normalizes highlights. Ensures that highlighting is done with use of the smallest possible number of
  * wrapping HTML elements.
  * Flattens highlights structure and merges sibling highlights. Normalizes text nodes within highlights.
+ * Adds "first" and "last" classes to the highlights and "text" or "block" class for each highlight depends
+ * on the content.
  * @param {Array} highlights - highlights to normalize.
  * @returns {Array} - array of normalized highlights. Order and number of returned highlights may be different than
  * input highlights.
  */
-function normalizeHighlights(highlights: Node[]) {
-  let normalizedHighlights;
+function normalizeHighlights(highlights: HTMLElement[]) {
+  let normalizedHighlights: HTMLElement[];
 
   //flattenNestedHighlights(highlights);
   mergeSiblingHighlights(highlights);
@@ -80,7 +88,33 @@ function normalizeHighlights(highlights: Node[]) {
     }
   });
 
+  for (const [index, node] of normalizedHighlights.entries()) {
+    if (index === 0) {
+      node.classList.add('first')
+    }
+
+    if (hasBlockContent(node)) {
+      node.classList.add('block')
+    } else {
+      node.classList.add('text')
+    }
+
+    if (index === (normalizedHighlights.length - 1)) {
+      node.classList.add('last')
+    }
+  }
+
   return normalizedHighlights;
+}
+
+/**
+ * Check if there are block elements inside node.
+ * Block elements are: img and iframe.
+ * @param {HTMLElement} node
+ * @returns {boolean}
+ */
+function hasBlockContent(node: HTMLElement) {
+  return !!node.querySelector(BLOCK_ELEMENTS.join(','));
 }
 
 /**
@@ -116,7 +150,7 @@ function highlightRange(range: Range, wrapper: HTMLElement) {
   do {
     if (!node) { done = true; }
 
-    if (dom(node).matches('.MathJax,img')) {
+    if (dom(node).matches(ALLOWED_ELEMENTS)) {
       highlightNode(node as HTMLElement);
       goDeeper = false;
     }
