@@ -560,6 +560,48 @@ describe('getFirstByXPath', () => {
     expect(result.textContent).toEqual('asdfasdf');
   });
 
+  it('modifies element offset to account for highlights', () => {
+    document.body.innerHTML = `
+      <div id="reference">
+        qwer <span ${DATA_ATTR}>zxcv</span><span ${DATA_ATTR}>asdf</span> werewwer
+      </div>
+    `;
+
+    const reference = document.getElementById('reference');
+    const [result, offset] = xpath.getFirstByXPath(".", 1, reference);
+
+    expect(result).toBe(reference);
+    expect(offset).toEqual(4);
+  });
+
+  it('modifies element offset to account for highlights (with extra elements)', () => {
+    document.body.innerHTML = `
+      <div id="reference">
+        qwer <span ${DATA_ATTR}>zxcv</span><span class="ASdf"></span><span ${DATA_ATTR}>asdf</span> werewwer
+      </div>
+    `;
+
+    const reference = document.getElementById('reference');
+    const [result, offset] = xpath.getFirstByXPath(".", 3, reference);
+
+    expect(result).toBe(reference);
+    expect(offset).toEqual(5);
+  });
+
+  it('doesn\'t over-modify element offset to account for highlights', () => {
+    document.body.innerHTML = `
+      <div id="reference">
+        qwer <span ${DATA_ATTR}>zxcv</span><span class="ASdf"></span><span ${DATA_ATTR}>asdf</span><span ${DATA_ATTR}>asdf</span><span ${DATA_ATTR}>asdf</span> werewwer
+      </div>
+    `;
+
+    const reference = document.getElementById('reference');
+    const [result, offset] = xpath.getFirstByXPath(".", 2, reference);
+
+    expect(result).toBe(reference);
+    expect(offset).toEqual(3);
+  });
+
   it('doesn\'t count highlights between text', () => {
     document.body.innerHTML = `
       <div id="reference">
