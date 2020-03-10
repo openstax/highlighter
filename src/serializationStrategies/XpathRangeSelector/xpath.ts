@@ -1,13 +1,15 @@
 // tslint:disable
 import { DATA_ATTR } from '../../injectHighlightWrappers';
 
+type Nullable<T> = T | null | undefined;
+
 const findNonTextChild = (node: Node) => Array.prototype.find.call(node.childNodes,
   (node: Node) => node.nodeType === Node.ELEMENT_NODE && !isTextHighlight(node)
 );
-const isHighlight = (node: Node): node is HTMLElement => node && (node as Element).getAttribute && (node as Element).getAttribute(DATA_ATTR) !== null;
-const isTextHighlight = (node: Node): node is HTMLElement => isHighlight(node) && !findNonTextChild(node);
-const isText = (node: Node): node is Text => node && node.nodeType === 3;
-const isTextOrTextHighlight = (node: Node | HTMLElement) => isText(node) || isTextHighlight(node);
+const isHighlight = (node: Nullable<Node>): node is HTMLElement => !!node && (node as Element).getAttribute && (node as Element).getAttribute(DATA_ATTR) !== null;
+const isTextHighlight = (node: Nullable<Node>): node is HTMLElement => isHighlight(node) && !findNonTextChild(node);
+const isText = (node: Nullable<Node>): node is Text => !!node && node.nodeType === 3;
+const isTextOrTextHighlight = (node: Nullable<Node | HTMLElement>) => isText(node) || isTextHighlight(node);
 const isElement = (node: Node): node is HTMLElement => node && node.nodeType === 1;
 const isElementNotHighlight = (node: Node) => isElement(node) && !isHighlight(node);
 const nodeIndex = (list: NodeList, element: Node) => Array.prototype.indexOf.call(list, element);
@@ -191,18 +193,17 @@ export function getFirstByXPath(path: string, offset: number, referenceElement: 
       if (isTextOrTextHighlight(search)) {
         search = search.nextSibling;
 
-        while (isTextOrTextHighlight(search!)) {
+        while (isTextOrTextHighlight(search)) {
           modifyOffset++;
           search = search!.nextSibling;
         }
       } else {
-        search = search ? search.nextSibling : null;
+        search = search.nextSibling;
       }
     }
 
     offset+=modifyOffset;
   }
-
 
   if (node && isHighlight(node)) {
     node = null;
