@@ -12,7 +12,7 @@ interface IOptions {
   snapWords?: boolean;
   className?: string;
   skipIDsBy?: RegExp;
-  onClick?: (highlight?: Highlight) => void;
+  onClick?: (highlight: Highlight | undefined, event: MouseEvent) => void;
   onSelect?: (highlights: Highlight[], newHighlight?: Highlight) => void;
 }
 
@@ -121,14 +121,15 @@ export default class Highlighter {
     }
 
     if (selection.isCollapsed) {
-      this.onClick(ev.target);
+      this.onClick(ev);
     } else {
       this.onSelect(selection);
     }
   }
 
-  private onClick(target: any): void {
+  private onClick(event: MouseEvent): void {
     const { onClick } = this.options;
+    let target: any = event.target;
     if (!onClick) { return; }
 
     if (dom(target).isHtmlElement) {
@@ -139,14 +140,14 @@ export default class Highlighter {
           // check if the found highlight is known to this instance
           const highlight = this.highlights[target.el.getAttribute(DATA_ID_ATTR)];
           if (highlight) {
-            onClick(highlight);
+            onClick(highlight, event);
             return;
           }
         }
         target = dom(target.el.parentElement);
       }
     }
-    onClick();
+    onClick(undefined, event);
   }
 
   private onSelect(selection: Selection): void {
