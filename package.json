@@ -1,6 +1,6 @@
 {
   "name": "@openstax/highlighter",
-  "version": "1.5.2",
+  "version": "1.6.1",
   "main": "dist/index.js",
   "license": "MIT",
   "files": [
@@ -68,7 +68,7 @@
     ]
   },
   "dependencies": {
-    "@openstax/highlights-client": "^0.1.0",
+    "@openstax/highlights-client": "0.2.1",
     "change-case": "^4.0.0",
     "serialize-selection": "^1.1.1",
     "uuid": "^3.3.3"
