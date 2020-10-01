@@ -1,6 +1,7 @@
 // tslint:disable
 import dom from './dom';
 import Highlight from './Highlight';
+import { IOptions } from './Highlighter';
 import { DATA_ATTR_SELECTOR } from './injectHighlightWrappers';
 
 const NODE_TYPE = {
@@ -13,43 +14,47 @@ const NODE_TYPE = {
  * If no element is given, all highlights all removed.
  * @param {HTMLElement} [element] - element to remove highlights from
  */
-export function removeAllHighlights(element: HTMLElement) {
-  getHighlights(element).forEach(removeHighlightElement);
+export function removeAllHighlights(element: HTMLElement, options: IOptions) {
+  getHighlights(element).forEach((element) => removeHighlightElement(element, options));
 }
 
-export default function(highlight: Highlight) {
-  highlight.elements.forEach(removeHighlightElement);
+export default function(highlight: Highlight, options: IOptions) {
+  highlight.elements.forEach((element) => removeHighlightElement(element, options));
 }
 
-function removeHighlightElement(element: HTMLElement) {
+function removeHighlightElement(element: HTMLElement, options: IOptions) {
   const container = element,
     highlights = getHighlights(container);
 
-  function mergeSiblingTextNodes(textNode: Text) {
-    const prev = textNode.previousSibling,
-      next = textNode.nextSibling;
+  const highlightsFromCurrentHighlighter = highlights.filter(element => element.classList.contains(options.className!));
+
+  function mergeSiblingNodes(node: HTMLElement | Text) {
+    if (node.nodeType !== NODE_TYPE.TEXT_NODE) { return; }
+
+    const prev = node.previousSibling,
+      next = node.nextSibling;
 
     if (prev && prev.nodeType === NODE_TYPE.TEXT_NODE) {
-      textNode.nodeValue = prev!.nodeValue + textNode.nodeValue!;
+      node.nodeValue = prev!.nodeValue + node.nodeValue!;
       dom(prev).remove();
     }
     if (next && next.nodeType === NODE_TYPE.TEXT_NODE) {
-      textNode.nodeValue = textNode!.nodeValue + next.nodeValue!;
+      node.nodeValue = node!.nodeValue + next.nodeValue!;
       dom(next).remove();
     }
   }
 
   function removeHighlight(highlight: HTMLElement) {
-    const textNodes = dom(highlight).unwrap();
+    const childNodes = dom(highlight).unwrap();
 
-    textNodes.forEach(function(node: Text) {
-      mergeSiblingTextNodes(node);
+    childNodes.forEach(function(node: Text) {
+      mergeSiblingNodes(node);
     });
   }
 
-  sortByDepth(highlights, true);
+  sortByDepth(highlightsFromCurrentHighlighter, true);
 
-  highlights.forEach(removeHighlight);
+  highlightsFromCurrentHighlighter.forEach(removeHighlight);
 }
 
 /**
@@ -57,7 +62,7 @@ function removeHighlightElement(element: HTMLElement) {
  * @param {HTMLElement} container - return highlights from this element
  * @returns {Array} - array of highlights.
  */
-function getHighlights(container: HTMLElement) {
+function getHighlights(container: HTMLElement): HTMLElement[] {
   const nodeList = container.querySelectorAll(DATA_ATTR_SELECTOR),
     highlights = Array.prototype.slice.call(nodeList);
 
