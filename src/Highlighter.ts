@@ -6,7 +6,7 @@ import removeHighlightWrappers from './removeHighlightWrappers';
 import { snapSelection } from './selection';
 import SerializedHighlight from './SerializedHighlight';
 
-export interface IOptions {
+interface IOptions {
   snapTableRows?: boolean;
   snapMathJax?: boolean;
   snapWords?: boolean;
@@ -44,7 +44,7 @@ export default class Highlighter {
   }
 
   public erase = (highlight: Highlight): void => {
-    removeHighlightWrappers(highlight, this.options);
+    removeHighlightWrappers(highlight, (element: HTMLElement) => element.classList.contains(this.options.className!));
     delete this.highlights[highlight.id];
   }
 
@@ -80,6 +80,10 @@ export default class Highlighter {
     return {
       skipIDsBy,
     };
+  }
+
+  public getOptions(): IOptions & { className: string } {
+    return this.options as IOptions & { className: string };
   }
 
   public getOrderedHighlights(): Highlight[] {
@@ -162,7 +166,7 @@ export default class Highlighter {
       if (highlights.length === 0) {
         const highlight: Highlight = new Highlight(
           range,
-          { content: rangeContentsString(range, this.options) },
+          { content: rangeContentsString(range) },
           this.getHighlightOptions()
         );
         onSelect(highlights, highlight);

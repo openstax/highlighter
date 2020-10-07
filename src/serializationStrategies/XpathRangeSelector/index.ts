@@ -1,4 +1,5 @@
 import Highlighter from '../../Highlighter';
+import { removeAllHighlights } from '../../removeHighlightWrappers';
 import { getFirstByXPath, getXPathForElement } from './xpath';
 
 export const discriminator = 'XpathRangeSelector';
@@ -32,6 +33,9 @@ export function isLoadable(highlighter: Highlighter, data: IData): boolean {
   if (!referenceElement) {
     return false;
   }
+
+  // Remove all highlights that are not matching current highlighter before getting the range for the data
+  removeAllHighlights(referenceElement, (element: HTMLElement) => !element.classList.contains(highlighter.getOptions().className));
 
   const [startContainer] = getFirstByXPath(data.startContainer, data.startOffset, referenceElement);
   const [endContainer] = getFirstByXPath(data.endContainer, data.endOffset, referenceElement);

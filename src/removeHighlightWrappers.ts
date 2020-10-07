@@ -1,7 +1,6 @@
 // tslint:disable
 import dom from './dom';
 import Highlight from './Highlight';
-import { IOptions } from './Highlighter';
 import { DATA_ATTR_SELECTOR } from './injectHighlightWrappers';
 
 const NODE_TYPE = {
@@ -14,19 +13,21 @@ const NODE_TYPE = {
  * If no element is given, all highlights all removed.
  * @param {HTMLElement} [element] - element to remove highlights from
  */
-export function removeAllHighlights(element: HTMLElement, options: IOptions) {
-  getHighlights(element).forEach((element) => removeHighlightElement(element, options));
+export function removeAllHighlights(element: HTMLElement, matchingFn?: (element: HTMLElement) => boolean) {
+  getHighlights(element).forEach((element) => removeHighlightElement(element, matchingFn));
 }
 
-export default function(highlight: Highlight, options: IOptions) {
-  highlight.elements.forEach((element) => removeHighlightElement(element, options));
+export default function(highlight: Highlight, matchingFn?: (element: HTMLElement) => boolean) {
+  highlight.elements.forEach((element) => removeHighlightElement(element, matchingFn));
 }
 
-function removeHighlightElement(element: HTMLElement, options: IOptions) {
+function removeHighlightElement(element: HTMLElement, matchingFn?: (element: HTMLElement) => boolean) {
   const container = element,
     highlights = getHighlights(container);
 
-  const highlightsFromCurrentHighlighter = highlights.filter(element => element.classList.contains(options.className!));
+  const highlightsFromCurrentHighlighter = matchingFn
+    ? highlights.filter(matchingFn)
+    : highlights;
 
   function mergeSiblingNodes(node: HTMLElement | Text) {
     if (node.nodeType !== NODE_TYPE.TEXT_NODE) { return; }
