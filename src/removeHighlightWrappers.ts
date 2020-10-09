@@ -12,24 +12,25 @@ const NODE_TYPE = {
  * Removes highlights from element. If element is a highlight itself, it is removed as well.
  * If no element is given, all highlights all removed.
  * @param {HTMLElement} [element] - element to remove highlights from
+ * @param {HTMLElement} [filterFn] - filter which highlights should be removed from the element, default: all
  */
-export function removeAllHighlights(element: HTMLElement, matchingFn?: (element: HTMLElement) => boolean) {
-  getHighlights(element).forEach((element) => removeHighlightElement(element, matchingFn));
+export function removeAllHighlights(element: HTMLElement, filterFn?: (element: HTMLElement) => boolean) {
+  getHighlights(element).forEach((element) => removeHighlightElement(element, filterFn));
 }
 
-export default function(highlight: Highlight, matchingFn?: (element: HTMLElement) => boolean) {
-  highlight.elements.forEach((element) => removeHighlightElement(element, matchingFn));
+export default function(highlight: Highlight, filterFn?: (element: HTMLElement) => boolean) {
+  highlight.elements.forEach((element) => removeHighlightElement(element, filterFn));
 }
 
-function removeHighlightElement(element: HTMLElement, matchingFn?: (element: HTMLElement) => boolean) {
+function removeHighlightElement(element: HTMLElement, filterFn?: (element: HTMLElement) => boolean) {
   const container = element,
     highlights = getHighlights(container);
 
-  const highlightsFromCurrentHighlighter = matchingFn
-    ? highlights.filter(matchingFn)
+  const highlightsFromCurrentHighlighter = filterFn
+    ? highlights.filter(filterFn)
     : highlights;
 
-  function mergeSiblingNodes(node: HTMLElement | Text) {
+  function mergeSiblingNodes(node: Node) {
     if (node.nodeType !== NODE_TYPE.TEXT_NODE) { return; }
 
     const prev = node.previousSibling,
@@ -48,7 +49,7 @@ function removeHighlightElement(element: HTMLElement, matchingFn?: (element: HTM
   function removeHighlight(highlight: HTMLElement) {
     const childNodes = dom(highlight).unwrap();
 
-    childNodes.forEach(function(node: Text) {
+    childNodes.forEach(function(node: Node) {
       mergeSiblingNodes(node);
     });
   }

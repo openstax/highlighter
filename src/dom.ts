@@ -88,7 +88,9 @@ export default function dom(el: any) {
      * Removes base element from DOM.
      */
     remove() {
-      el.parentNode.removeChild(el);
+      if (el && el.parentNode) {
+        el.parentNode.removeChild(el);
+      }
       el = null;
     },
 
@@ -120,14 +122,12 @@ export default function dom(el: any) {
      * @returns {Node[]} - child nodes of unwrapped element.
      */
     unwrap() {
-      let nodes = Array.prototype.slice.call(el.childNodes),
-        wrapper;
+      let nodes = Array.prototype.slice.call(el.childNodes);
 
       nodes.forEach(function(node: any) {
-        wrapper = node.parentNode;
-        dom(node).insertBefore(node.parentNode);
-        dom(wrapper).remove();
+        dom(node).insertBefore(el);
       });
+      dom(el).remove();
 
       return nodes;
     },
