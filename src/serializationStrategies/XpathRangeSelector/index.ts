@@ -1,4 +1,5 @@
 import Highlighter from '../../Highlighter';
+import { DATA_ID_ATTR } from '../../injectHighlightWrappers';
 import { removeAllHighlights } from '../../removeHighlightWrappers';
 import { getFirstByXPath, getXPathForElement } from './xpath';
 
@@ -35,7 +36,9 @@ export function isLoadable(highlighter: Highlighter, data: IData): boolean {
   }
 
   // Remove all highlights that are not matching current highlighter before getting the range for the data
-  removeAllHighlights(referenceElement, (element: HTMLElement) => !element.classList.contains(highlighter.getOptions().className));
+  removeAllHighlights(
+    referenceElement,
+    (element: HTMLElement) => !highlighter.getHighlight(element.getAttribute(DATA_ID_ATTR) || ''));
 
   const [startContainer] = getFirstByXPath(data.startContainer, data.startOffset, referenceElement);
   const [endContainer] = getFirstByXPath(data.endContainer, data.endOffset, referenceElement);

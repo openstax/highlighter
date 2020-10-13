@@ -26,7 +26,7 @@ function removeHighlightElement(element: HTMLElement, filterFn?: (element: HTMLE
   const container = element,
     highlights = getHighlights(container);
 
-  const highlightsFromCurrentHighlighter = filterFn
+  const filteredHighlights = filterFn
     ? highlights.filter(filterFn)
     : highlights;
 
@@ -54,9 +54,9 @@ function removeHighlightElement(element: HTMLElement, filterFn?: (element: HTMLE
     });
   }
 
-  sortByDepth(highlightsFromCurrentHighlighter, true);
+  sortByDepth(filteredHighlights, true);
 
-  highlightsFromCurrentHighlighter.forEach(removeHighlight);
+  filteredHighlights.forEach(removeHighlight);
 }
 
 /**

@@ -44,7 +44,7 @@ export default class Highlighter {
   }
 
   public erase = (highlight: Highlight): void => {
-    removeHighlightWrappers(highlight, (element: HTMLElement) => element.classList.contains(this.options.className!));
+    removeHighlightWrappers(highlight, (element: HTMLElement) => !!this.getHighlight(element.getAttribute(DATA_ID_ATTR) || ''));
     delete this.highlights[highlight.id];
   }
 

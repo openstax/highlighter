@@ -88,9 +88,7 @@ export default function dom(el: any) {
      * Removes base element from DOM.
      */
     remove() {
-      if (el && el.parentNode) {
-        el.parentNode.removeChild(el);
-      }
+      if (el) { el.remove(); }
       el = null;
     },
 
