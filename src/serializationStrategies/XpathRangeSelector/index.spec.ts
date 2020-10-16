@@ -50,6 +50,30 @@ describe('isLoadable', () => {
     expect(result).toEqual(true);
   });
 
+  it('returns true for element inside another highlight', () => {
+    document.body.innerHTML = `
+      <div id="highlighter">
+        <div id="referenceElement">
+          <span data-highlighted="true" data-highlight-id="some-id">asdfasdfasdlf aklsdfj</span>` +
+          `l;dksfj as;ldfkjals;d fjas;ldkfj as;ldfkj
+        </div>
+      </div>
+    `;
+
+    const highligherEl = document.getElementById('highlighter')!;
+    const highlighter = new Highlighter(highligherEl);
+    const result = serializer.isLoadable(highlighter, {
+      endContainer: './text()[1]',
+      endOffset: 14,
+      referenceElementId: 'referenceElement',
+      startContainer: './text()[1]',
+      startOffset: 4,
+      type: 'XpathRangeSelector',
+    });
+
+    expect(result).toEqual(true);
+  });
+
   it('returns false when reference element cant be found', () => {
     document.body.innerHTML = `
       <div id="highlighter">
