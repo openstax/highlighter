@@ -20,6 +20,8 @@ export default class Highlighter {
   public readonly container: HTMLElement;
   private highlights: { [key: string]: Highlight } = {};
   private options: IOptions;
+  private keyUpTimeout: NodeJS.Timeout | null = null;
+  // private selectionTimeout: NodeJS.Timeout | null = null;
 
   constructor(container: HTMLElement, options: IOptions = {}) {
     this.container = container;
@@ -28,10 +30,14 @@ export default class Highlighter {
       ...options,
     };
     this.container.addEventListener('mouseup', this.onMouseup);
+    this.container.addEventListener('keyup', this.onKeyUp);
+    // this.container.addEventListener('selectionchange', this.onSelectionChange);
   }
 
   public unmount(): void {
     this.container.removeEventListener('mouseup', this.onMouseup);
+    this.container.removeEventListener('keyup', this.onKeyUp);
+    // this.container.removeEventListener('selectionchange', this.onSelectionChange);
   }
 
   public eraseAll = (): void => {
@@ -126,6 +132,46 @@ export default class Highlighter {
       this.onSelect(selection);
     }
   }
+
+  private onKeyUp = (ev: KeyboardEvent): void => {
+    if (this.keyUpTimeout) {
+      clearTimeout(this.keyUpTimeout);
+    }
+
+    const selection = this.document.getSelection();
+
+    if (!selection || selection.isCollapsed) {
+      return;
+    }
+
+    if (ev.shiftKey && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(ev.key)) {
+      this.onSelect(selection);
+    }
+  }
+
+  // private onSelectionChange = (ev: Event): void => {
+  //   if (this.selectionTimeout) {
+  //     clearTimeout(this.selectionTimeout);
+  //   }
+
+  //   const selection = this.document.getSelection();
+
+  //   if (!selection) {
+  //     return;
+  //   }
+
+  //   if (selection.isCollapsed) {
+  //     this.onClick(ev as any);
+  //     return;
+  //   }
+
+  //   this.selectionTimeout = setTimeout(() => {
+  //     const sel = this.document.getSelection();
+  //     if (!sel) { return; }
+
+  //     this.onSelect(sel);
+  //   }, 500);
+  // }
 
   private onClick(event: MouseEvent): void {
     const { onClick } = this.options;
