@@ -54,6 +54,8 @@ describe('onSelect', () => {
   let snapSelectionSpy: jest.SpyInstance;
   let rangeContentsStringSpy: jest.SpyInstance;
 
+  jest.useFakeTimers();
+
   beforeEach(() => {
     getSelectionSpy = jest.spyOn(document, 'getSelection');
     snapSelectionSpy = jest.spyOn(selection, 'snapSelection');
@@ -71,8 +73,15 @@ describe('onSelect', () => {
   it('returns a highlight with the snapped range, even if document selection returns something completely different (looking at you safari)', () => {
     let highlight: Highlight | undefined;
 
-    const highlighter = new Highlighter(
-      document.createElement('div'),
+    const container = document.createElement('div');
+    const node = document.createElement('div');
+    node.innerHTML = 'some text';
+
+    container.appendChild(node);
+
+    // tslint:disable-next-line no-unused-expression
+    new Highlighter(
+      container,
       {onSelect: (_: Highlight[], newHighlight?: Highlight) => highlight = newHighlight}
     );
 
@@ -80,16 +89,26 @@ describe('onSelect', () => {
     const selectionRange = new Range();
     const snappedRange = new Range();
 
+    selectionRange.setStart(node, 0);
+    selectionRange.setEnd(node, 5);
+
+    selectionRange.setStart(node, 0);
+    selectionRange.setEnd(node, 5);
+
     Object.defineProperty(inputSelection, 'isCollapsed', {value: false});
+    Object.defineProperty(inputSelection, 'anchorNode', {value: node});
+    Object.defineProperty(inputSelection, 'focusNode', {value: node});
 
     inputSelection.getRangeAt = jest.fn(() => selectionRange);
     snapSelectionSpy.mockImplementation(() => snappedRange);
 
     getSelectionSpy.mockImplementation(() => inputSelection);
 
-    const e = document.createEvent('MouseEvents');
-    e.initEvent('mouseup', true, true);
-    highlighter.container.dispatchEvent(e);
+    const e = document.createEvent('Event');
+    e.initEvent('selectionchange', true, true);
+    document.dispatchEvent(e);
+
+    jest.runTimersToTime(600);
 
     if (highlight === undefined) {
       expect(highlight).toBeDefined();
