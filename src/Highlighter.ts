@@ -3,7 +3,7 @@ import Highlight, { FOCUS_CSS, IOptions as HighlightOptions } from './Highlight'
 import injectHighlightWrappers, { DATA_ATTR, DATA_ID_ATTR } from './injectHighlightWrappers';
 import { rangeContentsString } from './rangeContents';
 import removeHighlightWrappers from './removeHighlightWrappers';
-import { snapSelection } from './selection';
+import { getRange, snapSelection } from './selection';
 import SerializedHighlight from './SerializedHighlight';
 
 interface IOptions {
@@ -20,8 +20,8 @@ export default class Highlighter {
   public readonly container: HTMLElement;
   private highlights: { [key: string]: Highlight } = {};
   private options: IOptions;
-  private keyUpTimeout: NodeJS.Timeout | null = null;
-  // private selectionTimeout: NodeJS.Timeout | null = null;
+  private selectionTimeout: NodeJS.Timeout | null = null;
+  private previousRange: Range | null = null;
 
   constructor(container: HTMLElement, options: IOptions = {}) {
     this.container = container;
@@ -29,15 +29,13 @@ export default class Highlighter {
       className: 'highlight',
       ...options,
     };
-    this.container.addEventListener('mouseup', this.onMouseup);
-    this.container.addEventListener('keyup', this.onKeyUp);
-    // this.container.addEventListener('selectionchange', this.onSelectionChange);
+    this.container.addEventListener('click', this.onClickHandler);
+    document.addEventListener('selectionchange', this.onSelectionChange);
   }
 
   public unmount(): void {
-    this.container.removeEventListener('mouseup', this.onMouseup);
-    this.container.removeEventListener('keyup', this.onKeyUp);
-    // this.container.removeEventListener('selectionchange', this.onSelectionChange);
+    this.container.removeEventListener('click', this.onClickHandler);
+    document.removeEventListener('selectionchange', this.onSelectionChange);
   }
 
   public eraseAll = (): void => {
@@ -119,59 +117,35 @@ export default class Highlighter {
     return this.container.ownerDocument;
   }
 
-  private onMouseup = (ev: MouseEvent): void => {
+  private onSelectionChange = (): void => {
     const selection = this.document.getSelection();
 
-    if (!selection) {
+    if (
+      !selection
+      || selection.isCollapsed
+      || selection.type === 'None'
+      || !dom(this.container).contains(selection.anchorNode)
+      || !dom(this.container).contains(selection.focusNode)
+      || this.compareRanges(selection ? getRange(selection) : null, this.previousRange)
+    ) {
       return;
     }
 
-    if (selection.isCollapsed) {
-      this.onClick(ev);
-    } else {
-      this.onSelect(selection);
+    if (this.selectionTimeout) {
+      clearTimeout(this.selectionTimeout);
     }
+
+    this.selectionTimeout = setTimeout(() => {
+      const sel = this.document.getSelection();
+      if (!sel) { return; }
+
+      this.onSelect(sel);
+    }, 500);
   }
 
-  private onKeyUp = (ev: KeyboardEvent): void => {
-    if (this.keyUpTimeout) {
-      clearTimeout(this.keyUpTimeout);
-    }
-
-    const selection = this.document.getSelection();
-
-    if (!selection || selection.isCollapsed) {
-      return;
-    }
-
-    if (ev.shiftKey && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(ev.key)) {
-      this.onSelect(selection);
-    }
+  private onClickHandler = (event: MouseEvent): void => {
+    this.onClick(event);
   }
-
-  // private onSelectionChange = (ev: Event): void => {
-  //   if (this.selectionTimeout) {
-  //     clearTimeout(this.selectionTimeout);
-  //   }
-
-  //   const selection = this.document.getSelection();
-
-  //   if (!selection) {
-  //     return;
-  //   }
-
-  //   if (selection.isCollapsed) {
-  //     this.onClick(ev as any);
-  //     return;
-  //   }
-
-  //   this.selectionTimeout = setTimeout(() => {
-  //     const sel = this.document.getSelection();
-  //     if (!sel) { return; }
-
-  //     this.onSelect(sel);
-  //   }, 500);
-  // }
 
   private onClick(event: MouseEvent): void {
     const { onClick } = this.options;
@@ -200,6 +174,7 @@ export default class Highlighter {
     const { onSelect } = this.options;
 
     const range = snapSelection(selection, this.options);
+    this.previousRange = range || null;
 
     if (onSelect && range) {
       const highlights: Highlight[] = Object.values(this.highlights)
@@ -216,5 +191,22 @@ export default class Highlighter {
         onSelect(highlights);
       }
     }
+  }
+
+  private compareRanges(range1: Range | null, range2: Range | null): boolean {
+    if (range1 === null && range2 === null) { return true; }
+    if (range1 === null && range2) { return false; }
+    if (range2 === null && range1) { return false; }
+    if (
+      range1
+      && range2
+      && range1.startContainer === range2.startContainer
+      && range1.endContainer === range2.endContainer
+      && range1.startOffset === range2.startOffset
+      && range1.endOffset === range2.endOffset
+    ) {
+      return true;
+    }
+    return false;
   }
 }
