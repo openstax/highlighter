@@ -6,6 +6,8 @@ import removeHighlightWrappers from './removeHighlightWrappers';
 import { getRange, snapSelection } from './selection';
 import SerializedHighlight from './SerializedHighlight';
 
+export const ON_SELECT_DELAY = 500;
+
 interface IOptions {
   snapTableRows?: boolean;
   snapMathJax?: boolean;
@@ -140,7 +142,7 @@ export default class Highlighter {
       if (!sel) { return; }
 
       this.onSelect(sel);
-    }, 500);
+    }, ON_SELECT_DELAY);
   }
 
   private onClickHandler = (event: MouseEvent): void => {
