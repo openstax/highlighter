@@ -1,5 +1,6 @@
 import Highlight from './Highlight';
 import Highlighter from './Highlighter';
+import * as injectHighlightWrappersUtils from './injectHighlightWrappers';
 import * as rangeContents from './rangeContents';
 import * as selection from './selection';
 
@@ -46,6 +47,67 @@ describe('Reference elements', () => {
     const highlighter = new Highlighter(container);
 
     expect(highlighter.getReferenceElement('referenceElement1')).toEqual(null);
+  });
+});
+
+describe('onClick', () => {
+  test('handle clicks inside of the container', () => {
+    const spyOnClick = jest.fn();
+
+    const container = document.createElement('div');
+
+    // tslint:disable-next-line no-unused-expression
+    new Highlighter(container, {onClick: spyOnClick});
+
+    const e = document.createEvent('MouseEvent');
+    e.initEvent('click', true, true);
+    container.dispatchEvent(e);
+
+    expect(spyOnClick).toHaveBeenCalledWith(undefined, e);
+  });
+
+  test('handle clicks on the highlights', () => {
+    const spyOnClick = jest.fn();
+    const spyInjectHighlightWrappersUtils = jest.fn();
+
+    const container = document.createElement('div');
+    const highlightElement = document.createElement('span');
+    highlightElement.setAttribute(injectHighlightWrappersUtils.DATA_ATTR, 'highlight');
+    highlightElement.setAttribute(injectHighlightWrappersUtils.DATA_ID_ATTR, 'some-highlight');
+    container.append(highlightElement);
+
+    const highlight = new Highlight(new Range(), { id: 'some-highlight', content: 'asd' });
+
+    jest.spyOn(injectHighlightWrappersUtils, 'default')
+      .mockImplementation(spyInjectHighlightWrappersUtils);
+
+    // tslint:disable-next-line no-unused-expression
+    const highlighter = new Highlighter(container, {onClick: spyOnClick});
+
+    highlighter.highlight(highlight);
+
+    const e = document.createEvent('MouseEvent');
+    e.initEvent('click', true, true);
+    Object.defineProperty(e, 'target', {value: highlightElement});
+    container.dispatchEvent(e);
+
+    expect(spyInjectHighlightWrappersUtils).toHaveBeenCalledWith(highlight, expect.anything());
+    expect(spyOnClick).toHaveBeenCalledWith(highlight, e);
+  });
+
+  test('does not handle clicks outside of the container', () => {
+    const spyOnClick = jest.fn();
+
+    const container = document.createElement('div');
+
+    // tslint:disable-next-line no-unused-expression
+    new Highlighter(container, {onClick: spyOnClick});
+
+    const e = document.createEvent('MouseEvent');
+    e.initEvent('click', true, true);
+    document.dispatchEvent(e);
+
+    expect(spyOnClick).not.toHaveBeenCalled();
   });
 });
 
