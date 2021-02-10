@@ -1,5 +1,5 @@
 import Highlight from './Highlight';
-import Highlighter from './Highlighter';
+import Highlighter, { ON_SELECT_DELAY } from './Highlighter';
 import * as injectHighlightWrappersUtils from './injectHighlightWrappers';
 import * as rangeContents from './rangeContents';
 import * as selection from './selection';
@@ -170,7 +170,7 @@ describe('onSelect', () => {
     e.initEvent('selectionchange', true, true);
     document.dispatchEvent(e);
 
-    jest.runTimersToTime(600);
+    jest.runTimersToTime(ON_SELECT_DELAY);
 
     if (highlight === undefined) {
       expect(highlight).toBeDefined();
@@ -178,5 +178,68 @@ describe('onSelect', () => {
       expect(highlight.range).not.toEqual(selectionRange);
       expect(highlight.range).toEqual(snappedRange);
     }
+  });
+
+  it('noops on selecitonchange event if there is no selection, selection is collapsed or selection type is None', () => {
+    const spyOnSelect = jest.fn();
+
+    const container = document.createElement('div');
+    const node = document.createElement('div');
+
+    container.appendChild(node);
+
+    // tslint:disable-next-line no-unused-expression
+    new Highlighter(container, {onSelect: spyOnSelect});
+
+    getSelectionSpy.mockImplementation(() => null);
+
+    const e = document.createEvent('Event');
+    e.initEvent('selectionchange', true, true);
+    document.dispatchEvent(e);
+
+    jest.runTimersToTime(ON_SELECT_DELAY + 100);
+
+    expect(spyOnSelect).not.toHaveBeenCalled();
+
+    getSelectionSpy.mockImplementation(() => ({ isCollapsed: true }));
+
+    jest.runTimersToTime(ON_SELECT_DELAY + 100);
+
+    expect(spyOnSelect).not.toHaveBeenCalled();
+
+    getSelectionSpy.mockImplementation(() => ({ isCollapsed: false, type: 'None' }));
+
+    jest.runTimersToTime(ON_SELECT_DELAY + 100);
+
+    expect(spyOnSelect).not.toHaveBeenCalled();
+  });
+
+  it('noops on selecitonchange event if anchorNode or focusNode is not in the container', () => {
+    const spyOnSelect = jest.fn();
+
+    const container = document.createElement('div');
+    const nodeInside = document.createElement('div');
+    const nodeOutside = document.createElement('div');
+
+    container.appendChild(nodeInside);
+
+    // tslint:disable-next-line no-unused-expression
+    new Highlighter(container, {onSelect: spyOnSelect});
+
+    getSelectionSpy.mockImplementation(() => ({ isCollapsed: false, anchorNode: nodeOutside, focusNode: nodeInside }));
+
+    const e = document.createEvent('Event');
+    e.initEvent('selectionchange', true, true);
+    document.dispatchEvent(e);
+
+    jest.runTimersToTime(ON_SELECT_DELAY + 100);
+
+    expect(spyOnSelect).not.toHaveBeenCalled();
+
+    getSelectionSpy.mockImplementation(() => ({ isCollapsed: false, anchorNode: nodeInside, focusNode: nodeOutside }));
+
+    jest.runTimersToTime(ON_SELECT_DELAY + 100);
+
+    expect(spyOnSelect).not.toHaveBeenCalled();
   });
 });
