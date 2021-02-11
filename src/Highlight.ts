@@ -12,6 +12,8 @@ export interface IHighlightData {
 
 export interface IOptions {
   skipIDsBy?: RegExp;
+  onFocusIn?: (highlight: Highlight) => void;
+  onFocusOut?: () => void;
 }
 
 export default class Highlight {
@@ -90,6 +92,18 @@ export default class Highlight {
   public focus(): Highlight {
     this.elements.forEach((el: HTMLElement) => el.classList.add(FOCUS_CSS));
     return this;
+  }
+
+  public onFocusIn(): void {
+    if (this.options.onFocusIn) {
+      this.options.onFocusIn(this);
+    }
+  }
+
+  public onFocusOut(): void {
+    if (this.options.onFocusOut) {
+      this.options.onFocusOut();
+    }
   }
 
   public intersects(range: Range): boolean {

@@ -6,6 +6,7 @@ export const TIMESTAMP_ATTR = 'data-timestamp';
 export const DATA_ATTR = 'data-highlighted';
 export const DATA_ATTR_SELECTOR = '[' + DATA_ATTR + ']';
 export const DATA_ID_ATTR = 'data-highlight-id';
+const DATA_SCREEN_READERS_ATTR = 'data-for-screenreaders';
 const NODE_TYPE = {
   ELEMENT_NODE: 1,
   TEXT_NODE: 3,
@@ -39,7 +40,7 @@ export default function injectHighlightWrappers(highlight: Highlight, options: I
   });
 
   const createdHighlights = highlightRange(highlight.range, wrapper);
-  const normalizedHighlights = normalizeHighlights(createdHighlights);
+  const normalizedHighlights = normalizeHighlights(highlight, createdHighlights);
 
   if (normalizedHighlights.length === 0) {
     return;
@@ -52,6 +53,29 @@ export default function injectHighlightWrappers(highlight: Highlight, options: I
 }
 
 /**
+ * Create empty span with tabindex=0 and all necessary information taken from @param highlight
+ * and insert this node at the first position inside @param element.
+ * @param highlight Highlight
+ * @param element HTMLElement highlight element
+ */
+function createAndInsertNodeForScreenReaders(highlight: Highlight, element: HTMLElement): void {
+  const node = document.createElement('span');
+  node.setAttribute(DATA_SCREEN_READERS_ATTR, 'true');
+  node.setAttribute('tabindex', '0');
+  node.setAttribute(DATA_ATTR, 'true');
+  node.setAttribute(DATA_ID_ATTR, highlight.id);
+
+  node.addEventListener('focusin', () => {
+    highlight.onFocusIn();
+  })
+  node.addEventListener('focusout', () => {
+    highlight.onFocusOut();
+  })
+
+  element.prepend(node);
+}
+
+/**
  * Normalizes highlights. Ensures that highlighting is done with use of the smallest possible number of
  * wrapping HTML elements.
  * Flattens highlights structure and merges sibling highlights. Normalizes text nodes within highlights.
@@ -61,7 +85,7 @@ export default function injectHighlightWrappers(highlight: Highlight, options: I
  * @returns {Array} - array of normalized highlights. Order and number of returned highlights may be different than
  * input highlights.
  */
-function normalizeHighlights(highlights: HTMLElement[]) {
+function normalizeHighlights(highlight: Highlight, highlights: HTMLElement[]) {
   let normalizedHighlights: HTMLElement[];
 
   //flattenNestedHighlights(highlights);
@@ -90,17 +114,18 @@ function normalizeHighlights(highlights: HTMLElement[]) {
 
   for (const [index, node] of normalizedHighlights.entries()) {
     if (index === 0) {
-      node.classList.add('first')
+      node.classList.add('first');
+      createAndInsertNodeForScreenReaders(highlight, node);
     }
 
     if (hasBlockContent(node)) {
-      node.classList.add('block')
+      node.classList.add('block');
     } else {
-      node.classList.add('text')
+      node.classList.add('text');
     }
 
     if (index === (normalizedHighlights.length - 1)) {
-      node.classList.add('last')
+      node.classList.add('last');
     }
   }
 
