@@ -1,6 +1,7 @@
 // tslint:disable
 import dom from './dom';
 import Highlight from './Highlight';
+import getMessages from './messages';
 
 export const TIMESTAMP_ATTR = 'data-timestamp';
 export const DATA_ATTR = 'data-highlighted';
@@ -56,23 +57,33 @@ export default function injectHighlightWrappers(highlight: Highlight, options: I
  * Create empty span with tabindex=0 and all necessary information taken from @param highlight
  * and insert this node at the first position inside @param element.
  * @param highlight Highlight
- * @param element HTMLElement highlight element
+ * @param element HTMLElement highlight element for which we will insert the starting or ending element for screenreader
+ * @param position start | end
  */
-function createAndInsertNodeForScreenReaders(highlight: Highlight, element: HTMLElement): void {
+function createAndInsertNodeForScreenReaders(highlight: Highlight, element: HTMLElement, position: 'start' | 'end'): void {
   const node = document.createElement('span');
   node.setAttribute(DATA_SCREEN_READERS_ATTR, 'true');
-  node.setAttribute('tabindex', '0');
   node.setAttribute(DATA_ATTR, 'true');
   node.setAttribute(DATA_ID_ATTR, highlight.id);
 
-  node.addEventListener('focusin', () => {
-    highlight.onFocusIn();
-  })
-  node.addEventListener('focusout', () => {
-    highlight.onFocusOut();
-  })
+  const ariaLabel = getMessages().highlight[position](highlight.getStyle()!);
 
-  element.prepend(node);
+  node.setAttribute('aria-label', ariaLabel);
+
+  if (position === 'start') {
+    node.setAttribute('tabindex', '0');
+
+    node.addEventListener('focusin', () => {
+      highlight.onFocusIn();
+    })
+    node.addEventListener('focusout', () => {
+      highlight.onFocusOut();
+    })
+
+    element.prepend(node);
+  } else {
+    element.append(node);
+  }
 }
 
 /**
@@ -115,7 +126,7 @@ function normalizeHighlights(highlight: Highlight, highlights: HTMLElement[]) {
   for (const [index, node] of normalizedHighlights.entries()) {
     if (index === 0) {
       node.classList.add('first');
-      createAndInsertNodeForScreenReaders(highlight, node);
+      createAndInsertNodeForScreenReaders(highlight, node, 'start');
     }
 
     if (hasBlockContent(node)) {
@@ -126,6 +137,7 @@ function normalizeHighlights(highlight: Highlight, highlights: HTMLElement[]) {
 
     if (index === (normalizedHighlights.length - 1)) {
       node.classList.add('last');
+      createAndInsertNodeForScreenReaders(highlight, node, 'end');
     }
   }
 
