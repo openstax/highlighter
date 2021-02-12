@@ -12,8 +12,9 @@ export interface IHighlightData {
 
 export interface IOptions {
   skipIDsBy?: RegExp;
+  formatMessage?: (id: string, values?: Record<string, any>) => string;
   onFocusIn?: (highlight: Highlight) => void;
-  onFocusOut?: () => void;
+  onFocusOut?: (highlight: Highlight) => void;
 }
 
 export default class Highlight {
@@ -53,6 +54,13 @@ export default class Highlight {
       ...data,
       id: data.id || uuid(),
     };
+  }
+
+  public getMessage(id: string, values?: Record<string, any>): string {
+    if (this.options.formatMessage) {
+      return this.options.formatMessage(id, values);
+    }
+    return id;
   }
 
   public setStyle(style: string) {
@@ -102,7 +110,7 @@ export default class Highlight {
 
   public onFocusOut(): void {
     if (this.options.onFocusOut) {
-      this.options.onFocusOut();
+      this.options.onFocusOut(this);
     }
   }
 

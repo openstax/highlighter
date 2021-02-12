@@ -12,10 +12,11 @@ interface IOptions {
   snapWords?: boolean;
   className?: string;
   skipIDsBy?: RegExp;
+  formatMessage?: (id: string, values?: Record<string, any>) => string;
   onClick?: (highlight: Highlight | undefined, event: MouseEvent) => void;
   onSelect?: (highlights: Highlight[], newHighlight?: Highlight) => void;
   onFocusIn?: (highlight: Highlight) => void;
-  onFocusOut?: () => void;
+  onFocusOut?: (highlight: Highlight) => void;
 }
 
 export default class Highlighter {
@@ -77,11 +78,12 @@ export default class Highlighter {
   }
 
   public getHighlightOptions(): HighlightOptions {
-    const { onFocusIn, onFocusOut, skipIDsBy } = this.options;
+    const { formatMessage, onFocusIn, onFocusOut, skipIDsBy } = this.options;
 
     return {
       onFocusIn,
       onFocusOut,
+      formatMessage,
       skipIDsBy,
     };
   }

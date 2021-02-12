@@ -1,7 +1,6 @@
 // tslint:disable
 import dom from './dom';
 import Highlight from './Highlight';
-import getMessages from './messages';
 
 export const TIMESTAMP_ATTR = 'data-timestamp';
 export const DATA_ATTR = 'data-highlighted';
@@ -66,7 +65,7 @@ function createAndInsertNodeForScreenReaders(highlight: Highlight, element: HTML
   node.setAttribute(DATA_ATTR, 'true');
   node.setAttribute(DATA_ID_ATTR, highlight.id);
 
-  const ariaLabel = getMessages().highlight[position](highlight.getStyle()!);
+  const ariaLabel = highlight.getMessage(`i18n:highlighter:highlight:${position}`, { color: highlight.getStyle() });
 
   node.setAttribute('aria-label', ariaLabel);
 
