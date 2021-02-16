@@ -12,6 +12,7 @@ export interface IHighlightData {
 
 export interface IOptions {
   skipIDsBy?: RegExp;
+  supportScreenreaders?: boolean;
   formatMessage?: (id: string, values?: Record<string, any>) => string;
   onFocusIn?: (highlight: Highlight) => void;
   onFocusOut?: (highlight: Highlight) => void;

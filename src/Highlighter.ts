@@ -12,6 +12,7 @@ interface IOptions {
   snapWords?: boolean;
   className?: string;
   skipIDsBy?: RegExp;
+  supportScreenreaders?: boolean;
   formatMessage?: (id: string, values?: Record<string, any>) => string;
   onClick?: (highlight: Highlight | undefined, event: MouseEvent) => void;
   onSelect?: (highlights: Highlight[], newHighlight?: Highlight) => void;
@@ -78,13 +79,14 @@ export default class Highlighter {
   }
 
   public getHighlightOptions(): HighlightOptions {
-    const { formatMessage, onFocusIn, onFocusOut, skipIDsBy } = this.options;
+    const { formatMessage, onFocusIn, onFocusOut, skipIDsBy, supportScreenreaders } = this.options;
 
     return {
       onFocusIn,
       onFocusOut,
       formatMessage,
       skipIDsBy,
+      supportScreenreaders,
     };
   }
 

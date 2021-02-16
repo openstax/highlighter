@@ -6,7 +6,8 @@ export const TIMESTAMP_ATTR = 'data-timestamp';
 export const DATA_ATTR = 'data-highlighted';
 export const DATA_ATTR_SELECTOR = '[' + DATA_ATTR + ']';
 export const DATA_ID_ATTR = 'data-highlight-id';
-const DATA_SCREEN_READERS_ATTR = 'data-for-screenreaders';
+export const DATA_SCREEN_READERS_ATTR = 'data-for-screenreaders';
+export const DATA_SCREEN_READERS_ATTR_SELECTOR = '[' + DATA_SCREEN_READERS_ATTR + ']';
 const NODE_TYPE = {
   ELEMENT_NODE: 1,
   TEXT_NODE: 3,
@@ -55,11 +56,16 @@ export default function injectHighlightWrappers(highlight: Highlight, options: I
 /**
  * Create empty span with tabindex=0 and all necessary information taken from @param highlight
  * and insert this node at the first position inside @param element.
+ * This operation will noop if highlight.options.supportScreenreaders is falsy.
  * @param highlight Highlight
  * @param element HTMLElement highlight element for which we will insert the starting or ending element for screenreader
  * @param position start | end
  */
 function createAndInsertNodeForScreenReaders(highlight: Highlight, element: HTMLElement, position: 'start' | 'end'): void {
+  if (!highlight.options.supportScreenreaders) {
+    return;
+  }
+
   const node = document.createElement('span');
   node.setAttribute(DATA_SCREEN_READERS_ATTR, 'true');
   node.setAttribute(DATA_ATTR, 'true');
