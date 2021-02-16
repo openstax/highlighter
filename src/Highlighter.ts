@@ -82,9 +82,9 @@ export default class Highlighter {
     const { formatMessage, onFocusIn, onFocusOut, skipIDsBy, supportScreenreaders } = this.options;
 
     return {
+      formatMessage,
       onFocusIn,
       onFocusOut,
-      formatMessage,
       skipIDsBy,
       supportScreenreaders,
     };
