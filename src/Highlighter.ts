@@ -1,3 +1,4 @@
+import { throttle } from 'lodash';
 import dom from './dom';
 import Highlight, { FOCUS_CSS, IOptions as HighlightOptions } from './Highlight';
 import injectHighlightWrappers, { DATA_ATTR, DATA_ID_ATTR } from './injectHighlightWrappers';
@@ -22,8 +23,8 @@ export default class Highlighter {
   public readonly container: HTMLElement;
   private highlights: { [key: string]: Highlight } = {};
   private options: IOptions;
-  private selectionTimeout: NodeJS.Timeout | null = null;
   private previousRange: Range | null = null;
+  private isSnapping = false;
 
   constructor(container: HTMLElement, options: IOptions = {}) {
     this.container = container;
@@ -123,7 +124,8 @@ export default class Highlighter {
     const selection = this.document.getSelection();
 
     if (
-      !selection
+      this.isSnapping
+      || !selection
       || selection.isCollapsed
       || selection.type === 'None'
       || !dom(this.container).contains(selection.anchorNode)
@@ -133,16 +135,17 @@ export default class Highlighter {
       return;
     }
 
-    if (this.selectionTimeout) {
-      clearTimeout(this.selectionTimeout);
+    this.isSnapping = true;
+    const range = snapSelection(selection, this.options);
+    this.isSnapping = false;
+    this.previousRange = range || null;
+
+    if (!range) {
+      return;
     }
 
-    this.selectionTimeout = setTimeout(() => {
-      const sel = this.document.getSelection();
-      if (!sel) { return; }
-
-      this.onSelect(sel);
-    }, ON_SELECT_DELAY);
+    const throttledOnSelect = throttle(this.onSelect, ON_SELECT_DELAY);
+    throttledOnSelect();
   }
 
   private onClickHandler = (event: MouseEvent): void => {
@@ -172,11 +175,15 @@ export default class Highlighter {
     onClick(undefined, event);
   }
 
-  private onSelect(selection: Selection): void {
+  private onSelect = (): void => {
     const { onSelect } = this.options;
 
-    const range = snapSelection(selection, this.options);
-    this.previousRange = range || null;
+    const selection = document.getSelection();
+    if (!selection) {
+      return;
+    }
+
+    const range = getRange(selection);
 
     if (onSelect && range) {
       const highlights: Highlight[] = Object.values(this.highlights)
@@ -199,16 +206,7 @@ export default class Highlighter {
     if (range1 === null && range2 === null) { return true; }
     if (range1 === null && range2) { return false; }
     if (range2 === null && range1) { return false; }
-    if (
-      range1
-      && range2
-      && range1.startContainer === range2.startContainer
-      && range1.endContainer === range2.endContainer
-      && range1.startOffset === range2.startOffset
-      && range1.endOffset === range2.endOffset
-    ) {
-      return true;
-    }
-    return false;
+    return range1!.compareBoundaryPoints(Range.START_TO_START, range2!) === 0
+      && range1!.compareBoundaryPoints(Range.END_TO_END, range2!) === 0;
   }
 }
