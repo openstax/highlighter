@@ -134,7 +134,6 @@ describe('getXPathForElement', () => {
   });
 
   it('creates path through nested text highlights (on leading edge)', () => {
-    const screenReaderNode = `<span ${DATA_ATTR} ${DATA_SCREEN_READERS_ATTR}></span>`;
     document.body.innerHTML = `
       <div id="reference">
         <div></div>

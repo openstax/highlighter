@@ -1,6 +1,6 @@
-import dom from './dom';
-import Highlight, { FOCUS_CSS, IOptions as HighlightOptions } from './Highlight';
-import injectHighlightWrappers, { DATA_ATTR, DATA_ID_ATTR } from './injectHighlightWrappers';
+import dom, { isHtmlElement } from './dom';
+import Highlight, { FOCUS_CSS, IHighlightData, IOptions as HighlightOptions } from './Highlight';
+import injectHighlightWrappers, { DATA_ATTR, DATA_ID_ATTR, DATA_SCREEN_READERS_ATTR } from './injectHighlightWrappers';
 import { rangeContentsString } from './rangeContents';
 import removeHighlightWrappers from './removeHighlightWrappers';
 import { snapSelection } from './selection';
@@ -12,8 +12,7 @@ interface IOptions {
   snapWords?: boolean;
   className?: string;
   skipIDsBy?: RegExp;
-  supportScreenreaders?: boolean;
-  formatMessage?: (id: string, values?: Record<string, any>) => string;
+  formatMessage: (id: string, style: IHighlightData['style']) => string;
   onClick?: (highlight: Highlight | undefined, event: MouseEvent) => void;
   onSelect?: (highlights: Highlight[], newHighlight?: Highlight) => void;
   onFocusIn?: (highlight: Highlight) => void;
@@ -25,13 +24,15 @@ export default class Highlighter {
   private highlights: { [key: string]: Highlight } = {};
   private options: IOptions;
 
-  constructor(container: HTMLElement, options: IOptions = {}) {
+  constructor(container: HTMLElement, options: IOptions) {
     this.container = container;
     this.options = {
       className: 'highlight',
       ...options,
     };
     this.container.addEventListener('mouseup', this.onMouseup);
+    this.container.addEventListener('focusin', this.onFocusIn);
+    this.container.addEventListener('focusout', this.onFocusOut);
   }
 
   public unmount(): void {
@@ -79,14 +80,11 @@ export default class Highlighter {
   }
 
   public getHighlightOptions(): HighlightOptions {
-    const { formatMessage, onFocusIn, onFocusOut, skipIDsBy, supportScreenreaders } = this.options;
+    const { formatMessage, skipIDsBy } = this.options;
 
     return {
       formatMessage,
-      onFocusIn,
-      onFocusOut,
       skipIDsBy,
-      supportScreenreaders,
     };
   }
 
@@ -132,6 +130,36 @@ export default class Highlighter {
       this.onClick(ev);
     } else {
       this.onSelect(selection);
+    }
+  }
+
+  private onFocusIn = (ev: Event): void => {
+    if (!this.options.onFocusIn) {
+      return;
+    }
+
+    const highlightId = isHtmlElement(ev.target) && ev.target.hasAttribute(DATA_SCREEN_READERS_ATTR)
+      ? ev.target.getAttribute(DATA_ID_ATTR)
+      : null;
+    const highlight = highlightId ? this.getHighlight(highlightId) : null;
+
+    if (highlight) {
+      this.options.onFocusIn(highlight);
+    }
+  }
+
+  private onFocusOut = (ev: Event): void => {
+    if (!this.options.onFocusOut) {
+      return;
+    }
+
+    const highlightId = isHtmlElement(ev.target) && ev.target.hasAttribute(DATA_SCREEN_READERS_ATTR)
+      ? ev.target.getAttribute(DATA_ID_ATTR)
+      : null;
+    const highlight = highlightId ? this.getHighlight(highlightId) : null;
+
+    if (highlight) {
+      this.options.onFocusOut(highlight);
     }
   }
 

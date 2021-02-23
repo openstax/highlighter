@@ -12,10 +12,7 @@ export interface IHighlightData {
 
 export interface IOptions {
   skipIDsBy?: RegExp;
-  supportScreenreaders?: boolean;
-  formatMessage?: (id: string, values?: Record<string, any>) => string;
-  onFocusIn?: (highlight: Highlight) => void;
-  onFocusOut?: (highlight: Highlight) => void;
+  formatMessage: (id: string, style: IHighlightData['style']) => string;
 }
 
 export default class Highlight {
@@ -47,21 +44,18 @@ export default class Highlight {
   constructor(
     range: Range,
     data: Pick<IHighlightData, Exclude<keyof IHighlightData, 'id'>> & Partial<Pick<IHighlightData, 'id'>>,
-    options?: IOptions
+    options: IOptions
   ) {
     this.range = range;
-    this.options = options || {};
+    this.options = options;
     this.data = {
       ...data,
       id: data.id || uuid(),
     };
   }
 
-  public getMessage(id: string, values?: Record<string, any>): string {
-    if (this.options.formatMessage) {
-      return this.options.formatMessage(id, values);
-    }
-    return id;
+  public getMessage(id: string): string {
+    return this.options.formatMessage(id, this.data.style);
   }
 
   public setStyle(style: string) {
@@ -101,18 +95,6 @@ export default class Highlight {
   public focus(): Highlight {
     this.elements.forEach((el: HTMLElement) => el.classList.add(FOCUS_CSS));
     return this;
-  }
-
-  public onFocusIn(): void {
-    if (this.options.onFocusIn) {
-      this.options.onFocusIn(this);
-    }
-  }
-
-  public onFocusOut(): void {
-    if (this.options.onFocusOut) {
-      this.options.onFocusOut(this);
-    }
   }
 
   public intersects(range: Range): boolean {

@@ -22,7 +22,7 @@ export default function(highlight: Highlight) {
 }
 
 function removeHighlightElement(element: HTMLElement) {
-  getScreenReaderNodes(element).forEach((element) => element.remove());
+  getScreenReaderLabels(element).forEach((label) => label.remove());
 
   const container = element,
     highlights = getHighlights(container);
@@ -71,19 +71,19 @@ function getHighlights(container: HTMLElement) {
 }
 
 /**
- * Returns screenreader nodes from given container.
- * @param {HTMLElement} container - return nodes screated for screenreder from this element
- * @returns {Array} - array of screenreader nodes.
+ * Returns screenreader labels from given container.
+ * @param {HTMLElement} container - return nodes created for screenreder from this element
+ * @returns {Array} - array of screenreader HTMLElements.
  */
-function getScreenReaderNodes(container: HTMLElement) {
+function getScreenReaderLabels(container: HTMLElement) {
   const nodeList = container.querySelectorAll(DATA_SCREEN_READERS_ATTR_SELECTOR),
-    screenreaderNodes: HTMLElement[] = Array.prototype.slice.call(nodeList);
+    screenreaderLabels: HTMLElement[] = Array.prototype.slice.call(nodeList);
 
   if (container.matches(DATA_SCREEN_READERS_ATTR_SELECTOR)) {
-    screenreaderNodes.push(container);
+    screenreaderLabels.push(container);
   }
 
-  return screenreaderNodes;
+  return screenreaderLabels;
 }
 
 /**

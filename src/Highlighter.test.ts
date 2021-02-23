@@ -21,7 +21,7 @@ describe('Reference elements', () => {
       throw new Error('cannot find container');
     }
 
-    const highlighter = new Highlighter(container);
+    const highlighter = new Highlighter(container, { formatMessage: jest.fn() });
 
     expect(highlighter.getReferenceElement('referenceElement2')).toEqual(reference);
   });
@@ -43,7 +43,7 @@ describe('Reference elements', () => {
       throw new Error('can\'t find container');
     }
 
-    const highlighter = new Highlighter(container);
+    const highlighter = new Highlighter(container, { formatMessage: jest.fn() });
 
     expect(highlighter.getReferenceElement('referenceElement1')).toEqual(null);
   });
@@ -73,7 +73,7 @@ describe('onSelect', () => {
 
     const highlighter = new Highlighter(
       document.createElement('div'),
-      {onSelect: (_: Highlight[], newHighlight?: Highlight) => highlight = newHighlight}
+      {formatMessage: jest.fn(), onSelect: (_: Highlight[], newHighlight?: Highlight) => highlight = newHighlight}
     );
 
     const inputSelection = new Selection();

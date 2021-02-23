@@ -56,35 +56,22 @@ export default function injectHighlightWrappers(highlight: Highlight, options: I
 /**
  * Create empty span with tabindex=0 and all necessary information taken from @param highlight
  * and insert this node at the first position inside @param element.
- * This operation will noop if highlight.options.supportScreenreaders is falsy.
  * @param highlight Highlight
  * @param element HTMLElement highlight element for which we will insert the starting or ending element for screenreader
  * @param position start | end
  */
 function createAndInsertNodeForScreenReaders(highlight: Highlight, element: HTMLElement, position: 'start' | 'end'): void {
-  if (!highlight.options.supportScreenreaders) {
-    return;
-  }
-
   const node = document.createElement('span');
   node.setAttribute(DATA_SCREEN_READERS_ATTR, 'true');
   node.setAttribute(DATA_ATTR, 'true');
   node.setAttribute(DATA_ID_ATTR, highlight.id);
 
-  const ariaLabel = highlight.getMessage(`i18n:highlighter:highlight:${position}`, { color: highlight.getStyle() });
+  const ariaLabel = highlight.getMessage(`i18n:highlighter:highlight:${position}`);
 
   node.setAttribute('aria-label', ariaLabel);
 
   if (position === 'start') {
     node.setAttribute('tabindex', '0');
-
-    node.addEventListener('focusin', () => {
-      highlight.onFocusIn();
-    })
-    node.addEventListener('focusout', () => {
-      highlight.onFocusOut();
-    })
-
     element.prepend(node);
   } else {
     element.append(node);
