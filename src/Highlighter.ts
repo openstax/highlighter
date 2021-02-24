@@ -31,8 +31,8 @@ export default class Highlighter {
       ...options,
     };
     this.container.addEventListener('mouseup', this.onMouseup);
-    this.container.addEventListener('focusin', this.onFocusIn);
-    this.container.addEventListener('focusout', this.onFocusOut);
+    this.container.addEventListener('focusin', this.onFocusHandler('in'));
+    this.container.addEventListener('focusout', this.onFocusHandler('out'));
   }
 
   public unmount(): void {
@@ -133,8 +133,11 @@ export default class Highlighter {
     }
   }
 
-  private onFocusIn = (ev: Event): void => {
-    if (!this.options.onFocusIn) {
+  private onFocusHandler = (type: 'in' | 'out') => (ev: Event): void => {
+    if (
+      (type === 'in' && !this.options.onFocusIn)
+      || (type === 'out' && !this.options.onFocusOut)
+    ) {
       return;
     }
 
@@ -143,23 +146,12 @@ export default class Highlighter {
       : null;
     const highlight = highlightId ? this.getHighlight(highlightId) : null;
 
-    if (highlight) {
-      this.options.onFocusIn(highlight);
-    }
-  }
-
-  private onFocusOut = (ev: Event): void => {
-    if (!this.options.onFocusOut) {
-      return;
+    if (type === 'in' && highlight) {
+      this.options.onFocusIn!(highlight);
     }
 
-    const highlightId = isHtmlElement(ev.target) && ev.target.hasAttribute(DATA_SCREEN_READERS_ATTR)
-      ? ev.target.getAttribute(DATA_ID_ATTR)
-      : null;
-    const highlight = highlightId ? this.getHighlight(highlightId) : null;
-
-    if (highlight) {
-      this.options.onFocusOut(highlight);
+    if (type === 'out' && highlight) {
+      this.options.onFocusOut!(highlight);
     }
   }
 
