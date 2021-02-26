@@ -14,6 +14,18 @@ export const getRange = (selection: Selection): Range => {
   return range;
 };
 
+const getDirection = (selection: Selection): 'forward' | 'backward' => {
+  const anchorNode = selection.anchorNode;
+  const anchorOffset = selection.anchorOffset;
+  const range = getRange(selection);
+
+  if (anchorNode !== range.startContainer || anchorOffset !== range.startOffset) {
+    return 'backward';
+  }
+
+  return 'forward';
+};
+
 interface IOptions {
   snapTableRows?: boolean;
   snapMathJax?: boolean;
@@ -21,6 +33,7 @@ interface IOptions {
 }
 
 export const snapSelection = (selection: Selection, options: IOptions): Range | undefined => {
+  const selectionDirection = getDirection(selection);
   const range = getRange(selection);
 
   if (!range) {
@@ -92,6 +105,16 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
         gobbleForward();
       }
     }
+  }
+
+  if (selectionDirection === 'backward') {
+    // https://stackoverflow.com/a/10705853
+    const endRange = range.cloneRange();
+    endRange.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(endRange);
+    selection.extend(range.startContainer, range.startOffset);
+    return range;
   }
 
   selection.removeAllRanges();
