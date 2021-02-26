@@ -1,4 +1,4 @@
-import { throttle } from 'lodash';
+import { debounce } from 'lodash';
 import dom from './dom';
 import Highlight, { FOCUS_CSS, IOptions as HighlightOptions } from './Highlight';
 import injectHighlightWrappers, { DATA_ATTR, DATA_ID_ATTR } from './injectHighlightWrappers';
@@ -8,6 +8,7 @@ import { getRange, snapSelection } from './selection';
 import SerializedHighlight from './SerializedHighlight';
 
 export const ON_SELECT_DELAY = 500;
+export const ON_SELECTION_CHANGE_DELAY = 250;
 
 interface IOptions {
   snapTableRows?: boolean;
@@ -32,13 +33,15 @@ export default class Highlighter {
       className: 'highlight',
       ...options,
     };
+    this.debouncedOnSelect = debounce(this.onSelect, ON_SELECT_DELAY);
+    this.debouncedOnSelectionChange = debounce(this.onSelectionChange, ON_SELECTION_CHANGE_DELAY);
     this.container.addEventListener('click', this.onClickHandler);
-    document.addEventListener('selectionchange', this.onSelectionChange);
+    document.addEventListener('selectionchange', this.debouncedOnSelectionChange);
   }
 
   public unmount(): void {
     this.container.removeEventListener('click', this.onClickHandler);
-    document.removeEventListener('selectionchange', this.onSelectionChange);
+    document.removeEventListener('selectionchange', this.debouncedOnSelectionChange);
   }
 
   public eraseAll = (): void => {
@@ -120,6 +123,12 @@ export default class Highlighter {
     return this.container.ownerDocument;
   }
 
+  // Created in the constructor
+  private debouncedOnSelect: () => void = () => undefined;
+
+  // Created in the constructor
+  private debouncedOnSelectionChange: () => void = () => undefined;
+
   private onSelectionChange = (): void => {
     const selection = this.document.getSelection();
 
@@ -144,8 +153,7 @@ export default class Highlighter {
       return;
     }
 
-    const throttledOnSelect = throttle(this.onSelect, ON_SELECT_DELAY);
-    throttledOnSelect();
+    this.debouncedOnSelect();
   }
 
   private onClickHandler = (event: MouseEvent): void => {
