@@ -1,5 +1,6 @@
+import * as lodash from 'lodash';
 import Highlight from './Highlight';
-import Highlighter, { ON_SELECT_DELAY } from './Highlighter';
+import Highlighter from './Highlighter';
 import * as injectHighlightWrappersUtils from './injectHighlightWrappers';
 import * as rangeContents from './rangeContents';
 import * as selection from './selection';
@@ -141,11 +142,16 @@ describe('onSelect', () => {
 
     container.appendChild(node);
 
+    const spyDebounce = jest.spyOn(lodash, 'debounce')
+      .mockImplementation((fn: any) => fn);
+
     // tslint:disable-next-line no-unused-expression
     new Highlighter(
       container,
       {onSelect: (_: Highlight[], newHighlight?: Highlight) => highlight = newHighlight}
     );
+
+    expect(spyDebounce).toHaveBeenCalled();
 
     const inputSelection = new Selection();
     const selectionRange = new Range();
@@ -170,8 +176,6 @@ describe('onSelect', () => {
     e.initEvent('selectionchange', true, true);
     document.dispatchEvent(e);
 
-    jest.runTimersToTime(ON_SELECT_DELAY);
-
     if (highlight === undefined) {
       expect(highlight).toBeDefined();
     } else {
@@ -188,8 +192,13 @@ describe('onSelect', () => {
 
     container.appendChild(node);
 
+    const spyDebounce = jest.spyOn(lodash, 'debounce')
+      .mockImplementation((fn: any) => fn);
+
     // tslint:disable-next-line no-unused-expression
     new Highlighter(container, {onSelect: spyOnSelect});
+
+    expect(spyDebounce).toHaveBeenCalled();
 
     getSelectionSpy.mockImplementation(() => null);
 
@@ -197,19 +206,13 @@ describe('onSelect', () => {
     e.initEvent('selectionchange', true, true);
     document.dispatchEvent(e);
 
-    jest.runTimersToTime(ON_SELECT_DELAY + 100);
-
     expect(spyOnSelect).not.toHaveBeenCalled();
 
     getSelectionSpy.mockImplementation(() => ({ isCollapsed: true }));
 
-    jest.runTimersToTime(ON_SELECT_DELAY + 100);
-
     expect(spyOnSelect).not.toHaveBeenCalled();
 
     getSelectionSpy.mockImplementation(() => ({ isCollapsed: false, type: 'None' }));
-
-    jest.runTimersToTime(ON_SELECT_DELAY + 100);
 
     expect(spyOnSelect).not.toHaveBeenCalled();
   });
@@ -223,8 +226,13 @@ describe('onSelect', () => {
 
     container.appendChild(nodeInside);
 
+    const spyDebounce = jest.spyOn(lodash, 'debounce')
+      .mockImplementation((fn: any) => fn);
+
     // tslint:disable-next-line no-unused-expression
     new Highlighter(container, {onSelect: spyOnSelect});
+
+    expect(spyDebounce).toHaveBeenCalled();
 
     getSelectionSpy.mockImplementation(() => ({ isCollapsed: false, anchorNode: nodeOutside, focusNode: nodeInside }));
 
@@ -232,13 +240,9 @@ describe('onSelect', () => {
     e.initEvent('selectionchange', true, true);
     document.dispatchEvent(e);
 
-    jest.runTimersToTime(ON_SELECT_DELAY + 100);
-
     expect(spyOnSelect).not.toHaveBeenCalled();
 
     getSelectionSpy.mockImplementation(() => ({ isCollapsed: false, anchorNode: nodeInside, focusNode: nodeOutside }));
-
-    jest.runTimersToTime(ON_SELECT_DELAY + 100);
 
     expect(spyOnSelect).not.toHaveBeenCalled();
   });

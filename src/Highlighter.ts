@@ -1,3 +1,4 @@
+import { debounce } from 'lodash';
 import dom from './dom';
 import Highlight, { FOCUS_CSS, IOptions as HighlightOptions } from './Highlight';
 import injectHighlightWrappers, { DATA_ATTR, DATA_ID_ATTR } from './injectHighlightWrappers';
@@ -6,7 +7,7 @@ import removeHighlightWrappers from './removeHighlightWrappers';
 import { getRange, snapSelection } from './selection';
 import SerializedHighlight from './SerializedHighlight';
 
-export const ON_SELECT_DELAY = 500;
+export const ON_SELECT_DELAY = 300;
 
 interface IOptions {
   snapTableRows?: boolean;
@@ -22,7 +23,6 @@ export default class Highlighter {
   public readonly container: HTMLElement;
   private highlights: { [key: string]: Highlight } = {};
   private options: IOptions;
-  private selectionTimeout: NodeJS.Timeout | null = null;
   private previousRange: Range | null = null;
 
   constructor(container: HTMLElement, options: IOptions = {}) {
@@ -31,13 +31,18 @@ export default class Highlighter {
       className: 'highlight',
       ...options,
     };
+    this.debouncedOnSelect = debounce(this.onSelect, ON_SELECT_DELAY);
     this.container.addEventListener('click', this.onClickHandler);
     document.addEventListener('selectionchange', this.onSelectionChange);
+    this.container.addEventListener('keyup', this.snapSelection);
+    this.container.addEventListener('mouseup', this.snapSelection);
   }
 
   public unmount(): void {
     this.container.removeEventListener('click', this.onClickHandler);
     document.removeEventListener('selectionchange', this.onSelectionChange);
+    this.container.removeEventListener('keyup', this.snapSelection);
+    this.container.removeEventListener('mouseup', this.snapSelection);
   }
 
   public eraseAll = (): void => {
@@ -119,6 +124,19 @@ export default class Highlighter {
     return this.container.ownerDocument;
   }
 
+  private snapSelection = () => {
+    const selection = this.document.getSelection();
+
+    if (!selection || selection.isCollapsed) {
+      return;
+    }
+
+    return snapSelection(selection, this.options);
+  }
+
+  // Created in the constructor
+  private debouncedOnSelect: () => void = () => undefined;
+
   private onSelectionChange = (): void => {
     const selection = this.document.getSelection();
 
@@ -133,16 +151,7 @@ export default class Highlighter {
       return;
     }
 
-    if (this.selectionTimeout) {
-      clearTimeout(this.selectionTimeout);
-    }
-
-    this.selectionTimeout = setTimeout(() => {
-      const sel = this.document.getSelection();
-      if (!sel) { return; }
-
-      this.onSelect(sel);
-    }, ON_SELECT_DELAY);
+    this.debouncedOnSelect();
   }
 
   private onClickHandler = (event: MouseEvent): void => {
@@ -172,10 +181,15 @@ export default class Highlighter {
     onClick(undefined, event);
   }
 
-  private onSelect(selection: Selection): void {
+  private onSelect = (): void => {
     const { onSelect } = this.options;
 
-    const range = snapSelection(selection, this.options);
+    const selection = document.getSelection();
+    if (!selection) {
+      return;
+    }
+
+    const range = this.snapSelection();
     this.previousRange = range || null;
 
     if (onSelect && range) {
@@ -199,16 +213,7 @@ export default class Highlighter {
     if (range1 === null && range2 === null) { return true; }
     if (range1 === null && range2) { return false; }
     if (range2 === null && range1) { return false; }
-    if (
-      range1
-      && range2
-      && range1.startContainer === range2.startContainer
-      && range1.endContainer === range2.endContainer
-      && range1.startOffset === range2.startOffset
-      && range1.endOffset === range2.endOffset
-    ) {
-      return true;
-    }
-    return false;
+    return range1!.compareBoundaryPoints(Range.START_TO_START, range2!) === 0
+      && range1!.compareBoundaryPoints(Range.END_TO_END, range2!) === 0;
   }
 }
