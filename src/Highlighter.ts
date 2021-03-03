@@ -134,10 +134,8 @@ export default class Highlighter {
   }
 
   private onFocusHandler = (type: 'in' | 'out') => (ev: Event): void => {
-    if (
-      (type === 'in' && !this.options.onFocusIn)
-      || (type === 'out' && !this.options.onFocusOut)
-    ) {
+    const handler = type === 'in' ? this.options.onFocusIn : this.options.onFocusOut;
+    if (!handler) {
       return;
     }
 
@@ -146,12 +144,8 @@ export default class Highlighter {
       : null;
     const highlight = highlightId ? this.getHighlight(highlightId) : null;
 
-    if (type === 'in' && highlight) {
-      this.options.onFocusIn!(highlight);
-    }
-
-    if (type === 'out' && highlight) {
-      this.options.onFocusOut!(highlight);
+    if (highlight) {
+      handler(highlight);
     }
   }
 
