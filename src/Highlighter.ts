@@ -31,18 +31,19 @@ export default class Highlighter {
       className: 'highlight',
       ...options,
     };
+    this.debouncedSnapSelection = debounce(this.snapSelection, ON_SELECT_DELAY);
     this.debouncedOnSelect = debounce(this.onSelect, ON_SELECT_DELAY);
     this.container.addEventListener('click', this.onClickHandler);
     document.addEventListener('selectionchange', this.onSelectionChange);
-    this.container.addEventListener('keyup', this.snapSelection);
-    this.container.addEventListener('mouseup', this.snapSelection);
+    this.container.addEventListener('keyup', this.debouncedOnSelect);
+    this.container.addEventListener('mouseup', this.onSelect);
   }
 
   public unmount(): void {
     this.container.removeEventListener('click', this.onClickHandler);
     document.removeEventListener('selectionchange', this.onSelectionChange);
-    this.container.removeEventListener('keyup', this.snapSelection);
-    this.container.removeEventListener('mouseup', this.snapSelection);
+    this.container.removeEventListener('keyup', this.debouncedOnSelect);
+    this.container.removeEventListener('mouseup', this.onSelect);
   }
 
   public eraseAll = (): void => {
@@ -135,6 +136,9 @@ export default class Highlighter {
   }
 
   // Created in the constructor
+  private debouncedSnapSelection: () => void = () => undefined;
+
+  // Created in the constructor
   private debouncedOnSelect: () => void = () => undefined;
 
   private onSelectionChange = (): void => {
@@ -151,7 +155,7 @@ export default class Highlighter {
       return;
     }
 
-    this.debouncedOnSelect();
+    this.debouncedSnapSelection();
   }
 
   private onClickHandler = (event: MouseEvent): void => {
