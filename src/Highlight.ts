@@ -1,6 +1,7 @@
 import * as uuid from 'uuid/v4';
 import dom from './dom';
 import SerializedHighlight from './SerializedHighlight';
+import { DATA_SCREEN_READERS_ATTR_SELECTOR } from './injectHighlightWrappers';
 
 export const FOCUS_CSS = 'focus';
 
@@ -92,9 +93,25 @@ export default class Highlight {
     return this;
   }
 
-  public focus(): Highlight {
+  /**
+   * Add class 'focus' to all elements of this highlight.
+   */
+  public addFocusedStyles(): Highlight {
     this.elements.forEach((el: HTMLElement) => el.classList.add(FOCUS_CSS));
     return this;
+  }
+
+  /**
+   * Move focus to the first element of this highlight.
+   * @return boolean indicating if the action was a success.
+   */
+  public focus(): boolean {
+    const focusableElement = this.elements[0].querySelector(DATA_SCREEN_READERS_ATTR_SELECTOR) as HTMLElement | null;
+    if (focusableElement) {
+      focusableElement.focus();
+      return true;
+    }
+    return false;
   }
 
   public intersects(range: Range): boolean {

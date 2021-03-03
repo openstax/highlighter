@@ -70,7 +70,7 @@ export default class Highlighter {
     return this.container.querySelector(`[id="${id}"]`);
   }
 
-  public clearFocus(): void {
+  public clearFocusedStyles(): void {
     this.container.querySelectorAll(`.${this.options.className}.${FOCUS_CSS}`)
       .forEach((el: Element) => el.classList.remove(FOCUS_CSS));
   }
