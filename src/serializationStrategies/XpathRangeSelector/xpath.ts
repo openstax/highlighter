@@ -1,5 +1,5 @@
 // tslint:disable
-import { DATA_ATTR } from '../../injectHighlightWrappers';
+import { DATA_ATTR, DATA_SCREEN_READERS_ATTR } from '../../injectHighlightWrappers';
 
 type Nullable<T> = T | null | undefined;
 
@@ -68,6 +68,15 @@ const floatThroughText = (element: Node, offset: number, container: Node): [Node
   if (isTextOrTextHighlight(element) && offset === 0 && element.parentNode && element.parentNode !== container) {
     return floatThroughText(element.parentNode, nodeIndex(element.parentNode.childNodes, element), container);
   } else if (isTextOrTextHighlight(element) && offset === getMaxOffset(element) && element.parentNode && element.parentNode !== container) {
+    return floatThroughText(element.parentNode, nodeIndex(element.parentNode.childNodes, element) + 1, container);
+  } else if (
+    isTextOrTextHighlight(element)
+    && (offset + 1) === getMaxOffset(element)
+    && isElement(element.childNodes[offset])
+    && (element.childNodes[offset] as HTMLElement).hasAttribute(DATA_SCREEN_READERS_ATTR)
+    && element.parentNode
+    && element.parentNode !== container
+  ) {
     return floatThroughText(element.parentNode, nodeIndex(element.parentNode.childNodes, element) + 1, container);
   } else {
     return [element, offset];

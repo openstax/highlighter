@@ -210,15 +210,14 @@ describe('getXPathForElement', () => {
     expect(result2).toEqual(expectedPath);
     expect(offset2).toEqual(expectedOffset);
 
-    // idk what input offset i should pass here
-    // const target3 = document.getElementById('target3');
-    // const [result3, offset3] = xpath.getXPathForElement(target3, 1, reference);
-    // expect(result3).toEqual(expectedPath);
-    // expect(offset3).toEqual(expectedOffset);
+    const target3 = document.getElementById('target3');
+    const [result3, offset3] = xpath.getXPathForElement(target3, 3, reference);
+    expect(result3).toEqual(expectedPath);
+    expect(offset3).toEqual(expectedOffset);
 
-    // const [result4, offset4] = xpath.getXPathForElement(target3.childNodes[0], 8, reference);
-    // expect(result4).toEqual(expectedPath);
-    // expect(offset4).toEqual(expectedOffset);
+    const [result4, offset4] = xpath.getXPathForElement(target3.childNodes[1], 8, reference);
+    expect(result4).toEqual(expectedPath);
+    expect(offset4).toEqual(expectedOffset);
   });
 
   it('remove unnecessary text nodes with nested text highlights (on leading edge)', () => {
