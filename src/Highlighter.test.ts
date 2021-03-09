@@ -176,6 +176,10 @@ describe('onSelect', () => {
     e.initEvent('selectionchange', true, true);
     document.dispatchEvent(e);
 
+    const eKeyUp = document.createEvent('Event');
+    eKeyUp.initEvent('keyup', true, true);
+    container.dispatchEvent(eKeyUp);
+
     if (highlight === undefined) {
       expect(highlight).toBeDefined();
     } else {
