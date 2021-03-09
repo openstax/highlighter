@@ -330,7 +330,7 @@ describe('getXPathForElement', () => {
     const [result, offset] = xpath.getXPathForElement(reference, 4, reference);
 
     expect(result).toEqual("./text()[2]");
-    expect(offset).toEqual(1);
+    expect(offset).toEqual(2);
   });
 
   it('does count highlights in offsets without adjacent text', () => {

@@ -1,7 +1,7 @@
 import * as uuid from 'uuid/v4';
 import dom from './dom';
-import SerializedHighlight from './SerializedHighlight';
 import { DATA_SCREEN_READERS_ATTR_SELECTOR } from './injectHighlightWrappers';
+import SerializedHighlight from './SerializedHighlight';
 
 export const FOCUS_CSS = 'focus';
 

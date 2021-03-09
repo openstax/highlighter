@@ -13,6 +13,7 @@ const isTextOrTextHighlight = (node: Nullable<Node | HTMLElement>) => isText(nod
 const isElement = (node: Node): node is HTMLElement => node && node.nodeType === 1;
 const isElementNotHighlight = (node: Node) => isElement(node) && !isHighlight(node);
 const nodeIndex = (list: NodeList, element: Node) => Array.prototype.indexOf.call(list, element);
+const isScreenReaderNode = (node: Node): node is HTMLElement => isHighlight(node) && node.getAttribute(DATA_SCREEN_READERS_ATTR) !== null;
 
 const IS_PATH_PART_SELF = /^\.$/;
 const IS_PATH_PART_TEXT = /^text\(\)\[(\d+)\]$/;
@@ -73,7 +74,7 @@ const floatThroughText = (element: Node, offset: number, container: Node): [Node
     isTextOrTextHighlight(element)
     && (offset + 1) === getMaxOffset(element)
     && isElement(element.childNodes[offset])
-    && (element.childNodes[offset] as HTMLElement).hasAttribute(DATA_SCREEN_READERS_ATTR)
+    && isScreenReaderNode(element.childNodes[offset])
     && element.parentNode
     && element.parentNode !== container
   ) {
@@ -118,10 +119,10 @@ export function getXPathForElement(targetElement: Node, offset: number, referenc
     let search: Node | null = focus.childNodes[offset - 1];
 
     while (search) {
-      if (isTextOrTextHighlight(search)) {
+      if (isTextOrTextHighlight(search) && !isScreenReaderNode(search)) {
         search = search.previousSibling;
 
-        while (isTextOrTextHighlight(search!)) {
+        while (isTextOrTextHighlight(search!) && !isScreenReaderNode(search!)) {
           offset--;
           search = search!.previousSibling;
         }
