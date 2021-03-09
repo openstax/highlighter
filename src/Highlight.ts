@@ -13,7 +13,7 @@ export interface IHighlightData {
 
 export interface IOptions {
   skipIDsBy?: RegExp;
-  formatMessage: (id: string, style: IHighlightData['style']) => string;
+  formatMessage: (descriptor: { id: string }, values: { style: IHighlightData['style'] }) => string;
 }
 
 export default class Highlight {
@@ -56,7 +56,7 @@ export default class Highlight {
   }
 
   public getMessage(id: string): string {
-    return this.options.formatMessage(id, this.data.style);
+    return this.options.formatMessage({ id }, { style: this.data.style });
   }
 
   public setStyle(style: string) {

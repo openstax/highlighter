@@ -12,7 +12,7 @@ interface IOptions {
   snapWords?: boolean;
   className?: string;
   skipIDsBy?: RegExp;
-  formatMessage: (id: string, style: IHighlightData['style']) => string;
+  formatMessage: (descriptor: { id: string }, values: { style: IHighlightData['style'] }) => string;
   onClick?: (highlight: Highlight | undefined, event: MouseEvent) => void;
   onSelect?: (highlights: Highlight[], newHighlight?: Highlight) => void;
   onFocusIn?: (highlight: Highlight) => void;
