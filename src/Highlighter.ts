@@ -1,10 +1,13 @@
+import { debounce } from 'lodash';
 import dom from './dom';
 import Highlight, { FOCUS_CSS, IOptions as HighlightOptions } from './Highlight';
 import injectHighlightWrappers, { DATA_ATTR, DATA_ID_ATTR } from './injectHighlightWrappers';
 import { rangeContentsString } from './rangeContents';
 import removeHighlightWrappers from './removeHighlightWrappers';
-import { snapSelection } from './selection';
+import { getRange, snapSelection } from './selection';
 import SerializedHighlight from './SerializedHighlight';
+
+export const ON_SELECT_DELAY = 300;
 
 interface IOptions {
   snapTableRows?: boolean;
@@ -20,6 +23,7 @@ export default class Highlighter {
   public readonly container: HTMLElement;
   private highlights: { [key: string]: Highlight } = {};
   private options: IOptions;
+  private previousRange: Range | null = null;
 
   constructor(container: HTMLElement, options: IOptions = {}) {
     this.container = container;
@@ -27,11 +31,19 @@ export default class Highlighter {
       className: 'highlight',
       ...options,
     };
-    this.container.addEventListener('mouseup', this.onMouseup);
+    this.debouncedSnapSelection = debounce(this.snapSelection, ON_SELECT_DELAY);
+    this.debouncedOnSelect = debounce(this.onSelect, ON_SELECT_DELAY);
+    this.container.addEventListener('click', this.onClickHandler);
+    document.addEventListener('selectionchange', this.onSelectionChange);
+    this.container.addEventListener('keyup', this.debouncedOnSelect);
+    this.container.addEventListener('mouseup', this.onSelect);
   }
 
   public unmount(): void {
-    this.container.removeEventListener('mouseup', this.onMouseup);
+    this.container.removeEventListener('click', this.onClickHandler);
+    document.removeEventListener('selectionchange', this.onSelectionChange);
+    this.container.removeEventListener('keyup', this.debouncedOnSelect);
+    this.container.removeEventListener('mouseup', this.onSelect);
   }
 
   public eraseAll = (): void => {
@@ -113,18 +125,41 @@ export default class Highlighter {
     return this.container.ownerDocument;
   }
 
-  private onMouseup = (ev: MouseEvent): void => {
+  private snapSelection = () => {
     const selection = this.document.getSelection();
 
-    if (!selection) {
+    if (!selection || selection.isCollapsed) {
       return;
     }
 
-    if (selection.isCollapsed) {
-      this.onClick(ev);
-    } else {
-      this.onSelect(selection);
+    return snapSelection(selection, this.options);
+  }
+
+  // Created in the constructor
+  private debouncedSnapSelection: () => void = () => undefined;
+
+  // Created in the constructor
+  private debouncedOnSelect: () => void = () => undefined;
+
+  private onSelectionChange = (): void => {
+    const selection = this.document.getSelection();
+
+    if (
+      !selection
+      || selection.isCollapsed
+      || selection.type === 'None'
+      || !dom(this.container).contains(selection.anchorNode)
+      || !dom(this.container).contains(selection.focusNode)
+      || this.compareRanges(selection ? getRange(selection) : null, this.previousRange)
+    ) {
+      return;
     }
+
+    this.debouncedSnapSelection();
+  }
+
+  private onClickHandler = (event: MouseEvent): void => {
+    this.onClick(event);
   }
 
   private onClick(event: MouseEvent): void {
@@ -150,10 +185,16 @@ export default class Highlighter {
     onClick(undefined, event);
   }
 
-  private onSelect(selection: Selection): void {
+  private onSelect = (): void => {
     const { onSelect } = this.options;
 
-    const range = snapSelection(selection, this.options);
+    const selection = document.getSelection();
+    if (!selection) {
+      return;
+    }
+
+    const range = this.snapSelection();
+    this.previousRange = range || null;
 
     if (onSelect && range) {
       const highlights: Highlight[] = Object.values(this.highlights)
@@ -170,5 +211,13 @@ export default class Highlighter {
         onSelect(highlights);
       }
     }
+  }
+
+  private compareRanges(range1: Range | null, range2: Range | null): boolean {
+    if (range1 === null && range2 === null) { return true; }
+    if (range1 === null && range2) { return false; }
+    if (range2 === null && range1) { return false; }
+    return range1!.compareBoundaryPoints(Range.START_TO_START, range2!) === 0
+      && range1!.compareBoundaryPoints(Range.END_TO_END, range2!) === 0;
   }
 }
