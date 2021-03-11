@@ -63,7 +63,6 @@ export default function injectHighlightWrappers(highlight: Highlight, options: I
 function createAndInsertNodeForScreenReaders(highlight: Highlight, element: HTMLElement, position: 'start' | 'end'): void {
   const node = document.createElement('span');
   node.setAttribute(DATA_SCREEN_READERS_ATTR, 'true');
-  node.setAttribute(DATA_ATTR, 'true');
   node.setAttribute(DATA_ID_ATTR, highlight.id);
 
   const ariaLabel = highlight.getMessage(`i18n:highlighter:highlight:${position}`);

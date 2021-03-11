@@ -1,7 +1,7 @@
 import {DATA_ATTR, DATA_SCREEN_READERS_ATTR} from '../../injectHighlightWrappers';
 import * as xpath from './xpath';
 
-const screenReaderNode = `<span ${DATA_ATTR} ${DATA_SCREEN_READERS_ATTR}></span>`;
+const screenReaderNode = `<span ${DATA_SCREEN_READERS_ATTR}></span>`;
 
 describe('getXPathForElement', () => {
   it('creates path to self', () => {
