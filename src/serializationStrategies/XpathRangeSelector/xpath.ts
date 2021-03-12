@@ -8,8 +8,10 @@ const findNonTextChild = (node: Node) => Array.prototype.find.call(node.childNod
 );
 const isHighlight = (node: Nullable<Node>): node is HTMLElement => !!node && (node as Element).getAttribute && (node as Element).getAttribute(DATA_ATTR) !== null;
 const isHighlightOrScreenReaderNode = (node: Nullable<Node>) => isHighlight(node) || isScreenReaderNode(node);
+const isTextHihlight = (node: Nullable<Node>): node is HTMLElement => isHighlight(node) && !findNonTextChild(node);
 const isTextHighlightOrScreenReaderNode = (node: Nullable<Node>): node is HTMLElement => (isHighlight(node) || isScreenReaderNode(node)) && !findNonTextChild(node);
 const isText = (node: Nullable<Node>): node is Text => !!node && node.nodeType === 3;
+const isTextOrTextHighlight  = (node: Nullable<Node>): node is Text | HTMLElement => isText(node) || isTextHihlight(node);
 const isTextOrTextHighlightOrScreenReaderNode = (node: Nullable<Node | HTMLElement>) => isText(node) || isTextHighlightOrScreenReaderNode(node) || isScreenReaderNode(node);
 const isElement = (node: Node): node is HTMLElement => node && node.nodeType === 1;
 const isElementNotHighlight = (node: Node) => isElement(node) && !isHighlight(node);
@@ -120,10 +122,10 @@ export function getXPathForElement(targetElement: Node, offset: number, referenc
     let search: Node | null = focus.childNodes[offset - 1];
 
     while (search) {
-      if (isTextOrTextHighlightOrScreenReaderNode(search) && !isScreenReaderNode(search)) {
+      if (isTextOrTextHighlight(search)) {
         search = search.previousSibling;
 
-        while (isTextOrTextHighlightOrScreenReaderNode(search!) && !isScreenReaderNode(search!)) {
+        while (isTextOrTextHighlight(search!)) {
           offset--;
           search = search!.previousSibling;
         }
