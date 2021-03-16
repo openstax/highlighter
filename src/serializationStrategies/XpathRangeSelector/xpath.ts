@@ -74,7 +74,7 @@ const floatThroughText = (element: Node, offset: number, container: Node): [Node
   } else if (isTextOrTextHighlightOrScreenReaderNode(element) && offset === getMaxOffset(element) && element.parentNode && element.parentNode !== container) {
     return floatThroughText(element.parentNode, nodeIndex(element.parentNode.childNodes, element) + 1, container);
   } else if (
-    isTextOrTextHighlightOrScreenReaderNode(element)
+    isTextOrTextHighlight(element)
     && (offset + 1) === getMaxOffset(element)
     && isElement(element.childNodes[offset])
     && isScreenReaderNode(element.childNodes[offset])
