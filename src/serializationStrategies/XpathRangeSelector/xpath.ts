@@ -8,10 +8,10 @@ const findNonTextChild = (node: Node) => Array.prototype.find.call(node.childNod
 );
 const isHighlight = (node: Nullable<Node>): node is HTMLElement => !!node && (node as Element).getAttribute && (node as Element).getAttribute(DATA_ATTR) !== null;
 const isHighlightOrScreenReaderNode = (node: Nullable<Node>) => isHighlight(node) || isScreenReaderNode(node);
-const isTextHihlight = (node: Nullable<Node>): node is HTMLElement => isHighlight(node) && !findNonTextChild(node);
+const isTextHighlight = (node: Nullable<Node>): node is HTMLElement => isHighlight(node) && !findNonTextChild(node);
 const isTextHighlightOrScreenReaderNode = (node: Nullable<Node>): node is HTMLElement => (isHighlight(node) || isScreenReaderNode(node)) && !findNonTextChild(node);
 const isText = (node: Nullable<Node>): node is Text => !!node && node.nodeType === 3;
-const isTextOrTextHighlight  = (node: Nullable<Node>): node is Text | HTMLElement => isText(node) || isTextHihlight(node);
+const isTextOrTextHighlight  = (node: Nullable<Node>): node is Text | HTMLElement => isText(node) || isTextHighlight(node);
 const isTextOrTextHighlightOrScreenReaderNode = (node: Nullable<Node | HTMLElement>) => isText(node) || isTextHighlightOrScreenReaderNode(node) || isScreenReaderNode(node);
 const isElement = (node: Node): node is HTMLElement => node && node.nodeType === 1;
 const isElementNotHighlight = (node: Node) => isElement(node) && !isHighlight(node);
