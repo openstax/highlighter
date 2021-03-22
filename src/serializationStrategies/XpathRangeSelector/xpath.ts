@@ -1,18 +1,22 @@
 // tslint:disable
-import { DATA_ATTR } from '../../injectHighlightWrappers';
+import { DATA_ATTR, DATA_SCREEN_READERS_ATTR } from '../../injectHighlightWrappers';
 
 type Nullable<T> = T | null | undefined;
 
 const findNonTextChild = (node: Node) => Array.prototype.find.call(node.childNodes,
-  (node: Node) => node.nodeType === Node.ELEMENT_NODE && !isTextHighlight(node)
+  (node: Node) => node.nodeType === Node.ELEMENT_NODE && !isTextHighlightOrScreenReaderNode(node)
 );
 const isHighlight = (node: Nullable<Node>): node is HTMLElement => !!node && (node as Element).getAttribute && (node as Element).getAttribute(DATA_ATTR) !== null;
+const isHighlightOrScreenReaderNode = (node: Nullable<Node>) => isHighlight(node) || isScreenReaderNode(node);
 const isTextHighlight = (node: Nullable<Node>): node is HTMLElement => isHighlight(node) && !findNonTextChild(node);
+const isTextHighlightOrScreenReaderNode = (node: Nullable<Node>): node is HTMLElement => (isHighlight(node) || isScreenReaderNode(node)) && !findNonTextChild(node);
 const isText = (node: Nullable<Node>): node is Text => !!node && node.nodeType === 3;
-const isTextOrTextHighlight = (node: Nullable<Node | HTMLElement>) => isText(node) || isTextHighlight(node);
+const isTextOrTextHighlight  = (node: Nullable<Node>): node is Text | HTMLElement => isText(node) || isTextHighlight(node);
+const isTextOrTextHighlightOrScreenReaderNode = (node: Nullable<Node | HTMLElement>) => isText(node) || isTextHighlightOrScreenReaderNode(node) || isScreenReaderNode(node);
 const isElement = (node: Node): node is HTMLElement => node && node.nodeType === 1;
 const isElementNotHighlight = (node: Node) => isElement(node) && !isHighlight(node);
 const nodeIndex = (list: NodeList, element: Node) => Array.prototype.indexOf.call(list, element);
+const isScreenReaderNode = (node: Nullable<Node>): node is HTMLElement => !!node && isElement(node) && node.getAttribute(DATA_SCREEN_READERS_ATTR) !== null;
 
 const IS_PATH_PART_SELF = /^\.$/;
 const IS_PATH_PART_TEXT = /^text\(\)\[(\d+)\]$/;
@@ -39,9 +43,9 @@ const recurseBackwardsThroughText = (current: Node, container: Node, resultOffse
   // we don't count the current, we count the previous
   const previous = current.previousSibling;
 
-  if (previous && isTextOrTextHighlight(previous)) {
+  if (previous && isTextOrTextHighlightOrScreenReaderNode(previous)) {
     return recurseBackwardsThroughText(previous, container, resultOffset + getTextLength(previous));
-  } else if (current.parentNode && isTextHighlight(current.parentNode)) {
+  } else if (current.parentNode && isTextHighlightOrScreenReaderNode(current.parentNode)) {
     return recurseBackwardsThroughText(current.parentNode, container, resultOffset);
   } else {
     return [current, resultOffset];
@@ -51,10 +55,10 @@ const recurseBackwardsThroughText = (current: Node, container: Node, resultOffse
 const resolveTextHighlightsToTextOffset = (element: Node, offset: number, container: Node): [Node, number] => {
   // this won't catch things that are right at the tail of the container, which is good, because we
   // want to contiue using element offset if possible
-  if (isElement(element) && isTextOrTextHighlight(element.childNodes[offset])) {
+  if (isElement(element) && isTextOrTextHighlightOrScreenReaderNode(element.childNodes[offset])) {
     return recurseBackwardsThroughText(element.childNodes[offset], container, 0);
     // however, if the element, is a highlgiht, then we should float
-  } else if (isTextHighlight(element)) {
+  } else if (isTextHighlightOrScreenReaderNode(element)) {
     return recurseBackwardsThroughText(element, container, getTextLength(element));
     // preserve the offset if the elment is text
   } else if (isText(element)) {
@@ -65,9 +69,18 @@ const resolveTextHighlightsToTextOffset = (element: Node, offset: number, contai
 };
 
 const floatThroughText = (element: Node, offset: number, container: Node): [Node, number] => {
-  if (isTextOrTextHighlight(element) && offset === 0 && element.parentNode && element.parentNode !== container) {
+  if (isTextOrTextHighlightOrScreenReaderNode(element) && offset === 0 && element.parentNode && element.parentNode !== container) {
     return floatThroughText(element.parentNode, nodeIndex(element.parentNode.childNodes, element), container);
-  } else if (isTextOrTextHighlight(element) && offset === getMaxOffset(element) && element.parentNode && element.parentNode !== container) {
+  } else if (isTextOrTextHighlightOrScreenReaderNode(element) && offset === getMaxOffset(element) && element.parentNode && element.parentNode !== container) {
+    return floatThroughText(element.parentNode, nodeIndex(element.parentNode.childNodes, element) + 1, container);
+  } else if (
+    isTextOrTextHighlight(element)
+    && (offset + 1) === getMaxOffset(element)
+    && isElement(element.childNodes[offset])
+    && isScreenReaderNode(element.childNodes[offset])
+    && element.parentNode
+    && element.parentNode !== container
+  ) {
     return floatThroughText(element.parentNode, nodeIndex(element.parentNode.childNodes, element) + 1, container);
   } else {
     return [element, offset];
@@ -75,7 +88,7 @@ const floatThroughText = (element: Node, offset: number, container: Node): [Node
 };
 
 const resolveToNextElementOffsetIfPossible = (element: Node, offset: number) => {
-  if (isTextOrTextHighlight(element) && element.parentNode && offset === getMaxOffset(element) && (!element.nextSibling || !isHighlight(element.nextSibling))) {
+  if (isTextOrTextHighlightOrScreenReaderNode(element) && element.parentNode && offset === getMaxOffset(element) && (!element.nextSibling || !isHighlightOrScreenReaderNode(element.nextSibling))) {
     return [element.parentNode, nodeIndex(element.parentNode.childNodes, element) + 1];
   }
 
@@ -84,7 +97,7 @@ const resolveToNextElementOffsetIfPossible = (element: Node, offset: number) => 
 
 const resolveToPreviousElementOffsetIfPossible = (element: Node, offset: number) => {
 
-  if (isTextOrTextHighlight(element) && element.parentNode && offset === 0 && (!element.previousSibling || !isHighlight(element.previousSibling))) {
+  if (isTextOrTextHighlightOrScreenReaderNode(element) && element.parentNode && offset === 0 && (!element.previousSibling || !isHighlightOrScreenReaderNode(element.previousSibling))) {
     return [element.parentNode, nodeIndex(element.parentNode.childNodes, element)];
   }
 
@@ -127,8 +140,8 @@ export function getXPathForElement(targetElement: Node, offset: number, referenc
     while (element) {
       // highlights in text change the number of nodes in the nodelist,
       // compensate by gobbling adjacent highlights and text
-      if (isTextOrTextHighlight(focus) && isTextOrTextHighlight(element)) {
-        while (isTextOrTextHighlight(element)) {
+      if (isTextOrTextHighlightOrScreenReaderNode(focus) && isTextOrTextHighlightOrScreenReaderNode(element)) {
+        while (isTextOrTextHighlightOrScreenReaderNode(element)) {
           element = element.previousSibling!;
         }
         pos += 1;
@@ -140,9 +153,9 @@ export function getXPathForElement(targetElement: Node, offset: number, referenc
       }
     }
 
-    if (isText(focus) || isTextHighlight(focus)) {
+    if (isText(focus) || isTextHighlightOrScreenReaderNode(focus)) {
       xpath = 'text()[' + pos + ']' + '/' + xpath;
-    } else if (!isHighlight(focus)) {
+    } else if (!isHighlightOrScreenReaderNode(focus)) {
       xpath = '*[name()=\'' + focus.nodeName.toLowerCase() + '\'][' + pos + ']' + '/' + xpath;
     }
 
@@ -168,16 +181,16 @@ export function getFirstByXPath(path: string, offset: number, referenceElement: 
 
   // the part following is greedy, so walk back to the first matching
   // textish node before computing offset
-  while (isTextOrTextHighlight(node!) && isTextOrTextHighlight(node!.previousSibling!)) {
+  while (isTextOrTextHighlightOrScreenReaderNode(node!) && isTextOrTextHighlightOrScreenReaderNode(node!.previousSibling!)) {
     node = node!.previousSibling as HTMLElement;
   }
   // highligts split up text nodes that should be treated as one, iterate through
   // until we find the text node that the offset specifies, modifying the offset
   // as we go. prefer leaving highlights if we have the option to deal with
   // adjacent highlights.
-  while ((isTextHighlight(node!) && offset >= node!.textContent!.length) || (isText(node!) && offset > node!.textContent!.length)) {
+  while ((isTextHighlightOrScreenReaderNode(node!) && offset >= node!.textContent!.length) || (isText(node!) && offset > node!.textContent!.length)) {
     offset -= node!.textContent!.length;
-    node = isTextOrTextHighlight(node!.nextSibling!) ? node!.nextSibling as HTMLElement : null;
+    node = isTextOrTextHighlightOrScreenReaderNode(node!.nextSibling!) ? node!.nextSibling as HTMLElement : null;
   }
 
   // for element targets, highlight children might be artifically
@@ -190,10 +203,10 @@ export function getFirstByXPath(path: string, offset: number, referenceElement: 
     while (search && offsetElementsFound < offset) {
       offsetElementsFound++;
 
-      if (isTextOrTextHighlight(search)) {
+      if (isTextOrTextHighlightOrScreenReaderNode(search)) {
         search = search.nextSibling;
 
-        while (isTextOrTextHighlight(search)) {
+        while (isTextOrTextHighlightOrScreenReaderNode(search)) {
           modifyOffset++;
           search = search!.nextSibling;
         }
@@ -205,7 +218,7 @@ export function getFirstByXPath(path: string, offset: number, referenceElement: 
     offset+=modifyOffset;
   }
 
-  if (node && isHighlight(node)) {
+  if (node && isHighlightOrScreenReaderNode(node)) {
     node = null;
   }
 
@@ -230,19 +243,19 @@ function followPart(node: Node, part: string) {
   }
   if (IS_PATH_PART_TEXT.test(part)) {
     let [, index] = part.match(IS_PATH_PART_TEXT) as any;
-    let text = findFirst(node.childNodes, isTextOrTextHighlight);
+    let text = findFirst(node.childNodes, isTextOrTextHighlightOrScreenReaderNode);
 
     while (text && index > 1) {
       let search = text;
 
-      while (isTextOrTextHighlight(search)) {
+      while (isTextOrTextHighlightOrScreenReaderNode(search)) {
         search = search.nextSibling;
       }
 
       index--;
 
       if (search) {
-        text = findFirstAfter(node.childNodes, search, isTextOrTextHighlight);
+        text = findFirstAfter(node.childNodes, search, isTextOrTextHighlightOrScreenReaderNode);
       } else {
         text = search;
       }
@@ -253,7 +266,7 @@ function followPart(node: Node, part: string) {
   }
   if (IS_PATH_PART_ELEMENT.test(part)) {
     let [, type, index] = part.match(IS_PATH_PART_ELEMENT) as any;
-    const nodeMatches = (node: Node) => isElement(node) && node.nodeName.toLowerCase() === type.toLowerCase() && !isHighlight(node);
+    const nodeMatches = (node: Node) => isElement(node) && node.nodeName.toLowerCase() === type.toLowerCase() && !isHighlightOrScreenReaderNode(node);
     let element = findFirst(node.childNodes, nodeMatches);
 
     while (element && index > 1) {

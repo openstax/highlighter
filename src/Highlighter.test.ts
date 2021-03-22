@@ -23,7 +23,7 @@ describe('Reference elements', () => {
       throw new Error('cannot find container');
     }
 
-    const highlighter = new Highlighter(container);
+    const highlighter = new Highlighter(container, { formatMessage: jest.fn() });
 
     expect(highlighter.getReferenceElement('referenceElement2')).toEqual(reference);
   });
@@ -45,7 +45,7 @@ describe('Reference elements', () => {
       throw new Error('can\'t find container');
     }
 
-    const highlighter = new Highlighter(container);
+    const highlighter = new Highlighter(container, { formatMessage: jest.fn() });
 
     expect(highlighter.getReferenceElement('referenceElement1')).toEqual(null);
   });
@@ -58,7 +58,7 @@ describe('onClick', () => {
     const container = document.createElement('div');
 
     // tslint:disable-next-line no-unused-expression
-    new Highlighter(container, {onClick: spyOnClick});
+    new Highlighter(container, {onClick: spyOnClick, formatMessage: jest.fn()});
 
     const e = document.createEvent('MouseEvent');
     e.initEvent('click', true, true);
@@ -77,13 +77,13 @@ describe('onClick', () => {
     highlightElement.setAttribute(injectHighlightWrappersUtils.DATA_ID_ATTR, 'some-highlight');
     container.append(highlightElement);
 
-    const highlight = new Highlight(new Range(), { id: 'some-highlight', content: 'asd' });
+    const highlight = new Highlight(new Range(), { id: 'some-highlight', content: 'asd' }, { formatMessage: jest.fn() });
 
     jest.spyOn(injectHighlightWrappersUtils, 'default')
       .mockImplementation(spyInjectHighlightWrappersUtils);
 
     // tslint:disable-next-line no-unused-expression
-    const highlighter = new Highlighter(container, {onClick: spyOnClick});
+    const highlighter = new Highlighter(container, {onClick: spyOnClick, formatMessage: jest.fn()});
 
     highlighter.highlight(highlight);
 
@@ -102,7 +102,7 @@ describe('onClick', () => {
     const container = document.createElement('div');
 
     // tslint:disable-next-line no-unused-expression
-    new Highlighter(container, {onClick: spyOnClick});
+    new Highlighter(container, {onClick: spyOnClick, formatMessage: jest.fn()});
 
     const e = document.createEvent('MouseEvent');
     e.initEvent('click', true, true);
@@ -148,7 +148,7 @@ describe('onSelect', () => {
     // tslint:disable-next-line no-unused-expression
     new Highlighter(
       container,
-      {onSelect: (_: Highlight[], newHighlight?: Highlight) => highlight = newHighlight}
+      {formatMessage: jest.fn(), onSelect: (_: Highlight[], newHighlight?: Highlight) => highlight = newHighlight}
     );
 
     expect(spyDebounce).toHaveBeenCalled();
@@ -200,7 +200,7 @@ describe('onSelect', () => {
       .mockImplementation((fn: any) => fn);
 
     // tslint:disable-next-line no-unused-expression
-    new Highlighter(container, {onSelect: spyOnSelect});
+    new Highlighter(container, {onSelect: spyOnSelect, formatMessage: jest.fn()});
 
     expect(spyDebounce).toHaveBeenCalled();
 
@@ -234,7 +234,7 @@ describe('onSelect', () => {
       .mockImplementation((fn: any) => fn);
 
     // tslint:disable-next-line no-unused-expression
-    new Highlighter(container, {onSelect: spyOnSelect});
+    new Highlighter(container, {onSelect: spyOnSelect, formatMessage: jest.fn()});
 
     expect(spyDebounce).toHaveBeenCalled();
 

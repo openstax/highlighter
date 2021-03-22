@@ -1,7 +1,7 @@
 import { debounce } from 'lodash';
-import dom from './dom';
-import Highlight, { FOCUS_CSS, IOptions as HighlightOptions } from './Highlight';
-import injectHighlightWrappers, { DATA_ATTR, DATA_ID_ATTR } from './injectHighlightWrappers';
+import dom, { isHtmlElement } from './dom';
+import Highlight, { FOCUS_CSS, IHighlightData, IOptions as HighlightOptions } from './Highlight';
+import injectHighlightWrappers, { DATA_ATTR, DATA_ID_ATTR, DATA_SCREEN_READERS_ATTR } from './injectHighlightWrappers';
 import { rangeContentsString } from './rangeContents';
 import removeHighlightWrappers from './removeHighlightWrappers';
 import { getRange, snapSelection } from './selection';
@@ -15,8 +15,11 @@ interface IOptions {
   snapWords?: boolean;
   className?: string;
   skipIDsBy?: RegExp;
+  formatMessage: (descriptor: { id: string }, values: { style: IHighlightData['style'] }) => string;
   onClick?: (highlight: Highlight | undefined, event: MouseEvent) => void;
   onSelect?: (highlights: Highlight[], newHighlight?: Highlight) => void;
+  onFocusIn?: (highlight: Highlight) => void;
+  onFocusOut?: (highlight: Highlight) => void;
 }
 
 export default class Highlighter {
@@ -24,19 +27,32 @@ export default class Highlighter {
   private highlights: { [key: string]: Highlight } = {};
   private options: IOptions;
   private previousRange: Range | null = null;
+  private focusInHandler: (ev: Event) => void;
+  private focusOutHandler: (ev: Event) => void;
 
-  constructor(container: HTMLElement, options: IOptions = {}) {
+  constructor(container: HTMLElement, options: IOptions) {
     this.container = container;
     this.options = {
       className: 'highlight',
+      onFocusIn: (highlight) => {
+        this.clearFocusedStyles();
+        highlight.addFocusedStyles();
+      },
+      onFocusOut: () => {
+        this.clearFocusedStyles();
+      },
       ...options,
     };
     this.debouncedSnapSelection = debounce(this.snapSelection, ON_SELECT_DELAY);
     this.debouncedOnSelect = debounce(this.onSelect, ON_SELECT_DELAY);
+    this.focusInHandler = this.onFocusHandler('in');
+    this.focusOutHandler = this.onFocusHandler('out');
     this.container.addEventListener('click', this.onClickHandler);
     document.addEventListener('selectionchange', this.onSelectionChange);
     this.container.addEventListener('keyup', this.debouncedOnSelect);
     this.container.addEventListener('mouseup', this.onSelect);
+    this.container.addEventListener('focusin', this.focusInHandler);
+    this.container.addEventListener('focusout', this.focusOutHandler);
   }
 
   public unmount(): void {
@@ -44,6 +60,8 @@ export default class Highlighter {
     document.removeEventListener('selectionchange', this.onSelectionChange);
     this.container.removeEventListener('keyup', this.debouncedOnSelect);
     this.container.removeEventListener('mouseup', this.onSelect);
+    this.container.removeEventListener('focusin', this.focusInHandler);
+    this.container.removeEventListener('focusout', this.focusOutHandler);
   }
 
   public eraseAll = (): void => {
@@ -77,7 +95,7 @@ export default class Highlighter {
     return this.container.querySelector(`[id="${id}"]`);
   }
 
-  public clearFocus(): void {
+  public clearFocusedStyles(): void {
     this.container.querySelectorAll(`.${this.options.className}.${FOCUS_CSS}`)
       .forEach((el: Element) => el.classList.remove(FOCUS_CSS));
   }
@@ -87,9 +105,10 @@ export default class Highlighter {
   }
 
   public getHighlightOptions(): HighlightOptions {
-    const { skipIDsBy } = this.options;
+    const { formatMessage, skipIDsBy } = this.options;
 
     return {
+      formatMessage,
       skipIDsBy,
     };
   }
@@ -160,6 +179,22 @@ export default class Highlighter {
 
   private onClickHandler = (event: MouseEvent): void => {
     this.onClick(event);
+  }
+
+  private onFocusHandler = (type: 'in' | 'out') => (ev: Event): void => {
+    const handler = type === 'in' ? this.options.onFocusIn : this.options.onFocusOut;
+    if (!handler) {
+      return;
+    }
+
+    const highlightId = isHtmlElement(ev.target) && ev.target.hasAttribute(DATA_SCREEN_READERS_ATTR)
+      ? ev.target.getAttribute(DATA_ID_ATTR)
+      : null;
+    const highlight = highlightId ? this.getHighlight(highlightId) : null;
+
+    if (highlight) {
+      handler(highlight);
+    }
   }
 
   private onClick(event: MouseEvent): void {

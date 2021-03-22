@@ -1,5 +1,6 @@
 import * as uuid from 'uuid/v4';
 import dom from './dom';
+import { DATA_SCREEN_READERS_ATTR_SELECTOR } from './injectHighlightWrappers';
 import SerializedHighlight from './SerializedHighlight';
 
 export const FOCUS_CSS = 'focus';
@@ -12,6 +13,7 @@ export interface IHighlightData {
 
 export interface IOptions {
   skipIDsBy?: RegExp;
+  formatMessage: (descriptor: { id: string }, values: { style: IHighlightData['style'] }) => string;
 }
 
 export default class Highlight {
@@ -43,14 +45,18 @@ export default class Highlight {
   constructor(
     range: Range,
     data: Pick<IHighlightData, Exclude<keyof IHighlightData, 'id'>> & Partial<Pick<IHighlightData, 'id'>>,
-    options?: IOptions
+    options: IOptions
   ) {
     this.range = range;
-    this.options = options || {};
+    this.options = options;
     this.data = {
       ...data,
       id: data.id || uuid(),
     };
+  }
+
+  public getMessage(id: string): string {
+    return this.options.formatMessage({ id }, { style: this.data.style });
   }
 
   public setStyle(style: string) {
@@ -87,9 +93,25 @@ export default class Highlight {
     return this;
   }
 
-  public focus(): Highlight {
+  /**
+   * Add class 'focus' to all elements of this highlight.
+   */
+  public addFocusedStyles(): Highlight {
     this.elements.forEach((el: HTMLElement) => el.classList.add(FOCUS_CSS));
     return this;
+  }
+
+  /**
+   * Move focus to the first element of this highlight.
+   * @return boolean indicating if the action was a success.
+   */
+  public focus(): boolean {
+    const focusableElement = this.elements[0].querySelector(DATA_SCREEN_READERS_ATTR_SELECTOR) as HTMLElement | null;
+    if (focusableElement) {
+      focusableElement.focus();
+      return true;
+    }
+    return false;
   }
 
   public intersects(range: Range): boolean {

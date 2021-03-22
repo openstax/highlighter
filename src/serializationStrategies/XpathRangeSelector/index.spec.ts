@@ -12,7 +12,7 @@ describe('load', () => {
     `;
 
     const highligherEl = document.getElementById('highlighter')!;
-    const highlighter = new Highlighter(highligherEl);
+    const highlighter = new Highlighter(highligherEl, { formatMessage: jest.fn() });
     const result = serializer.load(highlighter, {
       endContainer: './text()[1]',
       endOffset: 10,
@@ -37,7 +37,7 @@ describe('isLoadable', () => {
     `;
 
     const highligherEl = document.getElementById('highlighter')!;
-    const highlighter = new Highlighter(highligherEl);
+    const highlighter = new Highlighter(highligherEl, { formatMessage: jest.fn() });
     const result = serializer.isLoadable(highlighter, {
       endContainer: './text()[1]',
       endOffset: 10,
@@ -60,7 +60,7 @@ describe('isLoadable', () => {
     `;
 
     const highligherEl = document.getElementById('highlighter')!;
-    const highlighter = new Highlighter(highligherEl);
+    const highlighter = new Highlighter(highligherEl, { formatMessage: jest.fn() });
     const result = serializer.isLoadable(highlighter, {
       endContainer: './text()[1]',
       endOffset: 10,
@@ -83,7 +83,7 @@ describe('isLoadable', () => {
     `;
 
     const highligherEl = document.getElementById('highlighter')!;
-    const highlighter = new Highlighter(highligherEl);
+    const highlighter = new Highlighter(highligherEl, { formatMessage: jest.fn() });
     const result = serializer.isLoadable(highlighter, {
       endContainer: './text()[1]',
       endOffset: 10,
@@ -106,7 +106,7 @@ describe('isLoadable', () => {
     `;
 
     const highligherEl = document.getElementById('highlighter')!;
-    const highlighter = new Highlighter(highligherEl);
+    const highlighter = new Highlighter(highligherEl, { formatMessage: jest.fn() });
     const result = serializer.isLoadable(highlighter, {
       endContainer: './text()[8]',
       endOffset: 10,
