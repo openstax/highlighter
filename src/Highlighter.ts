@@ -34,6 +34,13 @@ export default class Highlighter {
     this.container = container;
     this.options = {
       className: 'highlight',
+      onFocusIn: (highlight) => {
+        this.clearFocusedStyles();
+        highlight.addFocusedStyles();
+      },
+      onFocusOut: () => {
+        this.clearFocusedStyles();
+      },
       ...options,
     };
     this.debouncedSnapSelection = debounce(this.snapSelection, ON_SELECT_DELAY);
