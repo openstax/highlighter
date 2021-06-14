@@ -224,7 +224,11 @@ export default class Highlighter {
     const { onSelect } = this.options;
 
     const selection = document.getSelection();
-    if (!selection) {
+    if (
+      !selection
+      || !dom(this.container).contains(selection.anchorNode)
+      || !dom(this.container).contains(selection.focusNode)
+    ) {
       return;
     }
 
