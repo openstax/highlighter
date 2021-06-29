@@ -146,9 +146,15 @@ export default class Highlighter {
 
   private snapSelection = () => {
     const selection = this.document.getSelection();
-
     if (!selection || selection.isCollapsed) {
       return;
+    }
+    
+    const anchor = selection.anchorNode;
+    if (anchor && anchor.parentNode && selection.focusNode) {
+      if (anchor.nodeName === 'IMG' || anchor.nodeName === 'IFRAME') {
+        selection!.setBaseAndExtent(anchor.parentNode, 0, selection.focusNode, selection.focusOffset);
+      }
     }
 
     return snapSelection(selection, this.options);
