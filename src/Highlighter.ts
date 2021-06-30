@@ -145,14 +145,8 @@ export default class Highlighter {
   }
 
   public getClosestNodeByName = (node: Node, nodeName: string): Node | null => {
-    if (!node.parentNode) {
-      return null;
-    }
-
-    if (node.nodeName === nodeName) {
-      return node;
-    }
-
+    if (node.nodeName === nodeName) { return node; }
+    if (!node.parentNode) { return null; }
     return this.getClosestNodeByName(node.parentNode, nodeName);
   }
 
@@ -160,7 +154,7 @@ export default class Highlighter {
 
   private snapSelection = () => {
     const selection = this.document.getSelection();
-    if (!selection || selection.isCollapsed ) {
+    if (!selection || selection.isCollapsed) {
       return;
     }
 
@@ -169,14 +163,13 @@ export default class Highlighter {
 
     if (anchor && focus) {
       if (this.isEmptyElement(anchor) && anchor.parentNode) {
+        // if anchor node is img/iframe, use its parent node instead
         selection!.setBaseAndExtent(anchor.parentNode, selection.anchorOffset, focus, selection.focusOffset);
       } else if (this.isEmptyElement(focus) && focus.parentNode) {
+        // if focus node is img/iframe, use figure caption node instead
         const closestFigure = this.getClosestNodeByName(focus, 'FIGURE');
         if (closestFigure && closestFigure.nextSibling) {
-          const newFocus = focus.nodeName === 'IMG' ? closestFigure.nextSibling : closestFigure;
-          selection!.setBaseAndExtent(anchor, selection.anchorOffset, newFocus, selection.focusOffset);
-        } else {
-          selection!.setBaseAndExtent(anchor, selection.anchorOffset, focus.parentNode, selection.focusOffset);
+          selection!.setBaseAndExtent(anchor, selection.anchorOffset, closestFigure.nextSibling, selection.focusOffset);
         }
       }
     }
