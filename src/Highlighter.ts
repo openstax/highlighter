@@ -147,7 +147,7 @@ export default class Highlighter {
   public getClosestNodeByName = (node: Node, nodeName: string): Node | null => {
     if (!node.parentNode) {
       return null;
-    };
+    }
 
     if (node.nodeName === nodeName) {
       return node;
@@ -156,29 +156,27 @@ export default class Highlighter {
     return this.getClosestNodeByName(node.parentNode, nodeName);
   }
 
+  private isEmptyElement = (node: Node) => node.nodeName === 'IMG' || node.nodeName === 'IFRAME';
+
   private snapSelection = () => {
     const selection = this.document.getSelection();
-    if (!selection || selection.isCollapsed) {
+    if (!selection || selection.isCollapsed ) {
       return;
     }
-    
+
     const anchor = selection.anchorNode;
     const focus = selection.focusNode;
-    console.log('ANCHOR: ', anchor)
-    console.log('FOCUS: ', focus)
 
-    if (anchor && focus && anchor.parentNode && focus.parentNode && anchor.parentNode.parentNode) {
-      const focusTag = focus.nodeName;
-      if (anchor.nodeName === 'IMG' || anchor.nodeName === 'IFRAME') {
-        console.log('starts with img or iframe, updating to: ', anchor.parentNode)
-        selection!.setBaseAndExtent(anchor.parentNode, 0, focus, selection.focusOffset);
-      }
-      if (focusTag === 'IMG' || focusTag === 'IFRAME') {
-        let closestFigure = this.getClosestNodeByName(focus, 'FIGURE');
+    if (anchor && focus) {
+      if (this.isEmptyElement(anchor) && anchor.parentNode) {
+        selection!.setBaseAndExtent(anchor.parentNode, selection.anchorOffset, focus, selection.focusOffset);
+      } else if (this.isEmptyElement(focus) && focus.parentNode) {
+        const closestFigure = this.getClosestNodeByName(focus, 'FIGURE');
         if (closestFigure && closestFigure.nextSibling) {
-          const newFocus = focusTag === 'IMG' ? closestFigure.nextSibling : closestFigure;
-          console.log('ends with img or iframe, updating to: ', closestFigure.nextSibling)
-          selection!.setBaseAndExtent(anchor, 0, newFocus, selection.focusOffset);
+          const newFocus = focus.nodeName === 'IMG' ? closestFigure.nextSibling : closestFigure;
+          selection!.setBaseAndExtent(anchor, selection.anchorOffset, newFocus, selection.focusOffset);
+        } else {
+          selection!.setBaseAndExtent(anchor, selection.anchorOffset, focus.parentNode, selection.focusOffset);
         }
       }
     }
