@@ -144,6 +144,18 @@ export default class Highlighter {
     return this.container.ownerDocument;
   }
 
+  public getClosestNodeByName = (node: Node, nodeName: string): Node | null => {
+    if (!node.parentNode) {
+      return null;
+    };
+
+    if (node.nodeName === nodeName) {
+      return node;
+    }
+
+    return this.getClosestNodeByName(node.parentNode, nodeName);
+  }
+
   private snapSelection = () => {
     const selection = this.document.getSelection();
     if (!selection || selection.isCollapsed) {
@@ -151,9 +163,23 @@ export default class Highlighter {
     }
     
     const anchor = selection.anchorNode;
-    if (anchor && anchor.parentNode && selection.focusNode) {
+    const focus = selection.focusNode;
+    console.log('ANCHOR: ', anchor)
+    console.log('FOCUS: ', focus)
+
+    if (anchor && focus && anchor.parentNode && focus.parentNode && anchor.parentNode.parentNode) {
+      const focusTag = focus.nodeName;
       if (anchor.nodeName === 'IMG' || anchor.nodeName === 'IFRAME') {
-        selection!.setBaseAndExtent(anchor.parentNode, 0, selection.focusNode, selection.focusOffset);
+        console.log('starts with img or iframe, updating to: ', anchor.parentNode)
+        selection!.setBaseAndExtent(anchor.parentNode, 0, focus, selection.focusOffset);
+      }
+      if (focusTag === 'IMG' || focusTag === 'IFRAME') {
+        let closestFigure = this.getClosestNodeByName(focus, 'FIGURE');
+        if (closestFigure && closestFigure.nextSibling) {
+          const newFocus = focusTag === 'IMG' ? closestFigure.nextSibling : closestFigure;
+          console.log('ends with img or iframe, updating to: ', closestFigure.nextSibling)
+          selection!.setBaseAndExtent(anchor, 0, newFocus, selection.focusOffset);
+        }
       }
     }
 
