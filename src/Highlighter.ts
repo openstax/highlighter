@@ -154,7 +154,7 @@ export default class Highlighter {
 
   private snapSelection = () => {
     const selection = this.document.getSelection();
-    
+
     if (!selection || selection.isCollapsed) {
       return;
     }
