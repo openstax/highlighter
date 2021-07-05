@@ -166,11 +166,13 @@ export default class Highlighter {
       if (this.isEmptyElement(anchor) && anchor.parentNode) {
         // if anchor node is img/iframe, use its parent node instead
         selection!.setBaseAndExtent(anchor.parentNode, selection.anchorOffset, focus, selection.focusOffset);
-      } else if (this.isEmptyElement(focus) && focus.parentNode) {
+      } else if (this.isEmptyElement(focus) && focus.parentNode && focus.parentNode.parentNode) {
         // if focus node is img/iframe, use figure caption node instead
         const closestFigure = this.getClosestNodeByName(focus, 'FIGURE');
         if (closestFigure && closestFigure.nextSibling) {
           selection!.setBaseAndExtent(anchor, selection.anchorOffset, closestFigure.nextSibling, selection.focusOffset);
+        } else {
+          selection!.setBaseAndExtent(anchor, selection.anchorOffset, focus.parentNode, selection.focusOffset + 1);
         }
       }
     }

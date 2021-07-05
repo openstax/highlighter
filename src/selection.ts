@@ -35,6 +35,7 @@ interface IOptions {
 export const snapSelection = (selection: Selection, options: IOptions): Range | undefined => {
   const selectionDirection = getDirection(selection);
   const range = getRange(selection);
+  console.log('selection received: ', selection, ' range: ', range)
 
   if (!range) {
     return;
