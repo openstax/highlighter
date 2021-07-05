@@ -144,12 +144,6 @@ export default class Highlighter {
     return this.container.ownerDocument;
   }
 
-  public getClosestNodeByName = (node: Node, nodeName: string): Node | null => {
-    if (node.nodeName === nodeName) { return node; }
-    if (!node.parentNode) { return null; }
-    return this.getClosestNodeByName(node.parentNode, nodeName);
-  }
-
   private isEmptyElement = (node: Node) => node.nodeName === 'IMG' || node.nodeName === 'IFRAME';
 
   private snapSelection = () => {
@@ -164,16 +158,11 @@ export default class Highlighter {
 
     if (anchor && focus) {
       if (this.isEmptyElement(anchor) && anchor.parentNode) {
-        // if anchor node is img/iframe, use its parent node instead
-        selection!.setBaseAndExtent(anchor.parentNode, selection.anchorOffset, focus, selection.focusOffset);
+        // if anchor node is childless element (img/iframe), use its parent node as anchor instead
+        selection.setBaseAndExtent(anchor.parentNode, selection.anchorOffset, focus, selection.focusOffset);
       } else if (this.isEmptyElement(focus) && focus.parentNode && focus.parentNode.parentNode) {
-        // if focus node is img/iframe, use figure caption node instead
-        const closestFigure = this.getClosestNodeByName(focus, 'FIGURE');
-        if (closestFigure && closestFigure.nextSibling) {
-          selection!.setBaseAndExtent(anchor, selection.anchorOffset, closestFigure.nextSibling, selection.focusOffset);
-        } else {
-          selection!.setBaseAndExtent(anchor, selection.anchorOffset, focus.parentNode, selection.focusOffset + 1);
-        }
+        // else if focus node is childless element, use its parent node as focus and add 1 char to focus offset
+        selection!.setBaseAndExtent(anchor, selection.anchorOffset, focus.parentNode, selection.focusOffset + 1);
       }
     }
 
