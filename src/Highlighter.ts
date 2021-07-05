@@ -158,10 +158,10 @@ export default class Highlighter {
 
     if (anchor && focus) {
       if (this.isEmptyElement(anchor) && anchor.parentNode) {
-        // if anchor node is childless element (img/iframe), use its parent node as anchor instead
+        // if anchor node is img/iframe, use its parent node as anchor instead
         selection.setBaseAndExtent(anchor.parentNode, selection.anchorOffset, focus, selection.focusOffset);
       } else if (this.isEmptyElement(focus) && focus.parentNode && focus.parentNode.parentNode) {
-        // else if focus node is childless element, use its parent node as focus and add 1 char to focus offset
+        // else if focus node is img/iframe, use its parent node as focus and add 1 char to focus offset
         selection!.setBaseAndExtent(anchor, selection.anchorOffset, focus.parentNode, selection.focusOffset + 1);
       }
     }
