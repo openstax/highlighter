@@ -144,7 +144,7 @@ export default class Highlighter {
     return this.container.ownerDocument;
   }
 
-  private isEmptyElement = (node: Node) => node.nodeName === 'IMG' || node.nodeName === 'IFRAME';
+  private isImgOrIframe = (node: Node) => node.nodeName === 'IMG' || node.nodeName === 'IFRAME';
 
   private snapSelection = () => {
     const selection = this.document.getSelection();
@@ -157,12 +157,24 @@ export default class Highlighter {
     const focus = selection.focusNode;
 
     if (anchor && focus) {
-      if (this.isEmptyElement(anchor) && anchor.parentNode) {
-        // if anchor node is img/iframe, use its parent node as anchor instead
-        selection.setBaseAndExtent(anchor.parentNode, selection.anchorOffset, focus, selection.focusOffset);
-      } else if (this.isEmptyElement(focus) && focus.parentNode && focus.parentNode.parentNode) {
-        // else if focus node is img/iframe, use its parent node as focus and add 1 char to focus offset
-        selection!.setBaseAndExtent(anchor, selection.anchorOffset, focus.parentNode, selection.focusOffset + 1);
+      const anchorParent = anchor.parentNode;
+      const focusParent = focus.parentNode;
+
+      // if selection begins on but doesn't end on img/iframe
+      if (this.isImgOrIframe(anchor) && anchorParent && !this.isImgOrIframe(focus)) {
+        selection.setBaseAndExtent(anchorParent, selection.anchorOffset, focus, selection.focusOffset);
+      }
+
+      // if selection ends on img/iframe
+      if (this.isImgOrIframe(focus) && focusParent) {
+        const focusGrandparent = focusParent.parentNode;
+        const focusHasCaption = focusGrandparent && focusGrandparent.nextSibling && (focusGrandparent.nextSibling as Element).className === 'os-caption-container';
+
+        // for images with captions, set caption as new focusNode, else use focus parent
+        const newFocus = focus.nodeName === 'IMG' && focusGrandparent && focusGrandparent.nextSibling && focusHasCaption ? focusGrandparent.nextSibling : focusParent;
+        const newFocusOffset = focus.nodeName === 'IMG' ? selection.focusOffset : selection.focusOffset + 1;
+        const newAnchor = this.isImgOrIframe(anchor) && anchorParent ? anchorParent : anchor;
+        selection.setBaseAndExtent(newAnchor, selection.anchorOffset, newFocus, newFocusOffset);
       }
     }
 
