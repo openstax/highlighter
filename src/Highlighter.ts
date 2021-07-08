@@ -170,6 +170,7 @@ export default class Highlighter {
       || !dom(this.container).contains(selection.anchorNode)
       || !dom(this.container).contains(selection.focusNode)
       || this.compareRanges(selection ? getRange(selection) : null, this.previousRange)
+      || window.matchMedia('not all and (pointer: fine), (hover: none)').matches // noop for touch devices
     ) {
       return;
     }
