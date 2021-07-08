@@ -168,11 +168,11 @@ export default class Highlighter {
       // if selection ends on img/iframe
       if (this.isImgOrIframe(focus) && focusParent) {
         const focusGrandparent = focusParent.parentNode;
-        const focusHasCaption = focusGrandparent && focusGrandparent.nextSibling && (focusGrandparent.nextSibling as Element).className === 'os-caption-container';
+        const focusIsImgWithCaption = focus.nodeName === 'IMG' && focusGrandparent && focusGrandparent.nextSibling && (focusGrandparent.nextSibling as Element).className === 'os-caption-container';
 
         // for images with captions, set caption as new focusNode, else use focus parent
-        const newFocus = focus.nodeName === 'IMG' && focusGrandparent && focusGrandparent.nextSibling && focusHasCaption ? focusGrandparent.nextSibling : focusParent;
-        const newFocusOffset = focus.nodeName === 'IMG' ? selection.focusOffset : selection.focusOffset + 1;
+        const newFocus = focusGrandparent && focusGrandparent.nextSibling && focusIsImgWithCaption ? focusGrandparent.nextSibling : focusParent;
+        const newFocusOffset = focusIsImgWithCaption ? selection.focusOffset : selection.focusOffset + 1;
         const newAnchor = this.isImgOrIframe(anchor) && anchorParent ? anchorParent : anchor;
         selection.setBaseAndExtent(newAnchor, selection.anchorOffset, newFocus, newFocusOffset);
       }
