@@ -177,7 +177,6 @@ export default class Highlighter {
         selection.setBaseAndExtent(newAnchor, selection.anchorOffset, newFocus, newFocusOffset);
       }
     }
-
     return snapSelection(selection, this.options);
   }
 
