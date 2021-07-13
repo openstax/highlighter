@@ -95,12 +95,12 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
     const gobbleForward = () => {
       range.setEnd(range.endContainer, range.endOffset + 1);
     };
-    if (range.startContainer.nodeName === '#text') {
+    if (range.startContainer.nodeName === '#text' && range.startContainer.textContent && range.startOffset < range.startContainer.textContent.length) {
       while (shouldGobbleBackward()) {
         gobbleBackward();
       }
     }
-    if (range.endContainer.nodeName === '#text') {
+    if (range.endContainer.nodeName === '#text' && range.endOffset > 0) {
       while (shouldGobbleForward()) {
         gobbleForward();
       }
