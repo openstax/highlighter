@@ -95,11 +95,13 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
     const gobbleForward = () => {
       range.setEnd(range.endContainer, range.endOffset + 1);
     };
+    // only snap backward if start offset overlaps with startContainer text
     if (range.startContainer.nodeName === '#text' && range.startContainer.textContent && range.startOffset < range.startContainer.textContent.length) {
       while (shouldGobbleBackward()) {
         gobbleBackward();
       }
     }
+    // only snap forward if end offset overlaps with endContainer text
     if (range.endContainer.nodeName === '#text' && range.endOffset > 0) {
       while (shouldGobbleForward()) {
         gobbleForward();
