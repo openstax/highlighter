@@ -144,8 +144,6 @@ export default class Highlighter {
     return this.container.ownerDocument;
   }
 
-  private isImgOrIframe = (node: Node) => node.nodeName === 'IMG' || node.nodeName === 'IFRAME';
-
   private snapSelection = () => {
     const selection = this.document.getSelection();
 
@@ -153,30 +151,6 @@ export default class Highlighter {
       return;
     }
 
-    const anchor = selection.anchorNode;
-    const focus = selection.focusNode;
-
-    if (anchor && focus) {
-      const anchorParent = anchor.parentNode;
-      const focusParent = focus.parentNode;
-
-      // if selection begins on but doesn't end on img/iframe
-      if (this.isImgOrIframe(anchor) && anchorParent && !this.isImgOrIframe(focus)) {
-        selection.setBaseAndExtent(anchorParent, selection.anchorOffset, focus, selection.focusOffset);
-      }
-
-      // if selection ends on img/iframe
-      if (this.isImgOrIframe(focus) && focusParent) {
-        const focusGrandparent = focusParent.parentNode;
-        const focusIsImgWithCaption = focus.nodeName === 'IMG' && focusGrandparent && focusGrandparent.nextSibling && (focusGrandparent.nextSibling as Element).className === 'os-caption-container';
-
-        // for images with captions, set caption as new focusNode, else use focus parent
-        const newFocus = focusGrandparent && focusGrandparent.nextSibling && focusIsImgWithCaption ? focusGrandparent.nextSibling : focusParent;
-        const newFocusOffset = focusIsImgWithCaption ? selection.focusOffset : selection.focusOffset + 1;
-        const newAnchor = this.isImgOrIframe(anchor) && anchorParent ? anchorParent : anchor;
-        selection.setBaseAndExtent(newAnchor, selection.anchorOffset, newFocus, newFocusOffset);
-      }
-    }
     return snapSelection(selection, this.options);
   }
 
