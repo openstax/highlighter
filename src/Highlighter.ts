@@ -153,8 +153,6 @@ export default class Highlighter {
       return;
     }
 
-    console.log('selection: ', selection)
-
     const anchor = selection.anchorNode;
     const focus = selection.focusNode;
 
