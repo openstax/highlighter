@@ -150,7 +150,6 @@ export default class Highlighter {
     if (!selection || selection.isCollapsed) {
       return;
     }
-
     cleanSelection(selection);
 
     return snapSelection(selection, this.options);
