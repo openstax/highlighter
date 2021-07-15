@@ -156,6 +156,7 @@ describe('onSelect', () => {
     const inputSelection = new Selection();
     const selectionRange = new Range();
     const snappedRange = new Range();
+    inputSelection.setBaseAndExtent = jest.fn(() => inputSelection);
 
     selectionRange.setStart(node, 0);
     selectionRange.setEnd(node, 5);
