@@ -156,7 +156,6 @@ describe('onSelect', () => {
     const inputSelection = new Selection();
     const selectionRange = new Range();
     const snappedRange = new Range();
-    inputSelection.setBaseAndExtent = jest.fn(() => inputSelection);
 
     selectionRange.setStart(node, 0);
     selectionRange.setEnd(node, 5);
@@ -168,6 +167,7 @@ describe('onSelect', () => {
     Object.defineProperty(inputSelection, 'anchorNode', {value: node});
     Object.defineProperty(inputSelection, 'focusNode', {value: node});
 
+    inputSelection.setBaseAndExtent = jest.fn(() => inputSelection);
     inputSelection.getRangeAt = jest.fn(() => selectionRange);
     snapSelectionSpy.mockImplementation(() => snappedRange);
 
