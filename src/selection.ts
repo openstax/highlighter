@@ -1,7 +1,7 @@
 import dom from './dom';
 
 const isIframe = (node: Node) => node.nodeName === 'IFRAME';
-const isFirstImgOnPage = (node: Node) => node.nodeName === 'IMG';
+const isImg = (node: Node) => node.nodeName === 'IMG';
 
 export const cleanSelection = (selection: Selection): Selection => {
   const anchor = selection.anchorNode;
@@ -68,7 +68,7 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
     return;
   }
 
-  if (isFirstImgOnPage(range.startContainer) && range.startContainer.parentNode) {
+  if (isImg(range.startContainer) && range.startContainer.parentNode) {
     range.setStart(range.startContainer.parentNode, range.startOffset);
   }
 
