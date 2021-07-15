@@ -26,7 +26,7 @@ export const cleanSelection = (selection: Selection): Selection => {
   }
 
   return selection;
-}
+};
 
 export const getRange = (selection: Selection): Range => {
   if (selection.rangeCount < 1) {
