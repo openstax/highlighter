@@ -31,10 +31,13 @@ export const cleanSelection = (selection: Selection): Selection => {
   const endsOnIframe = isIframe(focus);
   const range = getRange(selection);
   const isImgAndFirstElement = isImg(range.startContainer);
+
   // if selection starts w/ iframe or an img that is the first element of the page, replace anchorNode with its parent
   const newAnchor = (beginsOnIframe || isImgAndFirstElement) && anchorParent ? anchorParent : anchor;
+  
   // if selection ends on an iframe, replace focusNode with its parent
   const newFocus = endsOnIframe && focusParent ? focusParent : focus;
+  
   // if selection ends on an iframe, add 1 char to focus offset
   const newFocusOffset = endsOnIframe && focusParent ? selection.focusOffset + 1 : selection.focusOffset;
 
