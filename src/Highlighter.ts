@@ -4,7 +4,7 @@ import Highlight, { FOCUS_CSS, IHighlightData, IOptions as HighlightOptions } fr
 import injectHighlightWrappers, { DATA_ATTR, DATA_ID_ATTR, DATA_SCREEN_READERS_ATTR } from './injectHighlightWrappers';
 import { rangeContentsString } from './rangeContents';
 import removeHighlightWrappers from './removeHighlightWrappers';
-import { getRange, snapSelection } from './selection';
+import { cleanSelection, getRange, snapSelection } from './selection';
 import SerializedHighlight from './SerializedHighlight';
 
 export const ON_SELECT_DELAY = 300;
@@ -144,8 +144,6 @@ export default class Highlighter {
     return this.container.ownerDocument;
   }
 
-  private isIframe = (node: Node) => node.nodeName === 'IFRAME';
-
   private snapSelection = () => {
     const selection = this.document.getSelection();
 
@@ -153,24 +151,7 @@ export default class Highlighter {
       return;
     }
 
-    const anchor = selection.anchorNode;
-    const focus = selection.focusNode;
-
-    if (anchor && focus) {
-      const anchorParent = anchor.parentNode;
-      const focusParent = focus.parentNode;
-
-      // if selection begins on but doesn't end on iframe
-      if (this.isIframe(anchor) && anchorParent && !this.isIframe(focus)) {
-        selection.setBaseAndExtent(anchorParent, selection.anchorOffset, focus, selection.focusOffset);
-      }
-
-      // if selection ends on iframe
-      if (this.isIframe(focus) && focusParent) {
-        const newAnchor = this.isIframe(anchor) && anchorParent ? anchorParent : anchor;
-        selection.setBaseAndExtent(newAnchor, selection.anchorOffset, focusParent, selection.focusOffset + 1);
-      }
-    }
+    cleanSelection(selection);
 
     return snapSelection(selection, this.options);
   }

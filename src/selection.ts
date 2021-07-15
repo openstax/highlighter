@@ -1,5 +1,33 @@
 import dom from './dom';
 
+const isIframe = (node: Node) => node.nodeName === 'IFRAME';
+const isFirstImgOnPage = (node: Node) => node.nodeName === 'IMG';
+
+export const cleanSelection = (selection: Selection): Selection => {
+  const anchor = selection.anchorNode;
+  const focus = selection.focusNode;
+
+  if (!anchor || !focus) {
+    return selection;
+  }
+
+  const anchorParent = anchor.parentNode;
+  const focusParent = focus.parentNode;
+  const beginsOnIframe = isIframe(anchor);
+  const endsOnIframe = isIframe(focus);
+
+  if (beginsOnIframe && anchorParent && !endsOnIframe) {
+    selection.setBaseAndExtent(anchorParent, selection.anchorOffset, focus, selection.focusOffset);
+  }
+
+  if (endsOnIframe && focusParent) {
+    const newAnchor = beginsOnIframe && anchorParent ? anchorParent : anchor;
+    selection.setBaseAndExtent(newAnchor, selection.anchorOffset, focusParent, selection.focusOffset + 1);
+  }
+
+  return selection;
+}
+
 export const getRange = (selection: Selection): Range => {
   if (selection.rangeCount < 1) {
     throw new Error('selection had no ranges');
@@ -38,6 +66,10 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
 
   if (!range) {
     return;
+  }
+
+  if (isFirstImgOnPage(range.startContainer) && range.startContainer.parentNode) {
+    range.setStart(range.startContainer.parentNode, range.startOffset);
   }
 
   if (options.snapTableRows) {
@@ -83,10 +115,12 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
 
     const shouldGobbleBackward = () => {
       return range.startContainer.textContent &&
+        range.startOffset < range.startContainer.textContent.length &&
         shouldGobbleCharacter(range.startContainer.textContent, range.startOffset - 1);
     };
     const shouldGobbleForward = () => {
       return range.endContainer.textContent &&
+        range.endOffset > 0 &&
         shouldGobbleCharacter(range.endContainer.textContent, range.endOffset);
     };
     const gobbleBackward = () => {
@@ -95,14 +129,12 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
     const gobbleForward = () => {
       range.setEnd(range.endContainer, range.endOffset + 1);
     };
-    // only snap backward if start offset lands within startContainer
-    if (range.startContainer.nodeName === '#text' && range.startContainer.textContent && range.startOffset < range.startContainer.textContent.length) {
+    if (range.startContainer.nodeName === '#text') {
       while (shouldGobbleBackward()) {
         gobbleBackward();
       }
     }
-    // only snap forward if end offset lands within endContainer
-    if (range.endContainer.nodeName === '#text' && range.endOffset > 0) {
+    if (range.endContainer.nodeName === '#text') {
       while (shouldGobbleForward()) {
         gobbleForward();
       }
