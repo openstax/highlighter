@@ -3,31 +3,6 @@ import dom from './dom';
 const isIframe = (node: Node) => node.nodeName === 'IFRAME';
 const isImg = (node: Node) => node.nodeName === 'IMG';
 
-export const cleanSelection = (selection: Selection): Selection => {
-  const anchor = selection.anchorNode;
-  const focus = selection.focusNode;
-
-  if (!anchor || !focus) {
-    return selection;
-  }
-
-  const anchorParent = anchor.parentNode;
-  const focusParent = focus.parentNode;
-  const beginsOnIframe = isIframe(anchor);
-  const endsOnIframe = isIframe(focus);
-
-  if (beginsOnIframe && anchorParent && !endsOnIframe) {
-    selection.setBaseAndExtent(anchorParent, selection.anchorOffset, focus, selection.focusOffset);
-  }
-
-  if (endsOnIframe && focusParent) {
-    const newAnchor = beginsOnIframe && anchorParent ? anchorParent : anchor;
-    selection.setBaseAndExtent(newAnchor, selection.anchorOffset, focusParent, selection.focusOffset + 1);
-  }
-
-  return selection;
-};
-
 export const getRange = (selection: Selection): Range => {
   if (selection.rangeCount < 1) {
     throw new Error('selection had no ranges');
@@ -40,6 +15,32 @@ export const getRange = (selection: Selection): Range => {
   range.setEnd(endRange.endContainer, endRange.endOffset);
 
   return range;
+};
+
+export const cleanSelection = (selection: Selection): Selection => {
+  const anchor = selection.anchorNode;
+  const focus = selection.focusNode;
+
+  if (!anchor || !focus) {
+    return selection;
+  }
+
+  const anchorParent = anchor.parentNode;
+  const focusParent = focus.parentNode;
+  const beginsOnIframe = isIframe(anchor);
+  const endsOnIframe = isIframe(focus);
+  const range = getRange(selection);
+  const isImgAndFirstElement = isImg(range.startContainer);
+  // if selection starts w/ iframe or an img that is the first element of the page, replace anchorNode with its parent
+  const newAnchor = (beginsOnIframe || isImgAndFirstElement) && anchorParent ? anchorParent : anchor;
+  // if selection ends on an iframe, replace focusNode with its parent
+  const newFocus = endsOnIframe && focusParent ? focusParent : focus;
+  // if selection ends on an iframe, add 1 char to focus offset
+  const newFocusOffset = endsOnIframe && focusParent ? selection.focusOffset + 1 : selection.focusOffset;
+
+  selection.setBaseAndExtent(newAnchor, selection.anchorOffset, newFocus, newFocusOffset)
+
+  return selection;
 };
 
 const getDirection = (selection: Selection): 'forward' | 'backward' => {
@@ -66,10 +67,6 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
 
   if (!range) {
     return;
-  }
-
-  if (isImg(range.startContainer) && range.startContainer.parentNode) {
-    range.setStart(range.startContainer.parentNode, range.startOffset);
   }
 
   if (options.snapTableRows) {
@@ -115,11 +112,13 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
 
     const shouldGobbleBackward = () => {
       return range.startContainer.textContent &&
+        // ensure range of selection overlaps with startContainer before gobbling
         range.startOffset < range.startContainer.textContent.length &&
         shouldGobbleCharacter(range.startContainer.textContent, range.startOffset - 1);
     };
     const shouldGobbleForward = () => {
       return range.endContainer.textContent &&
+        // ensure range of selection overlaps with endContainer before gobbling
         range.endOffset > 0 &&
         shouldGobbleCharacter(range.endContainer.textContent, range.endOffset);
     };
