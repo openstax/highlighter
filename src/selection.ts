@@ -27,7 +27,7 @@ export const cleanSelection = (selection: Selection): Selection => {
 
   const range = getRange(selection);
 
-  // if selection starts w/ iframe or an img that is the first element of the page, replace anchorNode with its parent
+  // if selection starts w/ iframe or range startContainer is an img, replace anchorNode with its parent
   // fixes firefox behavior that prevented starting highlights on iframes or images without previous siblings
   const newAnchor = (isIframe(anchor) || isImg(range.startContainer)) && anchor.parentNode ? anchor.parentNode : anchor;
 
