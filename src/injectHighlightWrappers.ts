@@ -249,7 +249,7 @@ function refineRangeBoundaries(range: Range) {
     }
   } else if (range.startOffset < startContainer.childNodes.length) {
     startContainer = startContainer.childNodes.item(range.startOffset);
-  } else {
+  } else if (startContainer.nextSibling) {
     startContainer = startContainer.nextSibling as Node;
   }
 
