@@ -167,6 +167,7 @@ describe('onSelect', () => {
     Object.defineProperty(inputSelection, 'anchorNode', {value: node});
     Object.defineProperty(inputSelection, 'focusNode', {value: node});
 
+    inputSelection.setBaseAndExtent = jest.fn(() => inputSelection);
     inputSelection.getRangeAt = jest.fn(() => selectionRange);
     snapSelectionSpy.mockImplementation(() => snappedRange);
 
