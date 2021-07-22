@@ -257,7 +257,6 @@ function refineRangeBoundaries(range: Range) {
     startContainer = startContainer.nextSibling as Node;
   }
 
-
   // BEGIN this might not be necessary, test removing it
   const getMath = (node: Node) => {
     const mathjax = dom(node).farthest('.MathJax');
