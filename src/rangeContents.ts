@@ -52,9 +52,9 @@ export const cloneRangeContents = (range: Range): DocumentFragment => {
 };
 
 function cloneForRange(element: Node, range: Range, foundStart: boolean = false) {
-  const isStart = (node: Node) => (node.parentElement === range.startContainer || node === range.startContainer)
+  const isStart = (node: Node) => node.parentElement === range.startContainer
     && Array.prototype.indexOf.call(range.startContainer.childNodes, node) === range.startOffset;
-  const isEnd = (node: Node) => (node.parentElement === range.endContainer || node === range.endContainer)
+  const isEnd = (node: Node) => node.parentElement === range.endContainer
     && Array.prototype.indexOf.call(range.endContainer.childNodes, node) === range.endOffset;
 
   const result = element.cloneNode();
