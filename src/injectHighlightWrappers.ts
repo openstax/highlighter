@@ -170,12 +170,14 @@ function highlightRange(range: Range, wrapper: HTMLElement) {
   const highlightNode = (node: HTMLElement) => {
     wrapperClone = wrapper.cloneNode(true) as HTMLElement;
     wrapperClone.setAttribute(DATA_ATTR, 'true');
+
     highlight = dom(node).wrap(wrapperClone);
     highlights.push(highlight);
   };
 
   do {
     if (!node) { done = true; }
+
     if (dom(node).matches(ALLOWED_ELEMENTS)) {
       highlightNode(node as HTMLElement);
       goDeeper = false;
@@ -195,7 +197,6 @@ function highlightRange(range: Range, wrapper: HTMLElement) {
     if ((node as HTMLElement).tagName && IGNORE_TAGS.indexOf((node as HTMLElement).tagName) > -1) {
 
       if (endContainer.parentNode === node) {
-
         done = true;
       }
       goDeeper = false;
@@ -225,8 +226,7 @@ function refineRangeBoundaries(range: Range) {
     ancestor = range.commonAncestorContainer,
     goDeeper = true,
     startsOnIframe = range.startContainer.nodeName === 'IFRAME',
-    endsOnIframe = range.endContainer.nodeName === 'IFRAME'
-    ;
+    endsOnIframe = range.endContainer.nodeName === 'IFRAME';
 
   if (range.endOffset === 0) {
     while (!endContainer.previousSibling && endContainer.parentNode !== ancestor) {

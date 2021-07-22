@@ -72,7 +72,6 @@ function cloneForRange(element: Node, range: Range, foundStart: boolean = false)
   } else {
     let node: Node | null = element.firstChild;
     let foundEnd;
-    // element.firstChild.nodeValue === '<!-- no-selfclose -->'
 
     while (node && !isEnd(node) && !foundEnd) {
       foundStart = foundStart || isStart(node);
