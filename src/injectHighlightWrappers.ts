@@ -235,7 +235,7 @@ function refineRangeBoundaries(range: Range) {
     if (range.endOffset < endContainer.nodeValue!.length) {
       (endContainer as Text).splitText(range.endOffset);
     }
-  } else if (range.endOffset > 0 && range.endContainer.nodeName !== 'IFRAME') {
+  } else if (range.endOffset > 0 && !dom(endContainer).matches('iframe')) {
     // ranges ending in an iframe (observed in firefox) should not update their endContainer
     // otherwise the <!-- no-selfclose --> comment will be assigned causing a bug in the hilite wrapper
     endContainer = endContainer.childNodes.item(range.endOffset - 1);
@@ -249,13 +249,14 @@ function refineRangeBoundaries(range: Range) {
         endContainer = startContainer;
       }
     }
-  } else if (range.startOffset < startContainer.childNodes.length && range.startContainer.nodeName !== 'IFRAME') {
+  } else if (range.startOffset < startContainer.childNodes.length && !dom(startContainer).matches('iframe')) {
     // ranges starting with an iframe (observed in firefox) should not update their startContainer
     // otherwise the <!-- no-selfclose --> comment will be assigned causing a bug in the hilite wrapper
     startContainer = startContainer.childNodes.item(range.startOffset);
-  } else if (range.startContainer.nodeName !== 'IFRAME') {
+  } else if (startContainer.nextSibling) {
     startContainer = startContainer.nextSibling as Node;
   }
+
 
   // BEGIN this might not be necessary, test removing it
   const getMath = (node: Node) => {
