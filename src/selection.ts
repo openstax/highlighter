@@ -1,7 +1,7 @@
 import dom from './dom';
 
-const isIframe = (node: Node) => node && node.nodeName === 'IFRAME';
-const isImg = (node: Node) => node && node.nodeName === 'IMG';
+// const isIframe = (node: Node) => node && node.nodeName === 'IFRAME';
+// const isImg = (node: Node) => node && node.nodeName === 'IMG';
 
 export const getRange = (selection: Selection): Range => {
   if (selection.rangeCount < 1) {
@@ -25,21 +25,21 @@ export const cleanSelection = (selection: Selection): Selection => {
     return selection;
   }
 
-  const range = getRange(selection);
+  // const range = getRange(selection);
 
   // if selection starts w/ iframe or range startContainer is an img, replace anchorNode with its parent
   // fixes firefox behavior that prevented starting highlights on iframes or images without previous siblings
-  const newAnchor = (isIframe(anchor) || isImg(range.startContainer)) && anchor.parentNode ? anchor.parentNode : anchor;
+  // const newAnchor = (isIframe(anchor) || isImg(range.startContainer)) && anchor.parentNode ? anchor.parentNode : anchor;
 
   // if selection ends on an iframe, replace focusNode with its parent
   // fixes firefox behavior that prevented ending highlights on iframes
-  const newFocus = isIframe(focus) && focus.parentNode ? focus.parentNode : focus;
+  // const newFocus = isIframe(focus) && focus.parentNode ? focus.parentNode : focus;
 
   // if selection ends on an iframe, add 1 char to focus offset
   // fixes firefox behavior that prevented ending highlights on iframes
-  const newFocusOffset = isIframe(focus) && focus.parentNode ? selection.focusOffset + 1 : selection.focusOffset;
+  // const newFocusOffset = isIframe(focus) && focus.parentNode ? selection.focusOffset + 1 : selection.focusOffset;
 
-  selection.setBaseAndExtent(newAnchor, selection.anchorOffset, newFocus, newFocusOffset);
+  // selection.setBaseAndExtent(newAnchor, selection.anchorOffset, newFocus, newFocusOffset);
 
   return selection;
 };

@@ -37,6 +37,8 @@ export const cloneRangeContents = (range: Range): DocumentFragment => {
       return range.commonAncestorContainer.parentNode;
     } else if (tableTags.indexOf(range.commonAncestorContainer.nodeName) > -1) {
       return dom(range.commonAncestorContainer).closest('table').parentNode;
+    } else if (range.commonAncestorContainer.nodeName === 'IFRAME' && range.commonAncestorContainer.parentNode) {
+      return range.commonAncestorContainer.parentNode.parentNode;
     } else {
       return range.commonAncestorContainer;
     }
@@ -50,9 +52,9 @@ export const cloneRangeContents = (range: Range): DocumentFragment => {
 };
 
 function cloneForRange(element: Node, range: Range, foundStart: boolean = false) {
-  const isStart = (node: Node) => node.parentElement === range.startContainer
+  const isStart = (node: Node) => (node.parentElement === range.startContainer || node === range.startContainer)
     && Array.prototype.indexOf.call(range.startContainer.childNodes, node) === range.startOffset;
-  const isEnd = (node: Node) => node.parentElement === range.endContainer
+  const isEnd = (node: Node) => (node.parentElement === range.endContainer || node === range.endContainer)
     && Array.prototype.indexOf.call(range.endContainer.childNodes, node) === range.endOffset;
 
   const result = element.cloneNode();
@@ -70,6 +72,7 @@ function cloneForRange(element: Node, range: Range, foundStart: boolean = false)
   } else {
     let node: Node | null = element.firstChild;
     let foundEnd;
+    // element.firstChild.nodeValue === '<!-- no-selfclose -->'
 
     while (node && !isEnd(node) && !foundEnd) {
       foundStart = foundStart || isStart(node);
