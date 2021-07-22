@@ -4,7 +4,7 @@ import Highlight, { FOCUS_CSS, IHighlightData, IOptions as HighlightOptions } fr
 import injectHighlightWrappers, { DATA_ATTR, DATA_ID_ATTR, DATA_SCREEN_READERS_ATTR } from './injectHighlightWrappers';
 import { rangeContentsString } from './rangeContents';
 import removeHighlightWrappers from './removeHighlightWrappers';
-import { cleanSelection, getRange, snapSelection } from './selection';
+import { getRange, snapSelection } from './selection';
 import SerializedHighlight from './SerializedHighlight';
 
 export const ON_SELECT_DELAY = 300;
