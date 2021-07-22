@@ -224,9 +224,7 @@ function refineRangeBoundaries(range: Range) {
   let startContainer = range.startContainer,
     endContainer = range.endContainer,
     ancestor = range.commonAncestorContainer,
-    goDeeper = true,
-    startsOnIframe = range.startContainer.nodeName === 'IFRAME',
-    endsOnIframe = range.endContainer.nodeName === 'IFRAME';
+    goDeeper = true;
 
   if (range.endOffset === 0) {
     while (!endContainer.previousSibling && endContainer.parentNode !== ancestor) {
@@ -237,7 +235,7 @@ function refineRangeBoundaries(range: Range) {
     if (range.endOffset < endContainer.nodeValue!.length) {
       (endContainer as Text).splitText(range.endOffset);
     }
-  } else if (range.endOffset > 0 && !endsOnIframe) {
+  } else if (range.endOffset > 0 && range.endContainer.nodeName !== 'IFRAME') {
     endContainer = endContainer.childNodes.item(range.endOffset - 1);
   }
   if (startContainer.nodeType === NODE_TYPE.TEXT_NODE) {
@@ -249,9 +247,9 @@ function refineRangeBoundaries(range: Range) {
         endContainer = startContainer;
       }
     }
-  } else if (range.startOffset < startContainer.childNodes.length && !startsOnIframe) {
+  } else if (range.startOffset < startContainer.childNodes.length && range.startContainer.nodeName !== 'IFRAME') {
     startContainer = startContainer.childNodes.item(range.startOffset);
-  } else if (!startsOnIframe) {
+  } else if (range.startContainer.nodeName !== 'IFRAME') {
     startContainer = startContainer.nextSibling as Node;
   }
 
