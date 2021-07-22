@@ -253,7 +253,7 @@ function refineRangeBoundaries(range: Range) {
     // ranges starting with an iframe (observed in firefox) should not update their startContainer
     // otherwise the <!-- no-selfclose --> comment will be assigned causing a bug in the hilite wrapper
     startContainer = startContainer.childNodes.item(range.startOffset);
-  } else if (startContainer.nextSibling) {
+  } else {
     startContainer = startContainer.nextSibling as Node;
   }
 
