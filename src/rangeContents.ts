@@ -37,8 +37,6 @@ export const cloneRangeContents = (range: Range): DocumentFragment => {
       return range.commonAncestorContainer.parentNode;
     } else if (tableTags.indexOf(range.commonAncestorContainer.nodeName) > -1) {
       return dom(range.commonAncestorContainer).closest('table').parentNode;
-    } else if (range.commonAncestorContainer.nodeName === 'IFRAME' && range.commonAncestorContainer.parentNode) {
-      return range.commonAncestorContainer.parentNode.parentNode;
     } else {
       return range.commonAncestorContainer;
     }

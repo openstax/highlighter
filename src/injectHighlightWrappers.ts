@@ -236,6 +236,8 @@ function refineRangeBoundaries(range: Range) {
       (endContainer as Text).splitText(range.endOffset);
     }
   } else if (range.endOffset > 0 && range.endContainer.nodeName !== 'IFRAME') {
+    // ranges ending in an iframe (observed in firefox) should not update their endContainer
+    // otherwise the <!-- no-selfclose --> comment will be assigned causing a bug in the hilite wrapper
     endContainer = endContainer.childNodes.item(range.endOffset - 1);
   }
   if (startContainer.nodeType === NODE_TYPE.TEXT_NODE) {
@@ -248,10 +250,13 @@ function refineRangeBoundaries(range: Range) {
       }
     }
   } else if (range.startOffset < startContainer.childNodes.length && range.startContainer.nodeName !== 'IFRAME') {
+    // ranges starting with an iframe (observed in firefox) should not update their startContainer
+    // otherwise the <!-- no-selfclose --> comment will be assigned causing a bug in the hilite wrapper
     startContainer = startContainer.childNodes.item(range.startOffset);
   } else if (range.startContainer.nodeName !== 'IFRAME') {
     startContainer = startContainer.nextSibling as Node;
   }
+
 
   // BEGIN this might not be necessary, test removing it
   const getMath = (node: Node) => {
