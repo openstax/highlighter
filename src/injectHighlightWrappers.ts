@@ -251,7 +251,7 @@ function refineRangeBoundaries(range: Range) {
       }
     }
   } else if (range.startOffset < startContainer.childNodes.length && !dom(startContainer).matches('iframe')) {
-    // ranges ending in an iframe (observed in firefox) should not update their endContainer
+    // ranges ending in an iframe (observed in firefox) should not update their startContainer
     // otherwise a child of the iframe such as the <!-- no-selfclose --> comment will be assigned
     // this will prevent the highlight from being generated correctly in highlightRange()
     startContainer = startContainer.childNodes.item(range.startOffset);
