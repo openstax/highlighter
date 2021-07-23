@@ -237,7 +237,8 @@ function refineRangeBoundaries(range: Range) {
     }
   } else if (range.endOffset > 0 && !dom(endContainer).matches('iframe')) {
     // ranges ending in an iframe (observed in firefox) should not update their endContainer
-    // otherwise the <!-- no-selfclose --> comment will be assigned causing a bug in the hilite wrapper
+    // otherwise a child of the iframe such as the <!-- no-selfclose --> comment will be assigned
+    // this will prevent the highlight from being generated correctly in highlightRange()
     endContainer = endContainer.childNodes.item(range.endOffset - 1);
   }
   if (startContainer.nodeType === NODE_TYPE.TEXT_NODE) {
@@ -250,8 +251,9 @@ function refineRangeBoundaries(range: Range) {
       }
     }
   } else if (range.startOffset < startContainer.childNodes.length && !dom(startContainer).matches('iframe')) {
-    // ranges starting with an iframe (observed in firefox) should not update their startContainer
-    // otherwise the <!-- no-selfclose --> comment will be assigned causing a bug in the hilite wrapper
+    // ranges ending in an iframe (observed in firefox) should not update their endContainer
+    // otherwise a child of the iframe such as the <!-- no-selfclose --> comment will be assigned
+    // this will prevent the highlight from being generated correctly in highlightRange()
     startContainer = startContainer.childNodes.item(range.startOffset);
   } else {
     startContainer = startContainer.nextSibling as Node;
