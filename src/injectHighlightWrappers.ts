@@ -204,7 +204,7 @@ function highlightRange(range: Range, wrapper: HTMLElement) {
     if (goDeeper && node.hasChildNodes()) {
       node = node.firstChild as HTMLElement;
     } else if (!goDeeper && node.contains(endContainer)) {
-      // fixes a bug preventing highlights from starting/ending on an iframe in firefox
+      // fixes a bug preventing display of highlights ending on an iframe in firefox
       done = true;
     } else if (node.nextSibling) {
       node = node.nextSibling;
