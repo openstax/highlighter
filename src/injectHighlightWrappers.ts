@@ -21,6 +21,13 @@ const IGNORE_TAGS = [
   'AUDIO', 'CANVAS', 'EMBED', 'PARAM', 'METER', 'PROGRESS',
 ];
 /**
+ * Don't higlight content of children of these tags.
+ * @type {string[]}
+ */
+ const IGNORE_CHILDREN_TAGS = [
+  'IFRAME',
+];
+/**
  * Highlights can be created around these block and text elements.
  */
 const BLOCK_ELEMENTS = ['img', 'iframe'];
@@ -235,7 +242,7 @@ function refineRangeBoundaries(range: Range) {
     if (range.endOffset < endContainer.nodeValue!.length) {
       (endContainer as Text).splitText(range.endOffset);
     }
-  } else if (range.endOffset > 0 && !dom(endContainer).matches('iframe')) {
+  } else if (range.endOffset > 0 && IGNORE_CHILDREN_TAGS.indexOf((endContainer as HTMLElement).tagName) === -1) {
     // ranges ending in an iframe (observed in firefox) should not update their endContainer
     // otherwise a child of the iframe such as the <!-- no-selfclose --> comment will be assigned
     // this will prevent the highlight from being generated correctly in highlightRange()
@@ -250,7 +257,7 @@ function refineRangeBoundaries(range: Range) {
         endContainer = startContainer;
       }
     }
-  } else if (range.startOffset < startContainer.childNodes.length && !dom(startContainer).matches('iframe')) {
+  } else if (range.startOffset < startContainer.childNodes.length && IGNORE_CHILDREN_TAGS.indexOf((startContainer as HTMLElement).tagName) === -1) {
     // ranges ending in an iframe (observed in firefox) should not update their startContainer
     // otherwise a child of the iframe such as the <!-- no-selfclose --> comment will be assigned
     // this will prevent the highlight from being generated correctly in highlightRange()
