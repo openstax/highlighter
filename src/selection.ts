@@ -83,10 +83,16 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
 
     const shouldGobbleBackward = () => {
       return range.startContainer.textContent &&
+        // ensure range of selection overlaps with startContainer before gobbling
+        // fixes firefox behavior that prevented starting highlights on images
+        range.startOffset < range.startContainer.textContent.length &&
         shouldGobbleCharacter(range.startContainer.textContent, range.startOffset - 1);
     };
     const shouldGobbleForward = () => {
       return range.endContainer.textContent &&
+        // ensure range of selection overlaps with endContainer before gobbling
+        // fixes firefox behavior that prevented ending highlights on images
+        range.endOffset > 0 &&
         shouldGobbleCharacter(range.endContainer.textContent, range.endOffset);
     };
     const gobbleBackward = () => {
