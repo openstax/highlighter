@@ -177,7 +177,6 @@ function highlightRange(range: Range, wrapper: HTMLElement) {
 
   do {
     if (!node) { done = true; }
-    console.log('loop begins with: ', node, endContainer)
 
     if (dom(node).matches(ALLOWED_ELEMENTS)) {
       highlightNode(node as HTMLElement);
