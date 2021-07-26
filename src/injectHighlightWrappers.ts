@@ -21,13 +21,6 @@ const IGNORE_TAGS = [
   'AUDIO', 'CANVAS', 'EMBED', 'PARAM', 'METER', 'PROGRESS',
 ];
 /**
- * Don't higlight content of children of these tags.
- * @type {string[]}
- */
- const IGNORE_CHILDREN_TAGS = [
-  'IFRAME',
-];
-/**
  * Highlights can be created around these block and text elements.
  */
 const BLOCK_ELEMENTS = ['img', 'iframe'];
@@ -184,6 +177,7 @@ function highlightRange(range: Range, wrapper: HTMLElement) {
 
   do {
     if (!node) { done = true; }
+    console.log('loop begins with: ', node, endContainer)
 
     if (dom(node).matches(ALLOWED_ELEMENTS)) {
       highlightNode(node as HTMLElement);
@@ -210,6 +204,9 @@ function highlightRange(range: Range, wrapper: HTMLElement) {
     }
     if (goDeeper && node.hasChildNodes()) {
       node = node.firstChild as HTMLElement;
+    } else if (!goDeeper && node.contains(endContainer)) {
+      // fixes a bug preventing highlights from starting/ending on an iframe in firefox
+      done = true;
     } else if (node.nextSibling) {
       node = node.nextSibling;
       goDeeper = true;
@@ -242,10 +239,7 @@ function refineRangeBoundaries(range: Range) {
     if (range.endOffset < endContainer.nodeValue!.length) {
       (endContainer as Text).splitText(range.endOffset);
     }
-  } else if (range.endOffset > 0 && IGNORE_CHILDREN_TAGS.indexOf((endContainer as HTMLElement).tagName) === -1) {
-    // ranges ending in an iframe (observed in firefox) should not update their endContainer
-    // otherwise a child of the iframe such as the <!-- no-selfclose --> comment will be assigned
-    // this will prevent the highlight from being generated correctly in highlightRange()
+  } else if (range.endOffset > 0) {
     endContainer = endContainer.childNodes.item(range.endOffset - 1);
   }
   if (startContainer.nodeType === NODE_TYPE.TEXT_NODE) {
@@ -257,10 +251,7 @@ function refineRangeBoundaries(range: Range) {
         endContainer = startContainer;
       }
     }
-  } else if (range.startOffset < startContainer.childNodes.length && IGNORE_CHILDREN_TAGS.indexOf((startContainer as HTMLElement).tagName) === -1) {
-    // ranges ending in an iframe (observed in firefox) should not update their startContainer
-    // otherwise a child of the iframe such as the <!-- no-selfclose --> comment will be assigned
-    // this will prevent the highlight from being generated correctly in highlightRange()
+  } else if (range.startOffset < startContainer.childNodes.length) {
     startContainer = startContainer.childNodes.item(range.startOffset);
   } else if (startContainer.nextSibling) {
     startContainer = startContainer.nextSibling as Node;
