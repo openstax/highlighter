@@ -262,7 +262,7 @@ function refineRangeBoundaries(range: Range) {
     // otherwise a child of the iframe such as the <!-- no-selfclose --> comment will be assigned
     // this will prevent the highlight from being generated correctly in highlightRange()
     startContainer = startContainer.childNodes.item(range.startOffset);
-  } else {
+  } else if (startContainer.nextSibling) {
     startContainer = startContainer.nextSibling as Node;
   }
 

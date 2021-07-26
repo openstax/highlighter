@@ -142,6 +142,7 @@ describe('onSelect', () => {
 
     container.appendChild(node);
 
+    window.matchMedia = () => ({ matches: false }) as any; // doesnt match touch device media query
     const spyDebounce = jest.spyOn(lodash, 'debounce')
       .mockImplementation((fn: any) => fn);
 
@@ -197,6 +198,7 @@ describe('onSelect', () => {
 
     container.appendChild(node);
 
+    window.matchMedia = () => ({ matches: false }) as any; // doesnt match touch device media query
     const spyDebounce = jest.spyOn(lodash, 'debounce')
       .mockImplementation((fn: any) => fn);
 
@@ -231,6 +233,7 @@ describe('onSelect', () => {
 
     container.appendChild(nodeInside);
 
+    window.matchMedia = () => ({ matches: false }) as any; // doesnt match touch device media query
     const spyDebounce = jest.spyOn(lodash, 'debounce')
       .mockImplementation((fn: any) => fn);
 
@@ -248,6 +251,46 @@ describe('onSelect', () => {
     expect(spyOnSelect).not.toHaveBeenCalled();
 
     getSelectionSpy.mockImplementation(() => ({ isCollapsed: false, anchorNode: nodeInside, focusNode: nodeOutside }));
+
+    expect(spyOnSelect).not.toHaveBeenCalled();
+  });
+
+  it('noops on selectionchange event for touch devices', () => {
+    const spyOnSelect = jest.fn();
+
+    const container = document.createElement('div');
+    const node = document.createElement('div');
+    const inputSelection = new Selection();
+    const selectionRange = new Range();
+
+    selectionRange.setStart(node, 0);
+    selectionRange.setEnd(node, 5);
+
+    selectionRange.setStart(node, 0);
+    selectionRange.setEnd(node, 5);
+
+    Object.defineProperty(inputSelection, 'isCollapsed', {value: false});
+    Object.defineProperty(inputSelection, 'anchorNode', {value: node});
+    Object.defineProperty(inputSelection, 'focusNode', {value: node});
+
+    inputSelection.getRangeAt = jest.fn(() => selectionRange);
+
+    container.appendChild(node);
+
+    window.matchMedia = () => ({ matches: true }) as any; // matches touch device media query
+    const spyDebounce = jest.spyOn(lodash, 'debounce')
+      .mockImplementation((fn: any) => fn);
+
+    // tslint:disable-next-line no-unused-expression
+    new Highlighter(container, {onSelect: spyOnSelect, formatMessage: jest.fn()});
+
+    expect(spyDebounce).toHaveBeenCalled();
+
+    getSelectionSpy.mockImplementation(() => inputSelection);
+
+    const e = document.createEvent('Event');
+    e.initEvent('selectionchange', true, true);
+    document.dispatchEvent(e);
 
     expect(spyOnSelect).not.toHaveBeenCalled();
   });
