@@ -203,6 +203,11 @@ function highlightRange(range: Range, wrapper: HTMLElement) {
     }
     if (goDeeper && node.hasChildNodes()) {
       node = node.firstChild as HTMLElement;
+    } else if (!goDeeper && node.contains(endContainer)) {
+      // stops traversing of tree if endContainer is a descendent of current allowed node
+      // this prevents a bug where the highlighter breaks out of its bounds and scans the remainder of the page
+      // (happens when firefox sets the comment inside an iframe as endcontainer)
+      done = true;
     } else if (node.nextSibling) {
       node = node.nextSibling;
       goDeeper = true;
