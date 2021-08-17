@@ -33,6 +33,10 @@ interface IOptions {
   className?: string;
 }
 
+const isEmptyTextNode = (node: Node) => {
+  return node.nodeType === NODE_TYPE.TEXT_NODE && node.textContent && !node.textContent.trim().length;
+}
+
 export default function injectHighlightWrappers(highlight: Highlight, options: IOptions = {}) {
   const wrapper = createWrapper({
     id: highlight.id,
@@ -235,7 +239,11 @@ function refineRangeBoundaries(range: Range) {
     while (!endContainer.previousSibling && endContainer.parentNode !== ancestor) {
       endContainer = endContainer.parentNode as HTMLElement;
     }
-    endContainer = endContainer.previousSibling as HTMLElement;
+    // use previous sibling for end container unless it is a text node with only whitespace
+    // otherwise highlights ending on an img in firefox may not display correctly due to extra text nodes around img element
+    if (endContainer.previousSibling && !isEmptyTextNode(endContainer.previousSibling)) {
+      endContainer = endContainer.previousSibling as HTMLElement;
+    }
   } else if (endContainer.nodeType === NODE_TYPE.TEXT_NODE) {
     if (range.endOffset < endContainer.nodeValue!.length) {
       (endContainer as Text).splitText(range.endOffset);
