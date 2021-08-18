@@ -171,6 +171,9 @@ function highlightRange(range: Range, wrapper: HTMLElement) {
     highlight,
     wrapperClone;
 
+  console.log('start container: ', startContainer);
+  console.log('end container: ', endContainer);
+
   const highlightNode = (node: HTMLElement) => {
     wrapperClone = wrapper.cloneNode(true) as HTMLElement;
     wrapperClone.setAttribute(DATA_ATTR, 'true');
@@ -262,7 +265,9 @@ function refineRangeBoundaries(range: Range) {
     }
   } else if (range.startOffset < startContainer.childNodes.length) {
     startContainer = startContainer.childNodes.item(range.startOffset);
-  } else if (startContainer.nextSibling) {
+    // use next sibling for start container unless it is a text node with only whitespace
+    // otherwise highlights starting on an img in firefox may not display correctly due to extra text nodes around img element
+  } else if (startContainer.nextSibling && !isEmptyTextNode(startContainer.nextSibling)) {
     startContainer = startContainer.nextSibling as Node;
   }
 
