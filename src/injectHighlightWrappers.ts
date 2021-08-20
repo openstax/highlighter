@@ -171,9 +171,6 @@ function highlightRange(range: Range, wrapper: HTMLElement) {
     highlight,
     wrapperClone;
 
-  console.log('start container: ', startContainer);
-  console.log('end container: ', endContainer);
-
   const highlightNode = (node: HTMLElement) => {
     wrapperClone = wrapper.cloneNode(true) as HTMLElement;
     wrapperClone.setAttribute(DATA_ATTR, 'true');
