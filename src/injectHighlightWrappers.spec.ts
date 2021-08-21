@@ -44,7 +44,8 @@ describe('inject highlight wrappers', () => {
   });
 
   describe('for highlight ending on an <img>', () => {
-    it('in chrome', () => {
+
+    it('in chrome and safari', () => {
       const range: any = {
         collapse: false,
         commonAncestorContainer: page,
@@ -87,6 +88,53 @@ describe('inject highlight wrappers', () => {
 
       expect(highlightSpans[0].innerHTML).toMatchSnapshot();
       expect(highlightSpans[1].innerHTML).toMatchSnapshot();
+    });
+  });
+
+  describe('for highlight beginning and ending on an <img>', () => {
+
+    it('in chrome', () => {
+      // const range: any = {
+      //   collapse: false,
+      //   commonAncestorContainer: page,
+      //   endContainer: img,
+      //   endOffset: 0,
+      //   setEndAfter: jest.fn(),
+      //   setStartBefore: jest.fn(),
+      //   startContainer: textNode,
+      //   startOffset: 17,
+      // };
+      // const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+
+      // injectHighlightWrappers(highlight);
+      // const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
+
+      // expect(highlightSpans[0].innerHTML).toMatchSnapshot();
+      // expect(highlightSpans[1].innerHTML).toMatchSnapshot();
+    });
+
+    it('in firefox', () => {
+      // extra whitespace in firefox
+      span.prepend('\n');
+      span.append('\n');
+
+      const range: any = {
+        collapse: false,
+        commonAncestorContainer: page,
+        endContainer: img,
+        endOffset: 0,
+        setEndAfter: jest.fn(),
+        setStartBefore: jest.fn(),
+        startContainer: textNode,
+        startOffset: textNode.nodeValue ? textNode.nodeValue.length : 0,
+      };
+
+      const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+
+      injectHighlightWrappers(highlight);
+      const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
+
+      expect(highlightSpans[0].innerHTML).toMatchSnapshot();
     });
   });
 });
