@@ -91,9 +91,21 @@ describe('inject highlight wrappers', () => {
     });
   });
 
+  describe('for highlight ending on an <img>', () => {
+
+    it('in chrome', () => {
+      //
+    });
+
+    it('in firefox', () => {
+      //
+    });
+  });
+
   describe('for highlight beginning and ending on an <img>', () => {
 
     it('in chrome', () => {
+      // need to write this one
       // const range: any = {
       //   collapse: false,
       //   commonAncestorContainer: page,
