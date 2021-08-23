@@ -230,6 +230,7 @@ function highlightRange(range: Range, wrapper: HTMLElement) {
  * @returns {object} refined boundaries and initial state of highlighting algorithm.
  */
 function refineRangeBoundaries(range: Range) {
+  console.log('range: ', range);
   let startContainer = range.startContainer,
     endContainer = range.endContainer,
     ancestor = range.commonAncestorContainer,
