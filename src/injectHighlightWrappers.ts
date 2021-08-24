@@ -33,9 +33,8 @@ interface IOptions {
   className?: string;
 }
 
-const isEmptyTextNode = (node: Node) => {
-  return node.nodeType === NODE_TYPE.TEXT_NODE && node.textContent && !node.textContent.trim().length;
-}
+const isEmptyTextNode = (node: Node) =>
+  node.nodeType === NODE_TYPE.TEXT_NODE && node.textContent && !node.textContent.trim().length;
 
 export default function injectHighlightWrappers(highlight: Highlight, options: IOptions = {}) {
   const wrapper = createWrapper({
@@ -65,7 +64,6 @@ export default function injectHighlightWrappers(highlight: Highlight, options: I
  * @param position start | end
  */
 function createAndInsertNodeForScreenReaders(highlight: Highlight, element: HTMLElement, position: 'start' | 'end'): void {
-  console.log('create: ', position, element.innerHTML)
   const node = document.createElement('span');
   node.setAttribute(DATA_SCREEN_READERS_ATTR, 'true');
   node.setAttribute(DATA_ID_ATTR, highlight.id);
@@ -231,7 +229,6 @@ function highlightRange(range: Range, wrapper: HTMLElement) {
  * @returns {object} refined boundaries and initial state of highlighting algorithm.
  */
 function refineRangeBoundaries(range: Range) {
-  // console.log('range: ', range);
   let startContainer = range.startContainer,
     endContainer = range.endContainer,
     ancestor = range.commonAncestorContainer,

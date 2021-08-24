@@ -14,7 +14,7 @@ const testHTML = `
             </span>
           </figure>
           <div class="os-caption-container">
-            <span class="os-title-label">Figure </span>
+            <span id="test-caption-title" class="os-title-label">Figure </span>
             <span class="os-number">1</span>
             <span class="os-divider"> </span>
             <span class="os-divider"> </span>
@@ -31,6 +31,7 @@ describe('inject highlight wrappers', () => {
   let p: HTMLElement;
   let textNode: Node;
   let span: HTMLElement;
+  let captionTitle: HTMLElement;
 
   const highlightData = { id: 'some-highlight', content: 'asd', style: 'yellow' };
 
@@ -41,6 +42,7 @@ describe('inject highlight wrappers', () => {
     p = document.getElementById('test-p')!;
     textNode = p.childNodes[0];
     span = document.getElementById('test-span')!;
+    captionTitle = document.getElementById('test-caption-title')!;
 
     Date.now = jest.fn();
   });
@@ -95,18 +97,54 @@ describe('inject highlight wrappers', () => {
     });
   });
 
-  describe('for highlight ending on an <img>', () => {
+  describe('for highlight starting on an <img>', () => {
 
     it('in chrome', () => {
-      //
+      const range: any = {
+        collapse: false,
+        commonAncestorContainer: page,
+        endContainer: captionTitle,
+        endOffset: 1,
+        setEndAfter: jest.fn(),
+        setStartBefore: jest.fn(),
+        startContainer: span,
+        startOffset: 0,
+      };
+
+      const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+
+      injectHighlightWrappers(highlight);
+      const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
+
+      highlightSpans.forEach((el) => {
+        expect(el).toMatchSnapshot();
+      });
     });
 
     it('in firefox', () => {
-      //
+      const range: any = {
+        collapse: false,
+        commonAncestorContainer: page,
+        endContainer: captionTitle,
+        endOffset: 6,
+        setEndAfter: jest.fn(),
+        setStartBefore: jest.fn(),
+        startContainer: textNode,
+        startOffset: textNode.nodeValue!.length,
+      };
+
+      const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+
+      injectHighlightWrappers(highlight);
+      const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
+
+      highlightSpans.forEach((el) => {
+        expect(el).toMatchSnapshot();
+      });
     });
   });
 
-  describe('for highlight beginning and ending on an <img>', () => {
+  describe('for highlight starting and ending on an <img>', () => {
 
     it('in chrome', () => {
       const range: any = {
