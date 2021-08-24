@@ -126,11 +126,11 @@ describe('inject highlight wrappers', () => {
         collapse: false,
         commonAncestorContainer: page,
         endContainer: captionTitle,
-        endOffset: 6,
+        endOffset: 1,
         setEndAfter: jest.fn(),
         setStartBefore: jest.fn(),
-        startContainer: textNode,
-        startOffset: textNode.nodeValue!.length,
+        startContainer: span,
+        startOffset: 1,
       };
 
       const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });

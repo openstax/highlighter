@@ -261,9 +261,7 @@ function refineRangeBoundaries(range: Range) {
     }
   } else if (range.startOffset < startContainer.childNodes.length) {
     startContainer = startContainer.childNodes.item(range.startOffset);
-    // use next sibling for start container unless it is a text node with only whitespace
-    // otherwise highlights starting on an img in firefox may not display correctly due to extra text nodes around img element
-  } else if (startContainer.nextSibling && !isEmptyTextNode(startContainer.nextSibling)) {
+  } else if (startContainer.nextSibling) {
     startContainer = startContainer.nextSibling as Node;
   }
 
