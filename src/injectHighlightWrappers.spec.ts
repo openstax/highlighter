@@ -13,7 +13,7 @@ const testHTML = `
               <img id="test-img" src="/apps/archive/20210713.205645/resources/b1b5ba97150addc831c534413ca324a72c4e374b" data-media-type="image/jpg" alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c" id="3">
             </span>
           </figure>
-          <div id="test-caption" class="os-caption-container">
+          <div class="os-caption-container">
             <span class="os-title-label">Figure </span>
             <span class="os-number">1</span>
             <span class="os-divider"> </span>
@@ -31,7 +31,6 @@ describe('inject highlight wrappers', () => {
   let p: HTMLElement;
   let textNode: Node;
   let span: HTMLElement;
-  let caption: HTMLElement;
 
   const highlightData = { id: 'some-highlight', content: 'asd', style: 'yellow' };
 
@@ -42,7 +41,6 @@ describe('inject highlight wrappers', () => {
     p = document.getElementById('test-p')!;
     textNode = p.childNodes[0];
     span = document.getElementById('test-span')!;
-    caption = document.getElementById('test-caption')!;
 
     Date.now = jest.fn();
   });
@@ -65,8 +63,9 @@ describe('inject highlight wrappers', () => {
       injectHighlightWrappers(highlight);
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      expect(highlightSpans[0]).toMatchSnapshot();
-      expect(highlightSpans[1]).toMatchSnapshot();
+      highlightSpans.forEach((el) => {
+        expect(el).toMatchSnapshot();
+      });
     });
 
     it('in firefox', () => {
@@ -90,8 +89,9 @@ describe('inject highlight wrappers', () => {
       injectHighlightWrappers(highlight);
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      expect(highlightSpans[0]).toMatchSnapshot();
-      expect(highlightSpans[1]).toMatchSnapshot();
+      highlightSpans.forEach((el) => {
+        expect(el).toMatchSnapshot();
+      });
     });
   });
 
@@ -112,8 +112,8 @@ describe('inject highlight wrappers', () => {
       const range: any = {
         collapse: false,
         commonAncestorContainer: page,
-        endContainer: caption,
-        endOffset: 0,
+        endContainer: span,
+        endOffset: 2,
         setEndAfter: jest.fn(),
         setStartBefore: jest.fn(),
         startContainer: span,
@@ -124,7 +124,9 @@ describe('inject highlight wrappers', () => {
       injectHighlightWrappers(highlight);
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      expect(highlightSpans[0]).toMatchSnapshot();
+      highlightSpans.forEach((el) => {
+        expect(el).toMatchSnapshot();
+      });
     });
 
     it('in firefox', () => {
@@ -148,7 +150,9 @@ describe('inject highlight wrappers', () => {
       injectHighlightWrappers(highlight);
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      expect(highlightSpans[0]).toMatchSnapshot();
+      highlightSpans.forEach((el) => {
+        expect(el).toMatchSnapshot();
+      });
     });
   });
 });

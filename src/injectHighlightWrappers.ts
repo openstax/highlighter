@@ -65,6 +65,7 @@ export default function injectHighlightWrappers(highlight: Highlight, options: I
  * @param position start | end
  */
 function createAndInsertNodeForScreenReaders(highlight: Highlight, element: HTMLElement, position: 'start' | 'end'): void {
+  console.log('create: ', position, element.innerHTML)
   const node = document.createElement('span');
   node.setAttribute(DATA_SCREEN_READERS_ATTR, 'true');
   node.setAttribute(DATA_ID_ATTR, highlight.id);
@@ -230,7 +231,7 @@ function highlightRange(range: Range, wrapper: HTMLElement) {
  * @returns {object} refined boundaries and initial state of highlighting algorithm.
  */
 function refineRangeBoundaries(range: Range) {
-  console.log('range: ', range);
+  // console.log('range: ', range);
   let startContainer = range.startContainer,
     endContainer = range.endContainer,
     ancestor = range.commonAncestorContainer,
