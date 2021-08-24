@@ -5,16 +5,7 @@ import * as injectHighlightWrappersUtils from './injectHighlightWrappers';
 import * as rangeContents from './rangeContents';
 import * as selection from './selection';
 
-export const assertDocument = (message: string = 'BUG: Document is undefined') => {
-  if (typeof(document) === 'undefined') {
-    throw new Error(message);
-  }
-
-  return document;
-};
-
 describe('Reference elements', () => {
-  const document = assertDocument();
 
   test('resolve', () => {
     document.body.innerHTML = `
