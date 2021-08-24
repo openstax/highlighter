@@ -43,6 +43,8 @@ describe('inject highlight wrappers', () => {
     textNode = p.childNodes[0];
     span = document.getElementById('test-span')!;
     caption = document.getElementById('test-caption')!;
+
+    Date.now = jest.fn();
   });
 
   describe('for highlight ending on an <img>', () => {
@@ -63,8 +65,8 @@ describe('inject highlight wrappers', () => {
       injectHighlightWrappers(highlight);
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      expect(highlightSpans[0].innerHTML).toMatchSnapshot();
-      expect(highlightSpans[1].innerHTML).toMatchSnapshot();
+      expect(highlightSpans[0]).toMatchSnapshot();
+      expect(highlightSpans[1]).toMatchSnapshot();
     });
 
     it('in firefox', () => {
@@ -88,8 +90,8 @@ describe('inject highlight wrappers', () => {
       injectHighlightWrappers(highlight);
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      expect(highlightSpans[0].innerHTML).toMatchSnapshot();
-      expect(highlightSpans[1].innerHTML).toMatchSnapshot();
+      expect(highlightSpans[0]).toMatchSnapshot();
+      expect(highlightSpans[1]).toMatchSnapshot();
     });
   });
 
@@ -122,7 +124,7 @@ describe('inject highlight wrappers', () => {
       injectHighlightWrappers(highlight);
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      expect(highlightSpans[0].innerHTML).toMatchSnapshot();
+      expect(highlightSpans[0]).toMatchSnapshot();
     });
 
     it('in firefox', () => {
@@ -146,7 +148,7 @@ describe('inject highlight wrappers', () => {
       injectHighlightWrappers(highlight);
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      expect(highlightSpans[0].innerHTML).toMatchSnapshot();
+      expect(highlightSpans[0]).toMatchSnapshot();
     });
   });
 });
