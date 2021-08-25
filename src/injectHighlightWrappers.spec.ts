@@ -1,62 +1,46 @@
 import Highlight from './Highlight';
 import injectHighlightWrappers, { DATA_ATTR } from './injectHighlightWrappers';
+import { adjacentTextSections, imageBetweenParagraphs, paragraphImageAndCaption } from './injectHighlightWrappers.spec.data';
 
-// tslint:disable: max-line-length
-const testHTML = `
-  <div id="reference" class="page-content">
-    <div id="main-content">
-      <div id="container" data-type="page">
-        <p id="test-p">A hardware store sells 16-ft ladders and 24-ft ladders. A window is located 12 feet above the ground. A ladder needs to be purchased that will reach the window from a point on the ground 5 feet from the building.</p>
-        <div class="os-figure" id="Figure_01_03_001">
-          <figure data-id="Figure_01_03_001" class="small">
-            <span id="test-span" data-type="media" id="fs-id1167339431507" data-alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c">
-              <img id="test-img" src="/apps/archive/20210713.205645/resources/b1b5ba97150addc831c534413ca324a72c4e374b" data-media-type="image/jpg" alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c" id="3">
-            </span>
-          </figure>
-          <div class="os-caption-container">
-            <span id="test-caption-title" class="os-title-label">Figure </span>
-            <span class="os-number">1</span>
-            <span class="os-divider"> </span>
-            <span class="os-divider"> </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-`;
-
-describe('inject highlight wrappers', () => {
+describe('inject highlight wrappers for figure with caption', () => {
   let page: HTMLElement;
   let img: HTMLElement;
   let p: HTMLElement;
   let textNode: Node;
   let span: HTMLElement;
   let captionTitle: HTMLElement;
+  let captionTitleText: Node;
+  let rangeDefaults: {};
 
   const highlightData = { id: 'some-highlight', content: 'asd', style: 'yellow' };
 
   beforeEach(() => {
-    document.body.innerHTML = testHTML;
+    document.body.innerHTML = paragraphImageAndCaption;
     page = document.getElementById('container')!;
     img = document.getElementById('test-img')!;
     p = document.getElementById('test-p')!;
     textNode = p.childNodes[0];
     span = document.getElementById('test-span')!;
     captionTitle = document.getElementById('test-caption-title')!;
+    captionTitleText = captionTitle.childNodes[0];
 
     Date.now = jest.fn();
+
+    rangeDefaults = {
+      collapse: false,
+      commonAncestorContainer: page,
+      setEndAfter: jest.fn(),
+      setStartBefore: jest.fn(),
+    };
   });
 
   describe('for highlight ending on an <img>', () => {
 
     it('in chrome and safari', () => {
       const range: any = {
-        collapse: false,
-        commonAncestorContainer: page,
+        ...rangeDefaults,
         endContainer: img,
         endOffset: 0,
-        setEndAfter: jest.fn(),
-        setStartBefore: jest.fn(),
         startContainer: textNode,
         startOffset: 17,
       };
@@ -76,12 +60,9 @@ describe('inject highlight wrappers', () => {
       span.append('\n');
 
       const range: any = {
-        collapse: false,
-        commonAncestorContainer: page,
+        ...rangeDefaults,
         endContainer: img,
         endOffset: 0,
-        setEndAfter: jest.fn(),
-        setStartBefore: jest.fn(),
         startContainer: textNode,
         startOffset: 17,
       };
@@ -101,12 +82,9 @@ describe('inject highlight wrappers', () => {
 
     it('in chrome', () => {
       const range: any = {
-        collapse: false,
-        commonAncestorContainer: page,
+        ...rangeDefaults,
         endContainer: captionTitle,
         endOffset: 1,
-        setEndAfter: jest.fn(),
-        setStartBefore: jest.fn(),
         startContainer: span,
         startOffset: 0,
       };
@@ -123,14 +101,56 @@ describe('inject highlight wrappers', () => {
 
     it('in firefox', () => {
       const range: any = {
-        collapse: false,
-        commonAncestorContainer: page,
+        ...rangeDefaults,
         endContainer: captionTitle,
         endOffset: 1,
-        setEndAfter: jest.fn(),
-        setStartBefore: jest.fn(),
         startContainer: span,
         startOffset: 1,
+      };
+
+      const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+
+      injectHighlightWrappers(highlight);
+      const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
+
+      highlightSpans.forEach((el) => {
+        expect(el).toMatchSnapshot();
+      });
+    });
+  });
+
+  describe('for highlight starting on an <img> where img is first element on page', () => {
+
+    it('in chrome', () => {
+      p.remove();
+
+      const range: any = {
+        ...rangeDefaults,
+        endContainer: span,
+        endOffset: 1,
+        startContainer: span,
+        startOffset: 1,
+      };
+
+      const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+
+      injectHighlightWrappers(highlight);
+      const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
+
+      highlightSpans.forEach((el) => {
+        expect(el).toMatchSnapshot();
+      });
+    });
+
+    it('in firefox', () => {
+      p.remove();
+
+      const range: any = {
+        ...rangeDefaults,
+        endContainer: captionTitleText,
+        endOffset: 0,
+        startContainer: img,
+        startOffset: 0,
       };
 
       const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
@@ -148,12 +168,9 @@ describe('inject highlight wrappers', () => {
 
     it('in chrome', () => {
       const range: any = {
-        collapse: false,
-        commonAncestorContainer: page,
+        ...rangeDefaults,
         endContainer: span,
         endOffset: 2,
-        setEndAfter: jest.fn(),
-        setStartBefore: jest.fn(),
         startContainer: span,
         startOffset: 1,
       };
@@ -173,12 +190,9 @@ describe('inject highlight wrappers', () => {
       span.append('\n');
 
       const range: any = {
-        collapse: false,
-        commonAncestorContainer: page,
+        ...rangeDefaults,
         endContainer: img,
         endOffset: 0,
-        setEndAfter: jest.fn(),
-        setStartBefore: jest.fn(),
         startContainer: textNode,
         startOffset: textNode.nodeValue ? textNode.nodeValue.length : 0,
       };
@@ -191,6 +205,139 @@ describe('inject highlight wrappers', () => {
       highlightSpans.forEach((el) => {
         expect(el).toMatchSnapshot();
       });
+    });
+  });
+});
+
+describe('inject highlight wrappers for img between paragraphs', () => {
+  let section: HTMLElement;
+  let p1: HTMLElement;
+  let p2: HTMLElement;
+  let textNode1: Node;
+  let textNode2: Node;
+  let rangeDefaults: {};
+
+  const highlightData = { id: 'some-highlight', content: 'asd', style: 'yellow' };
+
+  beforeEach(() => {
+    document.body.innerHTML = imageBetweenParagraphs;
+    section = document.getElementById('container')!;
+    p1 = document.getElementById('test-p1')!;
+    p2 = document.getElementById('test-p2')!;
+    textNode1 = p1.childNodes[0];
+    textNode2 = p2.childNodes[0];
+
+    Date.now = jest.fn();
+
+    rangeDefaults = {
+      collapse: false,
+      commonAncestorContainer: section,
+      setEndAfter: jest.fn(),
+      setStartBefore: jest.fn(),
+    };
+  });
+
+  it('in firefox', () => {
+    const range: any = {
+      ...rangeDefaults,
+      endContainer: textNode2,
+      endOffset: 0,
+      startContainer: textNode1,
+      startOffset: 117,
+    };
+
+    const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+
+    injectHighlightWrappers(highlight);
+    const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
+
+    highlightSpans.forEach((el) => {
+      expect(el).toMatchSnapshot();
+    });
+  });
+
+  it('in chrome', () => {
+    const range: any = {
+      ...rangeDefaults,
+      endContainer: p2,
+      endOffset: 0,
+      startContainer: textNode1,
+      startOffset: 117,
+    };
+
+    const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+
+    injectHighlightWrappers(highlight);
+    const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
+
+    highlightSpans.forEach((el) => {
+      expect(el).toMatchSnapshot();
+    });
+  });
+});
+
+describe('inject highlight wrappers for text followed by section', () => {
+  let section: HTMLElement;
+  let heading: HTMLElement;
+  let p: HTMLElement;
+  let div: HTMLElement;
+  let textNode: Node;
+  let rangeDefaults: {};
+
+  const highlightData = { id: 'some-highlight', content: 'asd', style: 'yellow' };
+
+  beforeEach(() => {
+    document.body.innerHTML = adjacentTextSections;
+    section = document.getElementById('test-container')!;
+    heading = document.getElementById('test-span')!;
+    p = document.getElementById('test-p')!;
+    div = document.getElementById('test-div')!;
+    textNode = heading.childNodes[0];
+
+    Date.now = jest.fn();
+    console.log(document.body.innerHTML);
+
+    rangeDefaults = {
+      collapse: false,
+      commonAncestorContainer: section,
+      setEndAfter: jest.fn(),
+      setStartBefore: jest.fn(),
+    };
+  });
+
+  it('in chrome', () => {
+    const range: any = {
+      ...rangeDefaults,
+      endContainer: p,
+      endOffset: 0,
+      startContainer: textNode,
+      startOffset: 0,
+    };
+
+    const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+    injectHighlightWrappers(highlight);
+    const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
+
+    highlightSpans.forEach((el) => {
+      expect(el).toMatchSnapshot();
+    });
+  });
+
+  it('in firefox', () => {
+    const range: any = {
+      ...rangeDefaults,
+      endContainer: p,
+      endOffset: 0,
+      startContainer: textNode,
+      startOffset: 0,
+    };
+
+    const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+    injectHighlightWrappers(highlight);
+    const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
+
+    highlightSpans.forEach((el) => {
+      expect(el).toMatchSnapshot();
     });
   });
 });

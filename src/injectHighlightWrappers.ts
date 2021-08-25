@@ -238,9 +238,9 @@ function refineRangeBoundaries(range: Range) {
     while (!endContainer.previousSibling && endContainer.parentNode !== ancestor) {
       endContainer = endContainer.parentNode as HTMLElement;
     }
-    // use previous sibling for end container unless it is a text node with only whitespace
+    // use previous sibling for end container unless end container is an img preceded by a text node
     // otherwise highlights ending on an img in firefox may not display correctly due to extra text nodes around img element
-    if (endContainer.previousSibling && !isEmptyTextNode(endContainer.previousSibling)) {
+    if (endContainer.previousSibling && !(endContainer.nodeName === 'IMG' && isEmptyTextNode(endContainer.previousSibling))) {
       endContainer = endContainer.previousSibling as HTMLElement;
     }
   } else if (endContainer.nodeType === NODE_TYPE.TEXT_NODE) {
@@ -261,7 +261,10 @@ function refineRangeBoundaries(range: Range) {
     }
   } else if (range.startOffset < startContainer.childNodes.length) {
     startContainer = startContainer.childNodes.item(range.startOffset);
-  } else if (startContainer.nextSibling) {
+    // use next sibling for start container unless it is a text node with only whitespace
+    // otherwise highlights starting on an img in firefox may not display correctly due to extra text nodes around img element
+  } else if (startContainer.nextSibling && !isEmptyTextNode(startContainer.nextSibling)) {
+    // issue here may be when no text beforehand like algebra 1.Intro
     startContainer = startContainer.nextSibling as Node;
   }
 
