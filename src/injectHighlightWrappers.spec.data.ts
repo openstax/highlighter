@@ -7,7 +7,9 @@ export const paragraphImageAndCaption = `
         <div class="os-figure" id="Figure_01_03_001">
           <figure data-id="Figure_01_03_001" class="small">
             <span id="test-span" data-type="media" id="fs-id1167339431507" data-alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c">
+
               <img id="test-img" src="/apps/archive/20210713.205645/resources/b1b5ba97150addc831c534413ca324a72c4e374b" data-media-type="image/jpg" alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c" id="3">
+
             </span>
           </figure>
           <div class="os-caption-container">

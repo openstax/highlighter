@@ -55,10 +55,6 @@ describe('inject highlight wrappers for figure with caption', () => {
     });
 
     it('in firefox', () => {
-      // extra whitespace in firefox
-      span.prepend('\n');
-      span.append('\n');
-
       const range: any = {
         ...rangeDefaults,
         endContainer: img,
@@ -185,10 +181,6 @@ describe('inject highlight wrappers for figure with caption', () => {
     });
 
     it('in firefox', () => {
-      // extra whitespace in firefox
-      span.prepend('\n');
-      span.append('\n');
-
       const range: any = {
         ...rangeDefaults,
         endContainer: img,
@@ -295,7 +287,6 @@ describe('inject highlight wrappers for text followed by section', () => {
     textNode = heading.childNodes[0];
 
     Date.now = jest.fn();
-    console.log(document.body.innerHTML);
 
     rangeDefaults = {
       collapse: false,
