@@ -272,7 +272,6 @@ describe('inject highlight wrappers for text followed by section', () => {
   let section: HTMLElement;
   let heading: HTMLElement;
   let p: HTMLElement;
-  let div: HTMLElement;
   let textNode: Node;
   let rangeDefaults: {};
 
@@ -283,7 +282,6 @@ describe('inject highlight wrappers for text followed by section', () => {
     section = document.getElementById('test-container')!;
     heading = document.getElementById('test-span')!;
     p = document.getElementById('test-p')!;
-    div = document.getElementById('test-div')!;
     textNode = heading.childNodes[0];
 
     Date.now = jest.fn();
