@@ -39,10 +39,10 @@ describe('inject highlight wrappers for figure with caption', () => {
     it('in chrome and safari', () => {
       const range: any = {
         ...rangeDefaults,
-        endContainer: img,
-        endOffset: 0,
+        endContainer: span,
+        endOffset: 2,
         startContainer: textNode,
-        startOffset: 17,
+        startOffset: 2,
       };
       const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
 
