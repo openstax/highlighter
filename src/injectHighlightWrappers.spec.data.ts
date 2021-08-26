@@ -3,10 +3,10 @@ export const paragraphImageAndCaption = `
   <div id="container" data-type="page">
     <p id="test-p">A hardware store sells 16-ft ladders and 24-ft ladders. A window is located 12 feet above the ground. A ladder needs to be purchased that will reach the window from a point on the ground 5 feet from the building.</p>
 
-    <div class="os-figure" id="Figure_01_03_001">
-      <figure data-id="Figure_01_03_001" class="small">
+    <div class="os-figure">
+      <figure>
 
-        <span id="test-span" data-type="media" id="fs-id1167339431507" data-alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c">
+        <span id="test-span" data-type="media" data-alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c">
 
           <img id="test-img" src="/apps/archive/20210713.205645/resources/b1b5ba97150addc831c534413ca324a72c4e374b" data-media-type="image/jpg" alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c" id="3">
 
