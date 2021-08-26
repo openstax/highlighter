@@ -237,52 +237,36 @@ function refineRangeBoundaries(range: Range) {
     ancestor = range.commonAncestorContainer,
     goDeeper = true;
 
-    console.log(startContainer, endContainer)
-    console.log('end prev sib: ', endContainer.previousSibling)
-
   if (range.endOffset === 0) {
     while (!endContainer.previousSibling && endContainer.parentNode !== ancestor) {
-      console.log('1')
       endContainer = endContainer.parentNode as HTMLElement;
-      console.log('end reset to: ', endContainer)
     }
-    // use previous sibling for end container unless end container is an img preceded by an empty text node
+    // use previous sibling for end container unless end container is an img/media span preceded by an empty text node
     // otherwise highlights ending on an img in firefox may not display correctly due to extra text nodes around img element
     if (endContainer.previousSibling && !(isImgOrMediaSpan(endContainer) && isEmptyTextNode(endContainer.previousSibling))) {
-      console.log('2: ', endContainer.nodeName, endContainer.previousSibling)
       endContainer = endContainer.previousSibling as HTMLElement;
-      console.log('end reset to: ', endContainer.previousSibling)
     }
   } else if (endContainer.nodeType === NODE_TYPE.TEXT_NODE) {
-    console.log('3')
     if (range.endOffset < endContainer.nodeValue!.length) {
       (endContainer as Text).splitText(range.endOffset);
-      console.log('4')
     }
   } else if (range.endOffset > 0) {
-    console.log('5')
     endContainer = endContainer.childNodes.item(range.endOffset - 1);
   }
   if (startContainer.nodeType === NODE_TYPE.TEXT_NODE) {
-    console.log('6')
     if (range.startOffset === (startContainer as Text).nodeValue!.length) {
-      console.log('7')
       goDeeper = false;
     } else if (range.startOffset > 0) {
-      console.log('8')
       startContainer = (startContainer as Text).splitText(range.startOffset);
       if (endContainer === startContainer.previousSibling) {
-        console.log('9')
         endContainer = startContainer;
       }
     }
   } else if (range.startOffset < startContainer.childNodes.length) {
-    console.log('10')
     startContainer = startContainer.childNodes.item(range.startOffset);
-    // use next sibling for start container unless start container is an img followed by an empty text node
+    // use next sibling for start container unless start container is an img/media span followed by an empty text node
     // otherwise highlights starting on an img in firefox may not display correctly due to extra text nodes around img element
   } else if (startContainer.nextSibling && !(isImgOrMediaSpan(startContainer) && isEmptyTextNode(startContainer.nextSibling))) {
-    console.log('11')
     startContainer = startContainer.nextSibling as Node;
   }
 
