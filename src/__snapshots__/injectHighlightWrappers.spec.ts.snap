@@ -151,7 +151,7 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
-  Figure 
+  Figure
   <span
     aria-label="undefined"
     data-for-screenreaders="true"
@@ -187,7 +187,7 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
-  Figure 
+  Figure
   <span
     aria-label="undefined"
     data-for-screenreaders="true"

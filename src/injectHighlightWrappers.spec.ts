@@ -79,10 +79,10 @@ describe('inject highlight wrappers for figure with caption', () => {
     it('in chrome', () => {
       const range: any = {
         ...rangeDefaults,
-        endContainer: captionTitle,
-        endOffset: 1,
+        endContainer: captionTitleText,
+        endOffset: 6,
         startContainer: span,
-        startOffset: 0,
+        startOffset: 1,
       };
 
       const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
@@ -98,10 +98,10 @@ describe('inject highlight wrappers for figure with caption', () => {
     it('in firefox', () => {
       const range: any = {
         ...rangeDefaults,
-        endContainer: captionTitle,
-        endOffset: 1,
-        startContainer: span,
-        startOffset: 1,
+        endContainer: captionTitleText,
+        endOffset: 6,
+        startContainer: textNode,
+        startOffset: textNode.nodeValue!.length,
       };
 
       const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
