@@ -9,6 +9,7 @@ describe('inject highlight wrappers for figure with caption', () => {
   let textNode: Node;
   let span: HTMLElement;
   let captionTitle: HTMLElement;
+  let captionContainer: HTMLElement;
   let captionTitleText: Node;
   let rangeDefaults: {};
 
@@ -21,6 +22,7 @@ describe('inject highlight wrappers for figure with caption', () => {
     p = document.getElementById('test-p')!;
     textNode = p.childNodes[0];
     span = document.getElementById('test-span')!;
+    captionContainer = document.getElementById('test-caption-container')!;
     captionTitle = document.getElementById('test-caption-title')!;
     captionTitleText = captionTitle.childNodes[0];
 
@@ -57,10 +59,10 @@ describe('inject highlight wrappers for figure with caption', () => {
     it('in firefox', () => {
       const range: any = {
         ...rangeDefaults,
-        endContainer: img,
+        endContainer: captionTitleText,
         endOffset: 0,
         startContainer: textNode,
-        startOffset: 17,
+        startOffset: 2,
       };
 
       const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
@@ -76,13 +78,13 @@ describe('inject highlight wrappers for figure with caption', () => {
 
   describe('for highlight starting on an <img>', () => {
 
-    it('in chrome', () => {
+    it('in chrome and safari', () => {
       const range: any = {
         ...rangeDefaults,
         endContainer: captionTitleText,
         endOffset: 6,
-        startContainer: span,
-        startOffset: 1,
+        startContainer: textNode,
+        startOffset: textNode.nodeValue!.length,
       };
 
       const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
@@ -122,8 +124,8 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const range: any = {
         ...rangeDefaults,
-        endContainer: span,
-        endOffset: 1,
+        endContainer: captionContainer,
+        endOffset: 0,
         startContainer: span,
         startOffset: 1,
       };
@@ -143,9 +145,30 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const range: any = {
         ...rangeDefaults,
-        endContainer: captionTitleText,
+        endContainer: img,
         endOffset: 0,
         startContainer: img,
+        startOffset: 0,
+      };
+
+      const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+
+      injectHighlightWrappers(highlight);
+      const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
+
+      highlightSpans.forEach((el) => {
+        expect(el).toMatchSnapshot();
+      });
+    });
+
+    it('in safari', () => {
+      p.remove();
+
+      const range: any = {
+        ...rangeDefaults,
+        endContainer: span,
+        endOffset: 2,
+        startContainer: page,
         startOffset: 0,
       };
 
@@ -167,8 +190,8 @@ describe('inject highlight wrappers for figure with caption', () => {
         ...rangeDefaults,
         endContainer: span,
         endOffset: 2,
-        startContainer: span,
-        startOffset: 1,
+        startContainer: textNode,
+        startOffset: textNode.nodeValue!.length,
       };
       const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
 
@@ -186,7 +209,7 @@ describe('inject highlight wrappers for figure with caption', () => {
         endContainer: img,
         endOffset: 0,
         startContainer: textNode,
-        startOffset: textNode.nodeValue ? textNode.nodeValue.length : 0,
+        startOffset: textNode.nodeValue!.length,
       };
 
       const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
