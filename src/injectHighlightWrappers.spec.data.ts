@@ -1,5 +1,5 @@
 // tslint:disable: max-line-length
-export const paragraphImageAndCaption = `
+export const paragraphFigureAndCaption = `
   <div id="container" data-type="page">
     <p id="test-p">A hardware store sells 16-ft ladders and 24-ft ladders. A window is located 12 feet above the ground. A ladder needs to be purchased that will reach the window from a point on the ground 5 feet from the building.</p>
 

@@ -1,6 +1,6 @@
 import Highlight from './Highlight';
 import injectHighlightWrappers, { DATA_ATTR } from './injectHighlightWrappers';
-import { adjacentTextSections, imageBetweenParagraphs, paragraphImageAndCaption } from './injectHighlightWrappers.spec.data';
+import { adjacentTextSections, imageBetweenParagraphs, paragraphFigureAndCaption } from './injectHighlightWrappers.spec.data';
 
 describe('inject highlight wrappers for figure with caption', () => {
   let page: HTMLElement;
@@ -16,7 +16,7 @@ describe('inject highlight wrappers for figure with caption', () => {
   const highlightData = { id: 'some-highlight', content: 'asd', style: 'yellow' };
 
   beforeEach(() => {
-    document.body.innerHTML = paragraphImageAndCaption;
+    document.body.innerHTML = paragraphFigureAndCaption;
     page = document.getElementById('container')!;
     img = document.getElementById('test-img')!;
     p = document.getElementById('test-p')!;
