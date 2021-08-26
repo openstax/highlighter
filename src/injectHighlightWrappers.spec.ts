@@ -185,7 +185,7 @@ describe('inject highlight wrappers for figure with caption', () => {
 
   describe('for highlight starting and ending on an <img>', () => {
 
-    it('in chrome', () => {
+    it('in chrome and safari', () => {
       const range: any = {
         ...rangeDefaults,
         endContainer: span,
@@ -271,7 +271,7 @@ describe('inject highlight wrappers for img between paragraphs', () => {
     });
   });
 
-  it('in chrome', () => {
+  it('in chrome and safari', () => {
     const range: any = {
       ...rangeDefaults,
       endContainer: p2,
@@ -295,7 +295,8 @@ describe('inject highlight wrappers for text followed by section', () => {
   let section: HTMLElement;
   let heading: HTMLElement;
   let p: HTMLElement;
-  let textNode: Node;
+  let textNode1: Node;
+  let textNode2: Node;
   let rangeDefaults: {};
 
   const highlightData = { id: 'some-highlight', content: 'asd', style: 'yellow' };
@@ -305,7 +306,8 @@ describe('inject highlight wrappers for text followed by section', () => {
     section = document.getElementById('test-container')!;
     heading = document.getElementById('test-span')!;
     p = document.getElementById('test-p')!;
-    textNode = heading.childNodes[0];
+    textNode1 = heading.childNodes[0];
+    textNode2 = p.childNodes[0];
 
     Date.now = jest.fn();
 
@@ -317,12 +319,12 @@ describe('inject highlight wrappers for text followed by section', () => {
     };
   });
 
-  it('in chrome', () => {
+  it('in chrome and safari', () => {
     const range: any = {
       ...rangeDefaults,
       endContainer: p,
       endOffset: 0,
-      startContainer: textNode,
+      startContainer: textNode1,
       startOffset: 0,
     };
 
@@ -338,9 +340,9 @@ describe('inject highlight wrappers for text followed by section', () => {
   it('in firefox', () => {
     const range: any = {
       ...rangeDefaults,
-      endContainer: p,
+      endContainer: textNode2,
       endOffset: 0,
-      startContainer: textNode,
+      startContainer: textNode1,
       startOffset: 0,
     };
 
