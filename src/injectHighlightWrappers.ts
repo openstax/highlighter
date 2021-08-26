@@ -242,7 +242,7 @@ function refineRangeBoundaries(range: Range) {
       endContainer = endContainer.parentNode as HTMLElement;
     }
     // use previous sibling for end container unless end container is an img/media span preceded by an empty text node
-    // otherwise highlights ending on an img in firefox may not display correctly due to extra text nodes around img element
+    // otherwise highlights ending on an img in firefox may not display correctly due to empty text nodes around img element
     if (endContainer.previousSibling && !(isImgOrMediaSpan(endContainer) && isEmptyTextNode(endContainer.previousSibling))) {
       endContainer = endContainer.previousSibling as HTMLElement;
     }
@@ -265,7 +265,7 @@ function refineRangeBoundaries(range: Range) {
   } else if (range.startOffset < startContainer.childNodes.length) {
     startContainer = startContainer.childNodes.item(range.startOffset);
     // use next sibling for start container unless start container is an img/media span followed by an empty text node
-    // otherwise highlights starting on an img in firefox may not display correctly due to extra text nodes around img element
+    // otherwise highlights starting on an img in firefox may not display correctly due to empty text nodes around img element
   } else if (startContainer.nextSibling && !(isImgOrMediaSpan(startContainer) && isEmptyTextNode(startContainer.nextSibling))) {
     startContainer = startContainer.nextSibling as Node;
   }
