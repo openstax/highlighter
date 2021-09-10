@@ -1,6 +1,12 @@
 import Highlight from './Highlight';
-import injectHighlightWrappers, { DATA_ATTR } from './injectHighlightWrappers';
+import Highlighter from './Highlighter';
+import { DATA_ATTR } from './injectHighlightWrappers';
 import { adjacentTextSections, imageBetweenParagraphs, paragraphFigureAndCaption } from './injectHighlightWrappers.spec.data';
+
+const messages: { [key: string]: string } = {
+  'i18n:highlighter:highlight:end': 'End of highlight',
+  'i18n:highlighter:highlight:start': 'Start of highlight',
+};
 
 describe('inject highlight wrappers for figure with caption', () => {
   let page: HTMLElement;
@@ -47,11 +53,17 @@ describe('inject highlight wrappers for figure with caption', () => {
         startOffset: 2,
       };
       const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+      highlight.getMessage = (id: string) => {
+        return messages[id];
+      };
 
-      injectHighlightWrappers(highlight);
+      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: jest.fn()});
+      highlighter.highlight(highlight);
+
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
       highlightSpans.forEach((el) => {
+        el.classList.add('highlight');
         expect(el).toMatchSnapshot();
       });
     });
@@ -66,8 +78,13 @@ describe('inject highlight wrappers for figure with caption', () => {
       };
 
       const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+      highlight.getMessage = (id: string) => {
+        return messages[id];
+      };
 
-      injectHighlightWrappers(highlight);
+      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: jest.fn()});
+      highlighter.highlight(highlight);
+
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
       highlightSpans.forEach((el) => {
@@ -88,8 +105,13 @@ describe('inject highlight wrappers for figure with caption', () => {
       };
 
       const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+      highlight.getMessage = (id: string) => {
+        return messages[id];
+      };
 
-      injectHighlightWrappers(highlight);
+      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: jest.fn()});
+      highlighter.highlight(highlight);
+
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
       highlightSpans.forEach((el) => {
@@ -107,8 +129,13 @@ describe('inject highlight wrappers for figure with caption', () => {
       };
 
       const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+      highlight.getMessage = (id: string) => {
+        return messages[id];
+      };
 
-      injectHighlightWrappers(highlight);
+      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: jest.fn()});
+      highlighter.highlight(highlight);
+
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
       highlightSpans.forEach((el) => {
@@ -131,8 +158,13 @@ describe('inject highlight wrappers for figure with caption', () => {
       };
 
       const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+      highlight.getMessage = (id: string) => {
+        return messages[id];
+      };
 
-      injectHighlightWrappers(highlight);
+      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: jest.fn()});
+      highlighter.highlight(highlight);
+
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
       highlightSpans.forEach((el) => {
@@ -152,8 +184,13 @@ describe('inject highlight wrappers for figure with caption', () => {
       };
 
       const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+      highlight.getMessage = (id: string) => {
+        return messages[id];
+      };
 
-      injectHighlightWrappers(highlight);
+      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: jest.fn()});
+      highlighter.highlight(highlight);
+
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
       highlightSpans.forEach((el) => {
@@ -173,8 +210,13 @@ describe('inject highlight wrappers for figure with caption', () => {
       };
 
       const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+      highlight.getMessage = (id: string) => {
+        return messages[id];
+      };
 
-      injectHighlightWrappers(highlight);
+      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: jest.fn()});
+      highlighter.highlight(highlight);
+
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
       highlightSpans.forEach((el) => {
@@ -194,8 +236,13 @@ describe('inject highlight wrappers for figure with caption', () => {
         startOffset: textNode.nodeValue!.length,
       };
       const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+      highlight.getMessage = (id: string) => {
+        return messages[id];
+      };
 
-      injectHighlightWrappers(highlight);
+      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: jest.fn()});
+      highlighter.highlight(highlight);
+
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
       highlightSpans.forEach((el) => {
@@ -213,8 +260,13 @@ describe('inject highlight wrappers for figure with caption', () => {
       };
 
       const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+      highlight.getMessage = (id: string) => {
+        return messages[id];
+      };
 
-      injectHighlightWrappers(highlight);
+      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: jest.fn()});
+      highlighter.highlight(highlight);
+
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
       highlightSpans.forEach((el) => {
@@ -262,8 +314,13 @@ describe('inject highlight wrappers for img between paragraphs', () => {
     };
 
     const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+    highlight.getMessage = (id: string) => {
+      return messages[id];
+    };
 
-    injectHighlightWrappers(highlight);
+    const highlighter = new Highlighter(section, {onClick: jest.fn(), formatMessage: jest.fn()});
+    highlighter.highlight(highlight);
+
     const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
     highlightSpans.forEach((el) => {
@@ -281,8 +338,13 @@ describe('inject highlight wrappers for img between paragraphs', () => {
     };
 
     const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
+    highlight.getMessage = (id: string) => {
+      return messages[id];
+    };
 
-    injectHighlightWrappers(highlight);
+    const highlighter = new Highlighter(section, {onClick: jest.fn(), formatMessage: jest.fn()});
+    highlighter.highlight(highlight);
+
     const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
     highlightSpans.forEach((el) => {
@@ -329,7 +391,13 @@ describe('inject highlight wrappers for text followed by section', () => {
     };
 
     const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
-    injectHighlightWrappers(highlight);
+    highlight.getMessage = (id: string) => {
+      return messages[id];
+    };
+
+    const highlighter = new Highlighter(section, {onClick: jest.fn(), formatMessage: jest.fn()});
+    highlighter.highlight(highlight);
+
     const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
     highlightSpans.forEach((el) => {
@@ -347,7 +415,13 @@ describe('inject highlight wrappers for text followed by section', () => {
     };
 
     const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
-    injectHighlightWrappers(highlight);
+    highlight.getMessage = (id: string) => {
+      return messages[id];
+    };
+
+    const highlighter = new Highlighter(section, {onClick: jest.fn(), formatMessage: jest.fn()});
+    highlighter.highlight(highlight);
+
     const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
     highlightSpans.forEach((el) => {
