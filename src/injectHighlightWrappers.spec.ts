@@ -1,4 +1,4 @@
-import Highlight, { IHighlightData } from './Highlight';
+import Highlight from './Highlight';
 import Highlighter from './Highlighter';
 import { DATA_ATTR } from './injectHighlightWrappers';
 import { adjacentTextSections, imageBetweenParagraphs, paragraphFigureAndCaption } from './injectHighlightWrappers.spec.data';
