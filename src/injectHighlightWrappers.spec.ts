@@ -1,4 +1,4 @@
-import Highlight from './Highlight';
+import Highlight, { IHighlightData } from './Highlight';
 import Highlighter from './Highlighter';
 import { DATA_ATTR } from './injectHighlightWrappers';
 import { adjacentTextSections, imageBetweenParagraphs, paragraphFigureAndCaption } from './injectHighlightWrappers.spec.data';
@@ -18,6 +18,7 @@ describe('inject highlight wrappers for figure with caption', () => {
   let captionContainer: HTMLElement;
   let captionTitleText: Node;
   let rangeDefaults: {};
+  let mockMessages: (descriptor: { id: string }) => string;
 
   const highlightData = { id: 'some-highlight', content: 'asd', style: 'yellow' };
 
@@ -40,6 +41,8 @@ describe('inject highlight wrappers for figure with caption', () => {
       setEndAfter: jest.fn(),
       setStartBefore: jest.fn(),
     };
+
+    mockMessages = jest.fn((descriptor) => messages[descriptor.id]);
   });
 
   describe('for highlight ending on an <img>', () => {
@@ -52,12 +55,9 @@ describe('inject highlight wrappers for figure with caption', () => {
         startContainer: textNode,
         startOffset: 2,
       };
-      const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
-      highlight.getMessage = (id: string) => {
-        return messages[id];
-      };
+      const highlight = new Highlight(range, highlightData, {formatMessage: mockMessages});
 
-      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: jest.fn()});
+      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: mockMessages});
       highlighter.highlight(highlight);
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
@@ -77,12 +77,9 @@ describe('inject highlight wrappers for figure with caption', () => {
         startOffset: 2,
       };
 
-      const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
-      highlight.getMessage = (id: string) => {
-        return messages[id];
-      };
+      const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages });
 
-      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: jest.fn()});
+      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: mockMessages});
       highlighter.highlight(highlight);
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
@@ -104,12 +101,9 @@ describe('inject highlight wrappers for figure with caption', () => {
         startOffset: textNode.nodeValue!.length,
       };
 
-      const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
-      highlight.getMessage = (id: string) => {
-        return messages[id];
-      };
+      const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages });
 
-      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: jest.fn()});
+      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: mockMessages});
       highlighter.highlight(highlight);
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
@@ -128,12 +122,9 @@ describe('inject highlight wrappers for figure with caption', () => {
         startOffset: textNode.nodeValue!.length,
       };
 
-      const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
-      highlight.getMessage = (id: string) => {
-        return messages[id];
-      };
+      const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages });
 
-      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: jest.fn()});
+      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: mockMessages});
       highlighter.highlight(highlight);
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
@@ -157,12 +148,9 @@ describe('inject highlight wrappers for figure with caption', () => {
         startOffset: 1,
       };
 
-      const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
-      highlight.getMessage = (id: string) => {
-        return messages[id];
-      };
+      const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages });
 
-      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: jest.fn()});
+      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: mockMessages});
       highlighter.highlight(highlight);
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
@@ -183,12 +171,9 @@ describe('inject highlight wrappers for figure with caption', () => {
         startOffset: 0,
       };
 
-      const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
-      highlight.getMessage = (id: string) => {
-        return messages[id];
-      };
+      const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages });
 
-      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: jest.fn()});
+      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: mockMessages});
       highlighter.highlight(highlight);
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
@@ -209,12 +194,9 @@ describe('inject highlight wrappers for figure with caption', () => {
         startOffset: 0,
       };
 
-      const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
-      highlight.getMessage = (id: string) => {
-        return messages[id];
-      };
+      const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages });
 
-      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: jest.fn()});
+      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: mockMessages});
       highlighter.highlight(highlight);
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
@@ -235,12 +217,9 @@ describe('inject highlight wrappers for figure with caption', () => {
         startContainer: textNode,
         startOffset: textNode.nodeValue!.length,
       };
-      const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
-      highlight.getMessage = (id: string) => {
-        return messages[id];
-      };
+      const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages });
 
-      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: jest.fn()});
+      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: mockMessages});
       highlighter.highlight(highlight);
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
@@ -259,12 +238,9 @@ describe('inject highlight wrappers for figure with caption', () => {
         startOffset: textNode.nodeValue!.length,
       };
 
-      const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
-      highlight.getMessage = (id: string) => {
-        return messages[id];
-      };
+      const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages });
 
-      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: jest.fn()});
+      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: mockMessages});
       highlighter.highlight(highlight);
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
@@ -283,6 +259,7 @@ describe('inject highlight wrappers for img between paragraphs', () => {
   let textNode1: Node;
   let textNode2: Node;
   let rangeDefaults: {};
+  let mockMessages: (descriptor: { id: string }) => string;
 
   const highlightData = { id: 'some-highlight', content: 'asd', style: 'yellow' };
 
@@ -302,6 +279,8 @@ describe('inject highlight wrappers for img between paragraphs', () => {
       setEndAfter: jest.fn(),
       setStartBefore: jest.fn(),
     };
+
+    mockMessages = jest.fn((descriptor) => messages[descriptor.id]);
   });
 
   it('in firefox', () => {
@@ -313,12 +292,9 @@ describe('inject highlight wrappers for img between paragraphs', () => {
       startOffset: 117,
     };
 
-    const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
-    highlight.getMessage = (id: string) => {
-      return messages[id];
-    };
+    const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages });
 
-    const highlighter = new Highlighter(section, {onClick: jest.fn(), formatMessage: jest.fn()});
+    const highlighter = new Highlighter(section, {onClick: jest.fn(), formatMessage: mockMessages});
     highlighter.highlight(highlight);
 
     const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
@@ -337,12 +313,9 @@ describe('inject highlight wrappers for img between paragraphs', () => {
       startOffset: 117,
     };
 
-    const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
-    highlight.getMessage = (id: string) => {
-      return messages[id];
-    };
+    const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages });
 
-    const highlighter = new Highlighter(section, {onClick: jest.fn(), formatMessage: jest.fn()});
+    const highlighter = new Highlighter(section, {onClick: jest.fn(), formatMessage: mockMessages});
     highlighter.highlight(highlight);
 
     const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
@@ -360,6 +333,7 @@ describe('inject highlight wrappers for text followed by section', () => {
   let textNode1: Node;
   let textNode2: Node;
   let rangeDefaults: {};
+  let mockMessages: (descriptor: { id: string }) => string;
 
   const highlightData = { id: 'some-highlight', content: 'asd', style: 'yellow' };
 
@@ -379,6 +353,8 @@ describe('inject highlight wrappers for text followed by section', () => {
       setEndAfter: jest.fn(),
       setStartBefore: jest.fn(),
     };
+
+    mockMessages = jest.fn((descriptor) => messages[descriptor.id]);
   });
 
   it('in chrome and safari', () => {
@@ -390,12 +366,9 @@ describe('inject highlight wrappers for text followed by section', () => {
       startOffset: 0,
     };
 
-    const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
-    highlight.getMessage = (id: string) => {
-      return messages[id];
-    };
+    const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages });
 
-    const highlighter = new Highlighter(section, {onClick: jest.fn(), formatMessage: jest.fn()});
+    const highlighter = new Highlighter(section, {onClick: jest.fn(), formatMessage: mockMessages});
     highlighter.highlight(highlight);
 
     const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
@@ -414,12 +387,9 @@ describe('inject highlight wrappers for text followed by section', () => {
       startOffset: 0,
     };
 
-    const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
-    highlight.getMessage = (id: string) => {
-      return messages[id];
-    };
+    const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages });
 
-    const highlighter = new Highlighter(section, {onClick: jest.fn(), formatMessage: jest.fn()});
+    const highlighter = new Highlighter(section, {onClick: jest.fn(), formatMessage: mockMessages});
     highlighter.highlight(highlight);
 
     const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
