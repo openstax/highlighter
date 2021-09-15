@@ -33,6 +33,12 @@ interface IOptions {
   className?: string;
 }
 
+const isEmptyTextNode = (node: Node) =>
+  node.nodeType === NODE_TYPE.TEXT_NODE && node.textContent && !node.textContent.trim().length;
+
+const isImgOrMediaSpan = (node: Node) =>
+  node.nodeName === 'IMG' || (node.nodeName === 'SPAN' && (node as HTMLElement).dataset.type === 'media');
+
 export default function injectHighlightWrappers(highlight: Highlight, options: IOptions = {}) {
   const wrapper = createWrapper({
     id: highlight.id,
@@ -235,7 +241,11 @@ function refineRangeBoundaries(range: Range) {
     while (!endContainer.previousSibling && endContainer.parentNode !== ancestor) {
       endContainer = endContainer.parentNode as HTMLElement;
     }
-    endContainer = endContainer.previousSibling as HTMLElement;
+    // use previous sibling for end container unless end container is an img/media span preceded by an empty text node
+    // otherwise highlights ending on an img in firefox may not display correctly due to empty text nodes around img element
+    if (endContainer.previousSibling && !(isImgOrMediaSpan(endContainer) && isEmptyTextNode(endContainer.previousSibling))) {
+      endContainer = endContainer.previousSibling as HTMLElement;
+    }
   } else if (endContainer.nodeType === NODE_TYPE.TEXT_NODE) {
     if (range.endOffset < endContainer.nodeValue!.length) {
       (endContainer as Text).splitText(range.endOffset);
@@ -254,7 +264,9 @@ function refineRangeBoundaries(range: Range) {
     }
   } else if (range.startOffset < startContainer.childNodes.length) {
     startContainer = startContainer.childNodes.item(range.startOffset);
-  } else if (startContainer.nextSibling) {
+    // use next sibling for start container unless start container is an img/media span followed by an empty text node
+    // otherwise highlights starting on an img in firefox may not display correctly due to empty text nodes around img element
+  } else if (startContainer.nextSibling && !(isImgOrMediaSpan(startContainer) && isEmptyTextNode(startContainer.nextSibling))) {
     startContainer = startContainer.nextSibling as Node;
   }
 
