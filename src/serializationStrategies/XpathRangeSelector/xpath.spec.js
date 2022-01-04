@@ -3,6 +3,39 @@ import * as xpath from './xpath';
 
 const screenReaderNode = `<span ${DATA_SCREEN_READERS_ATTR}></span>`;
 
+describe('getNodePath', () => {
+  it('creates a path of indexes', () => {
+    document.body.innerHTML = `
+      <div id="1">
+        <header><h3 id="2">Header text</h3></header>
+        <section><p id="3">Section text</p></section>
+      </div>
+    `;
+
+    const container = document.getElementById('1');
+    const element = document.getElementById('2');
+    const result = xpath.getNodePath(element, container);
+    expect(result).toEqual([1, 0]);
+  });
+
+  it('works with text nodes', () => {
+    document.body.innerHTML = `
+      <div id="wrapper">
+        <div id="1">
+          Some text before the link
+          <a id="link"></a>
+          Text after the link
+        </div>
+      </div>
+    `;
+
+    const container = document.getElementById('1');
+    const element = xpath.getFirstByXPath('./text()[2]', 0, container);
+    const result = xpath.getNodePath(element[0], container);
+    expect(result).toEqual([2]);
+  });
+});
+
 describe('getXPathForElement', () => {
   it('creates path to self', () => {
     document.body.innerHTML = `
