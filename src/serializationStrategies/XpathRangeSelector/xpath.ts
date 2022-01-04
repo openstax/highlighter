@@ -104,6 +104,40 @@ const resolveToPreviousElementOffsetIfPossible = (element: Node, offset: number)
   return [element, offset] as const;
 };
 
+export function getNodePath(element: HTMLElement, container: HTMLElement): number[] {
+  let currentParent: HTMLElement | null = element;
+  const nodePath: number[] = [];
+
+  // Go up the stack, capturing the index of each node to create a path
+  while (currentParent != container) {
+    const currentChild = currentParent;
+
+    if (currentParent.parentElement) {
+      currentParent = currentParent.parentElement;
+      let filteredNodes = Array.from(currentParent.childNodes).filter(n => !isTextHighlightOrScreenReaderNode(n));
+
+      filteredNodes = filteredNodes.filter((current, i) => {
+        if (current == currentChild) {
+          // Always include the node with the content to get the index
+          return true;
+        }
+
+        const adjacent = filteredNodes[i + 1];
+        const isCollapsible = (adjacent && isText(adjacent) && isText(current));
+
+        // Remove adjacent text nodes
+        return !isCollapsible;
+      });
+
+      const index = filteredNodes.indexOf(currentChild);
+      nodePath.unshift(index);
+    }
+
+  }
+
+  return nodePath.length > 0 ? nodePath : [0];
+}
+
 // kinda copied from https://developer.mozilla.org/en-US/docs/Web/XPath/Snippets#getXPathForElement
 export function getXPathForElement(targetElement: Node, offset: number, reference: HTMLElement): [string, number] {
   [targetElement, offset] = floatThroughText(targetElement, offset, reference);
