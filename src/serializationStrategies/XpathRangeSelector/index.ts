@@ -1,5 +1,5 @@
 import Highlighter from '../../Highlighter';
-import { getFirstByXPath, getXPathForElement, getNodePath } from './xpath';
+import { getFirstByXPath, getXPathForElement } from './xpath';
 
 export const discriminator = 'XpathRangeSelector';
 
@@ -10,7 +10,6 @@ export interface IData {
   startOffset: number;
   endContainer: string;
   endOffset: number;
-  nodePath?: number[];
 }
 
 export function serialize(range: Range, referenceElement: HTMLElement): IData {
@@ -18,20 +17,12 @@ export function serialize(range: Range, referenceElement: HTMLElement): IData {
   const [endContainer, endOffset] = getXPathForElement(range.endContainer, range.endOffset, referenceElement);
   const [startContainer, startOffset] = getXPathForElement(range.startContainer, range.startOffset, referenceElement);
 
-  let nodePath: number[] = [];
-  const element = getFirstByXPath(startContainer, range.startOffset, referenceElement);
-
-  if (element[0]) {
-    nodePath = getNodePath(element[0], referenceElement);
-  }
-
   return {
     endContainer,
     endOffset,
     referenceElementId: referenceElement.id,
     startContainer,
     startOffset,
-    nodePath,
     type: discriminator,
   };
 }

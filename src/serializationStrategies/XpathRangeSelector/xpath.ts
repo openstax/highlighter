@@ -9,9 +9,9 @@ const findNonTextChild = (node: Node) => Array.prototype.find.call(node.childNod
 const isHighlight = (node: Nullable<Node>): node is HTMLElement => !!node && (node as Element).getAttribute && (node as Element).getAttribute(DATA_ATTR) !== null;
 const isHighlightOrScreenReaderNode = (node: Nullable<Node>) => isHighlight(node) || isScreenReaderNode(node);
 const isTextHighlight = (node: Nullable<Node>): node is HTMLElement => isHighlight(node) && !findNonTextChild(node);
-const isTextHighlightOrScreenReaderNode = (node: Nullable<Node>): node is HTMLElement => (isHighlight(node) || isScreenReaderNode(node)) && !findNonTextChild(node);
-const isText = (node: Nullable<Node>): node is Text => !!node && node.nodeType === 3;
-const isTextOrTextHighlight  = (node: Nullable<Node>): node is Text | HTMLElement => isText(node) || isTextHighlight(node);
+export const isTextHighlightOrScreenReaderNode = (node: Nullable<Node>): node is HTMLElement => (isHighlight(node) || isScreenReaderNode(node)) && !findNonTextChild(node);
+export const isText = (node: Nullable<Node>): node is Text => !!node && node.nodeType === 3;
+const isTextOrTextHighlight = (node: Nullable<Node>): node is Text | HTMLElement => isText(node) || isTextHighlight(node);
 const isTextOrTextHighlightOrScreenReaderNode = (node: Nullable<Node | HTMLElement>) => isText(node) || isTextHighlightOrScreenReaderNode(node) || isScreenReaderNode(node);
 const isElement = (node: Node): node is HTMLElement => node && node.nodeType === 1;
 const isElementNotHighlight = (node: Node) => isElement(node) && !isHighlight(node);
@@ -103,40 +103,6 @@ const resolveToPreviousElementOffsetIfPossible = (element: Node, offset: number)
 
   return [element, offset] as const;
 };
-
-export function getNodePath(element: HTMLElement, container: HTMLElement): number[] {
-  let currentParent: HTMLElement | null = element;
-  const nodePath: number[] = [];
-
-  // Go up the stack, capturing the index of each node to create a path
-  while (currentParent != container) {
-    const currentChild = currentParent;
-
-    if (currentParent.parentElement) {
-      currentParent = currentParent.parentElement;
-      let filteredNodes = Array.from(currentParent.childNodes).filter(n => !isTextHighlightOrScreenReaderNode(n));
-
-      filteredNodes = filteredNodes.filter((current, i) => {
-        if (current == currentChild) {
-          // Always include the node with the content to get the index
-          return true;
-        }
-
-        const adjacent = filteredNodes[i + 1];
-        const isCollapsible = (adjacent && isText(adjacent) && isText(current));
-
-        // Remove adjacent text nodes
-        return !isCollapsible;
-      });
-
-      const index = filteredNodes.indexOf(currentChild);
-      nodePath.unshift(index);
-    }
-
-  }
-
-  return nodePath.length > 0 ? nodePath : [0];
-}
 
 // kinda copied from https://developer.mozilla.org/en-US/docs/Web/XPath/Snippets#getXPathForElement
 export function getXPathForElement(targetElement: Node, offset: number, reference: HTMLElement): [string, number] {
