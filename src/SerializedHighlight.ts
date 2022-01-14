@@ -3,7 +3,9 @@ import {Highlight as ApiHighlight, NewHighlight as NewApiHighlight, styleIsColor
 import Highlight, {IHighlightData} from './Highlight';
 import Highlighter from './Highlighter';
 import {getDeserializer, IDeserializer, ISerializationData} from './serializationStrategies';
-import {serialize as defaultSerializer} from './serializationStrategies/XpathRangeSelector';
+import { serialize as defaultSerializer, discriminator as xPathDiscriminator } from './serializationStrategies/XpathRangeSelector';
+import { getContentPath } from './contentPath';
+import { XpathRangeSelector } from '@openstax/highlights-client';
 
 const mapKeys = (transform: (key: string) => string, obj: {[key: string]: any}) => Object.keys(obj).reduce((result, key) => ({
   ...result, [transform(key)]: obj[key],
@@ -83,6 +85,11 @@ export default class SerializedHighlight {
     const prevHighlight = highlighter.getHighlightBefore(highlight);
     const nextHighlight = highlighter.getHighlightAfter(highlight);
 
+    let contentPath: number[] | undefined;
+
+    if (serializationData.type == xPathDiscriminator) {
+      contentPath = getContentPath({ referenceElementId, ...serializationData }, highlighter, highlight);
+    }
     if (!style) {
       throw new Error('a style is requred to create an api payload');
     }
@@ -99,7 +106,7 @@ export default class SerializedHighlight {
       locationStrategies: [mapKeys(snakeCase, serializationData)],
       nextHighlightId: nextHighlight && nextHighlight.id,
       prevHighlightId: prevHighlight && prevHighlight.id,
-
+      contentPath,
     };
   }
 
