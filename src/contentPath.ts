@@ -18,34 +18,31 @@ export function getContentPath(serializationData: IData, highlighter: Highlighte
 }
 
 function getNodePath(element: HTMLElement, container: HTMLElement): number[] {
-  let currentParent: HTMLElement | null = element;
+  let currentNode: HTMLElement | null = element;
   const nodePath: number[] = [];
 
   // Go up the stack, capturing the index of each node to create a path
-  while (currentParent != container) {
-    const currentChild = currentParent;
+  while (currentNode != container) {
+    if (currentNode && currentNode.parentNode) {
+      let filteredNodes = Array.from(currentNode.parentNode.childNodes).filter(n => !isTextHighlightOrScreenReaderNode(n));
 
-    if (currentParent.parentElement) {
-      currentParent = currentParent.parentElement;
-      let filteredNodes = Array.from(currentParent.childNodes).filter(n => !isTextHighlightOrScreenReaderNode(n));
-
-      filteredNodes = filteredNodes.filter((current, i) => {
-        if (current == currentChild) {
+      filteredNodes = filteredNodes.filter((node, i) => {
+        if (node == currentNode) {
           // Always include the node with the content to get the index
           return true;
         }
 
-        const adjacent = filteredNodes[i + 1];
-        const isCollapsible = (adjacent && isText(adjacent) && isText(current));
+        const nextNode = filteredNodes[i + 1];
+        const isCollapsible = (nextNode && isText(nextNode) && isText(node));
 
         // Remove adjacent text nodes
         return !isCollapsible;
       });
 
-      const index = filteredNodes.indexOf(currentChild);
+      const index = filteredNodes.indexOf(currentNode);
       nodePath.unshift(index);
+      currentNode = currentNode.parentElement;
     }
-
   }
 
   return nodePath.length > 0 ? nodePath : [0];
