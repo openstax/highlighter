@@ -32,19 +32,19 @@ const getContainer = (container: Node, offset: number) =>
   ? container
   : container.childNodes[offset] || container;
 
-const resetRangeEnd = (range: Range, node: Node) => {
+const resetRangeEnd = (range: Range, node: Node, selector: string) => {
   if (!range || !node) {
     return;
   }
-  const endElement = node.nextSibling && dom(node.nextSibling).matches('[data-type="code"]') ? node.nextSibling : node;
+  const endElement = node.nextSibling && dom(node.nextSibling).matches(selector) ? node.nextSibling : node;
   const endContainer = endElement.parentNode;
   if (endContainer) {
     range.setEnd(endContainer, Array.prototype.indexOf.call(endContainer.childNodes, endElement) + 1);
   }
 };
 
-const snapToSelectedBlock = (range: Range, selector: string) => {
-  const getBlock = (node: Node) => dom(node).farthest(selector);
+const snapToSelectedBlock = (range: Range, ancestorSelector: string, endSelector?: string) => {
+  const getBlock = (node: Node) => dom(node).farthest(ancestorSelector);
   const getBlockBoundary = flow(getContainer, getBlock);
 
   const startBlock = getBlockBoundary(range.startContainer, range.startOffset);
@@ -54,7 +54,7 @@ const snapToSelectedBlock = (range: Range, selector: string) => {
   }
 
   const endBlock = getBlockBoundary(range.endContainer, range.endOffset);
-  resetRangeEnd(range, endBlock);
+  resetRangeEnd(range, endBlock, endSelector || ancestorSelector);
 };
 
 interface IOptions {
@@ -87,7 +87,7 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
   }
 
   if (options.snapMathJax) {
-    snapToSelectedBlock(range, '.MathJax,.MathJax_Display');
+    snapToSelectedBlock(range, '.MathJax,.MathJax_Display', 'script[type="math/mml"]');
   }
 
   if (options.snapCode) {
