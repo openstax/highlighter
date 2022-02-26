@@ -79,6 +79,7 @@ export default class SerializedHighlight {
    */
   public getApiPayload(highlighter: Highlighter, highlight: Highlight): Omit<NewApiHighlight, 'sourceType' | 'sourceId'> & {id: string} {
     const {id, content, style, annotation, referenceElementId, ...serializationData} = this.data;
+
     const prevHighlight = highlighter.getHighlightBefore(highlight);
     const nextHighlight = highlighter.getHighlightAfter(highlight);
 
