@@ -10,6 +10,7 @@ import SerializedHighlight from './SerializedHighlight';
 export const ON_SELECT_DELAY = 300;
 
 interface IOptions {
+  snapCode?: boolean;
   snapTableRows?: boolean;
   snapMathJax?: boolean;
   snapWords?: boolean;

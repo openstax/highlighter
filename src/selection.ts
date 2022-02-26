@@ -1,3 +1,4 @@
+import flow from 'lodash/fp/flow';
 import dom from './dom';
 
 export const getRange = (selection: Selection): Range => {
@@ -26,7 +27,24 @@ const getDirection = (selection: Selection): 'forward' | 'backward' => {
   return 'forward';
 };
 
+const getContainer = (container: Node, offset: number) =>
+  container.nodeType === 3 /* #text */
+  ? container
+  : container.childNodes[offset] || container;
+
+const resetRangeEnd = (range: Range, node: Node) => {
+  if (!range || !node) {
+    return;
+  }
+  const endElement = node.nextSibling && dom(node.nextSibling).matches('[data-type="code"]') ? node.nextSibling : node;
+  const endContainer = endElement.parentNode;
+  if (endContainer) {
+    range.setEnd(endContainer, Array.prototype.indexOf.call(endContainer.childNodes, endElement) + 1);
+  }
+};
+
 interface IOptions {
+  snapCode?: boolean;
   snapTableRows?: boolean;
   snapMathJax?: boolean;
   snapWords?: boolean;
@@ -35,7 +53,6 @@ interface IOptions {
 export const snapSelection = (selection: Selection, options: IOptions): Range | undefined => {
   const selectionDirection = getDirection(selection);
   const range = getRange(selection);
-
   if (!range) {
     return;
   }
@@ -56,25 +73,30 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
 
   if (options.snapMathJax) {
     const getMath = (node: Node) => dom(node).farthest('.MathJax,.MathJax_Display');
+    const getMathBoundary = flow(getContainer, getMath);
+    const startMath = getMathBoundary(range.startContainer, range.startOffset);
 
-    const startMath = getMath(range.startContainer.nodeType === 3 /* #text */
-      ? range.startContainer
-      : range.startContainer.childNodes[range.startOffset] || range.startContainer
-    );
     if (startMath) {
       range.setStartBefore(startMath);
     }
 
-    const endMath = getMath(range.endContainer.nodeType === 3 /* #text */
-      ? range.endContainer
-      : range.endContainer.childNodes[range.endOffset - 1] || range.endContainer
-    );
+    const endMath = getMathBoundary(range.endContainer, range.endOffset);
+    resetRangeEnd(range, endMath);
+  }
 
-    if (endMath) {
-      const endElement = dom(endMath.nextSibling).matches('script[type="math/mml"]') ? endMath.nextSibling : endMath;
-      const endContainer = endElement.parentNode;
-      range.setEnd(endContainer, Array.prototype.indexOf.call(endContainer.childNodes, endElement) + 1);
+  if (options.snapCode) {
+    // also this requires a change to rex (snapCode: true) + lib update
+    const getCode = (node: Node) => dom(node).farthest('[data-type="code"]');
+    const getCodeBoundary = flow(getContainer, getCode);
+
+    const startCode = getCodeBoundary(range.startContainer, range.startOffset);
+
+    if (startCode) {
+      range.setStartBefore(startCode);
     }
+
+    const endCode = getCodeBoundary(range.endContainer, range.endOffset);
+    resetRangeEnd(range, endCode);
   }
 
   if (options.snapWords) {
