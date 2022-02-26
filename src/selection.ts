@@ -43,6 +43,20 @@ const resetRangeEnd = (range: Range, node: Node) => {
   }
 };
 
+const snapToSelectedBlock = (range: Range, selector: string) => {
+  const getBlock = (node: Node) => dom(node).farthest(selector);
+  const getBlockBoundary = flow(getContainer, getBlock);
+
+  const startBlock = getBlockBoundary(range.startContainer, range.startOffset);
+
+  if (startBlock) {
+    range.setStartBefore(startBlock);
+  }
+
+  const endBlock = getBlockBoundary(range.endContainer, range.endOffset);
+  resetRangeEnd(range, endBlock);
+};
+
 interface IOptions {
   snapCode?: boolean;
   snapTableRows?: boolean;
@@ -53,6 +67,7 @@ interface IOptions {
 export const snapSelection = (selection: Selection, options: IOptions): Range | undefined => {
   const selectionDirection = getDirection(selection);
   const range = getRange(selection);
+
   if (!range) {
     return;
   }
@@ -72,31 +87,12 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
   }
 
   if (options.snapMathJax) {
-    const getMath = (node: Node) => dom(node).farthest('.MathJax,.MathJax_Display');
-    const getMathBoundary = flow(getContainer, getMath);
-    const startMath = getMathBoundary(range.startContainer, range.startOffset);
-
-    if (startMath) {
-      range.setStartBefore(startMath);
-    }
-
-    const endMath = getMathBoundary(range.endContainer, range.endOffset);
-    resetRangeEnd(range, endMath);
+    snapToSelectedBlock(range, '.MathJax,.MathJax_Display');
   }
 
   if (options.snapCode) {
     // also this requires a change to rex (snapCode: true) + lib update
-    const getCode = (node: Node) => dom(node).farthest('[data-type="code"]');
-    const getCodeBoundary = flow(getContainer, getCode);
-
-    const startCode = getCodeBoundary(range.startContainer, range.startOffset);
-
-    if (startCode) {
-      range.setStartBefore(startCode);
-    }
-
-    const endCode = getCodeBoundary(range.endContainer, range.endOffset);
-    resetRangeEnd(range, endCode);
+    snapToSelectedBlock(range, '[data-type="code"]');
   }
 
   if (options.snapWords) {
