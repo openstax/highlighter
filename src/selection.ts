@@ -1,4 +1,3 @@
-import flow from 'lodash/fp/flow';
 import dom from './dom';
 
 export const getRange = (selection: Selection): Range => {
@@ -27,41 +26,57 @@ const getDirection = (selection: Selection): 'forward' | 'backward' => {
   return 'forward';
 };
 
-const getContainer = (container: Node, offset: number) =>
-  container.nodeType === 3 /* #text */
-  ? container
-  : container.childNodes[offset] || container;
+const snapToMath = (range: Range) => {
+  const getMath = (node: Node) => dom(node).farthest('.MathJax,.MathJax_Display');
 
-const resetRangeEnd = (range: Range, node: Node, selector: string) => {
-  if (!range || !node) {
-    return;
+  const startMath = getMath(range.startContainer.nodeType === 3 /* #text */
+    ? range.startContainer
+    : range.startContainer.childNodes[range.startOffset] || range.startContainer
+  );
+  if (startMath) {
+    range.setStartBefore(startMath);
   }
-  const endElement = node.nextSibling && dom(node.nextSibling).matches(selector) ? node.nextSibling : node;
-  const endContainer = endElement.parentNode;
-  if (endContainer) {
+
+  const endMath = getMath(range.endContainer.nodeType === 3 /* #text */
+    ? range.endContainer
+    : range.endContainer.childNodes[range.endOffset - 1] || range.endContainer
+  );
+
+  if (endMath) {
+    const endElement = dom(endMath.nextSibling).matches('script[type="math/mml"]') ? endMath.nextSibling : endMath;
+    const endContainer = endElement.parentNode;
     range.setEnd(endContainer, Array.prototype.indexOf.call(endContainer.childNodes, endElement) + 1);
   }
 };
 
-const snapToSelectedBlock = (range: Range, ancestorSelector: string, endSelector?: string) => {
-  const getBlock = (node: Node) => dom(node).farthest(ancestorSelector);
-  const getBlockBoundary = flow(getContainer, getBlock);
+const snapToCode = (range: Range) => {
+  const getCode = (node: Node) => dom(node).farthest('[data-type="code"]');
 
-  const startBlock = getBlockBoundary(range.startContainer, range.startOffset);
-
-  if (startBlock) {
-    range.setStartBefore(startBlock);
+  const startCode = getCode(range.startContainer.nodeType === 3 /* #text */
+    ? range.startContainer
+    : range.startContainer.childNodes[range.startOffset] || range.startContainer
+  );
+  if (startCode) {
+    range.setStartBefore(startCode);
   }
 
-  const endBlock = getBlockBoundary(range.endContainer, range.endOffset);
-  resetRangeEnd(range, endBlock, endSelector || ancestorSelector);
+  const endCode = getCode(range.endContainer.nodeType === 3 /* #text */
+    ? range.endContainer
+    : range.endContainer.childNodes[range.endOffset - 1] || range.endContainer
+  );
+
+  if (endCode) {
+    const endElement = dom(endCode.nextSibling).matches('[data-type="code"]') ? endCode.nextSibling : endCode;
+    const endContainer = endElement.parentNode;
+    range.setEnd(endContainer, Array.prototype.indexOf.call(endContainer.childNodes, endElement) + 1);
+  }
 };
 
 interface IOptions {
-  snapCode?: boolean;
   snapTableRows?: boolean;
   snapMathJax?: boolean;
   snapWords?: boolean;
+  snapCode?: boolean;
 }
 
 export const snapSelection = (selection: Selection, options: IOptions): Range | undefined => {
@@ -87,12 +102,11 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
   }
 
   if (options.snapMathJax) {
-    snapToSelectedBlock(range, '.MathJax,.MathJax_Display', 'script[type="math/mml"]');
+    snapToMath(range);
   }
 
   if (options.snapCode) {
-    // also this requires a change to rex (snapCode: true) + lib update
-    snapToSelectedBlock(range, '[data-type="code"]');
+    snapToCode(range);
   }
 
   if (options.snapWords) {
