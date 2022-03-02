@@ -26,29 +26,6 @@ const getDirection = (selection: Selection): 'forward' | 'backward' => {
   return 'forward';
 };
 
-const snapToMath = (range: Range) => {
-  const getMath = (node: Node) => dom(node).farthest('.MathJax,.MathJax_Display');
-
-  const startMath = getMath(range.startContainer.nodeType === 3 /* #text */
-    ? range.startContainer
-    : range.startContainer.childNodes[range.startOffset] || range.startContainer
-  );
-  if (startMath) {
-    range.setStartBefore(startMath);
-  }
-
-  const endMath = getMath(range.endContainer.nodeType === 3 /* #text */
-    ? range.endContainer
-    : range.endContainer.childNodes[range.endOffset - 1] || range.endContainer
-  );
-
-  if (endMath) {
-    const endElement = dom(endMath.nextSibling).matches('script[type="math/mml"]') ? endMath.nextSibling : endMath;
-    const endContainer = endElement.parentNode;
-    range.setEnd(endContainer, Array.prototype.indexOf.call(endContainer.childNodes, endElement) + 1);
-  }
-};
-
 const snapToCode = (range: Range) => {
   const getCode = (node: Node) => dom(node).farthest('[data-type="code"]');
 
@@ -67,6 +44,29 @@ const snapToCode = (range: Range) => {
 
   if (endCode) {
     const endElement = dom(endCode.nextSibling).matches('[data-type="code"]') ? endCode.nextSibling : endCode;
+    const endContainer = endElement.parentNode;
+    range.setEnd(endContainer, Array.prototype.indexOf.call(endContainer.childNodes, endElement) + 1);
+  }
+};
+
+const snapToMath = (range: Range) => {
+  const getMath = (node: Node) => dom(node).farthest('.MathJax,.MathJax_Display');
+
+  const startMath = getMath(range.startContainer.nodeType === 3 /* #text */
+    ? range.startContainer
+    : range.startContainer.childNodes[range.startOffset] || range.startContainer
+  );
+  if (startMath) {
+    range.setStartBefore(startMath);
+  }
+
+  const endMath = getMath(range.endContainer.nodeType === 3 /* #text */
+    ? range.endContainer
+    : range.endContainer.childNodes[range.endOffset - 1] || range.endContainer
+  );
+
+  if (endMath) {
+    const endElement = dom(endMath.nextSibling).matches('script[type="math/mml"]') ? endMath.nextSibling : endMath;
     const endContainer = endElement.parentNode;
     range.setEnd(endContainer, Array.prototype.indexOf.call(endContainer.childNodes, endElement) + 1);
   }
@@ -101,12 +101,12 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
     }
   }
 
-  if (options.snapMathJax) {
-    snapToMath(range);
-  }
-
   if (options.snapCode) {
     snapToCode(range);
+  }
+
+  if (options.snapMathJax) {
+    snapToMath(range);
   }
 
   if (options.snapWords) {
