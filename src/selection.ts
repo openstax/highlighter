@@ -43,9 +43,8 @@ const snapToCode = (range: Range) => {
   );
 
   if (endCode) {
-    const endElement = dom(endCode.nextSibling).matches('[data-type="code"]') ? endCode.nextSibling : endCode;
-    const endContainer = endElement.parentNode;
-    range.setEnd(endContainer, Array.prototype.indexOf.call(endContainer.childNodes, endElement) + 1);
+    const endContainer = endCode.parentNode;
+    range.setEnd(endContainer, Array.prototype.indexOf.call(endContainer.childNodes, endCode) + 1);
   }
 };
 
