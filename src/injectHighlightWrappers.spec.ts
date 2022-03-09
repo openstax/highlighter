@@ -10,6 +10,7 @@ const messages: { [key: string]: string } = {
 
 describe('inject highlight wrappers for figure with caption', () => {
   let page: HTMLElement;
+  let figure: HTMLElement;
   let img: HTMLElement;
   let p: HTMLElement;
   let textNode: Node;
@@ -25,6 +26,7 @@ describe('inject highlight wrappers for figure with caption', () => {
   beforeEach(() => {
     document.body.innerHTML = paragraphFigureAndCaption;
     page = document.getElementById('container')!;
+    figure = document.getElementById('test-figure')!;
     img = document.getElementById('test-img')!;
     p = document.getElementById('test-p')!;
     textNode = p.childNodes[0];
@@ -36,8 +38,6 @@ describe('inject highlight wrappers for figure with caption', () => {
     Date.now = jest.fn();
 
     rangeDefaults = {
-      collapse: false,
-      commonAncestorContainer: page,
       setEndAfter: jest.fn(),
       setStartBefore: jest.fn(),
     };
@@ -45,11 +45,13 @@ describe('inject highlight wrappers for figure with caption', () => {
     mockMessages = jest.fn((descriptor) => messages[descriptor.id]);
   });
 
-  describe('for highlight ending on an <img>', () => {
+  describe('for highlight starting on a <p> and ending on an <img>', () => {
 
     it('in chrome and safari', () => {
       const range: any = {
         ...rangeDefaults,
+        collapsed: false,
+        commonAncestorContainer: page,
         endContainer: span,
         endOffset: 2,
         startContainer: textNode,
@@ -71,7 +73,9 @@ describe('inject highlight wrappers for figure with caption', () => {
     it('in firefox', () => {
       const range: any = {
         ...rangeDefaults,
-        endContainer: captionTitleText,
+        collapsed: false,
+        commonAncestorContainer: page,
+        endContainer: img,
         endOffset: 0,
         startContainer: textNode,
         startOffset: 2,
@@ -88,13 +92,16 @@ describe('inject highlight wrappers for figure with caption', () => {
         expect(el).toMatchSnapshot();
       });
     });
+
   });
 
-  describe('for highlight starting on an <img>', () => {
+  describe('for highlight starting on an <img> and ending on the caption', () => {
 
     it('in chrome and safari', () => {
       const range: any = {
         ...rangeDefaults,
+        collapsed: false,
+        commonAncestorContainer: page,
         endContainer: captionTitleText,
         endOffset: 6,
         startContainer: textNode,
@@ -116,10 +123,12 @@ describe('inject highlight wrappers for figure with caption', () => {
     it('in firefox', () => {
       const range: any = {
         ...rangeDefaults,
+        collapsed: false,
+        commonAncestorContainer: figure,
         endContainer: captionTitleText,
-        endOffset: 6,
-        startContainer: textNode,
-        startOffset: textNode.nodeValue!.length,
+        endOffset: 0,
+        startContainer: img,
+        startOffset: 0,
       };
 
       const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages });
@@ -135,13 +144,63 @@ describe('inject highlight wrappers for figure with caption', () => {
     });
   });
 
-  describe('for highlight starting on an <img> where img is first element on page', () => {
+  describe('for highlight starting and ending on an <img>', () => {
+
+    it('in chrome and safari', () => {
+      const range: any = {
+        ...rangeDefaults,
+        collapsed: false,
+        commonAncestorContainer: page,
+        endContainer: span,
+        endOffset: 2,
+        startContainer: textNode,
+        startOffset: textNode.nodeValue!.length,
+      };
+      const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages });
+
+      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: mockMessages});
+      highlighter.highlight(highlight);
+
+      const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
+
+      highlightSpans.forEach((el) => {
+        expect(el).toMatchSnapshot();
+      });
+    });
+
+    it('in firefox', () => {
+      const range: any = {
+        ...rangeDefaults,
+        collapsed: true,
+        commonAncestorContainer: img,
+        endContainer: img,
+        endOffset: 0,
+        startContainer: img,
+        startOffset: 0,
+      };
+
+      const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages });
+
+      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: mockMessages});
+      highlighter.highlight(highlight);
+
+      const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
+
+      highlightSpans.forEach((el) => {
+        expect(el).toMatchSnapshot();
+      });
+    });
+  });
+
+  describe('for highlight starting/ending on an <img> where img is first element on page', () => {
 
     it('in chrome', () => {
       p.remove();
 
       const range: any = {
         ...rangeDefaults,
+        collapsed: false,
+        commonAncestorContainer: page,
         endContainer: captionContainer,
         endOffset: 0,
         startContainer: span,
@@ -165,6 +224,8 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const range: any = {
         ...rangeDefaults,
+        collapsed: true,
+        commonAncestorContainer: img,
         endContainer: img,
         endOffset: 0,
         startContainer: img,
@@ -188,54 +249,12 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const range: any = {
         ...rangeDefaults,
+        collapsed: false,
+        commonAncestorContainer: page,
         endContainer: span,
         endOffset: 2,
         startContainer: page,
         startOffset: 0,
-      };
-
-      const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages });
-
-      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: mockMessages});
-      highlighter.highlight(highlight);
-
-      const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
-
-      highlightSpans.forEach((el) => {
-        expect(el).toMatchSnapshot();
-      });
-    });
-  });
-
-  describe('for highlight starting and ending on an <img>', () => {
-
-    it('in chrome and safari', () => {
-      const range: any = {
-        ...rangeDefaults,
-        endContainer: span,
-        endOffset: 2,
-        startContainer: textNode,
-        startOffset: textNode.nodeValue!.length,
-      };
-      const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages });
-
-      const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: mockMessages});
-      highlighter.highlight(highlight);
-
-      const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
-
-      highlightSpans.forEach((el) => {
-        expect(el).toMatchSnapshot();
-      });
-    });
-
-    it('in firefox', () => {
-      const range: any = {
-        ...rangeDefaults,
-        endContainer: img,
-        endOffset: 0,
-        startContainer: textNode,
-        startOffset: textNode.nodeValue!.length,
       };
 
       const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages });
