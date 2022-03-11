@@ -1,41 +1,60 @@
-import { getContentPath } from "./contentPath";
-import Highlighter from "./Highlighter";
-import Highlight from "./Highlight";
-import { IData } from "./serializationStrategies/XpathRangeSelector";
-import { adjacentTextSections } from "./injectHighlightWrappers.spec.data";
+import { getContentPath } from './contentPath';
+import Highlighter from './Highlighter';
+import { adjacentTextSections } from './injectHighlightWrappers.spec.data';
+import { IData } from './serializationStrategies/XpathRangeSelector';
 
 describe('getContentPath', () => {
   it('creates a path of indexes', () => {
     document.body.innerHTML = `<div id="page">${adjacentTextSections}</div>`;
 
     const container = document.getElementById('page')!;
-    const element = document.getElementById('test-p')!;
-
     const highlighter = new Highlighter(container, { formatMessage: jest.fn() });
-    const highlightData = { id: 'some-highlight', content: 'asd', style: 'yellow' };
-
-    const range: any = {
-      collapse: false,
-      commonAncestorContainer: container,
-      setEndAfter: jest.fn(),
-      setStartBefore: jest.fn(),
-      endContainer: element.childNodes[0],
-      endOffset: 10,
-      startContainer: element.childNodes[0],
-      startOffset: 4,
-    };
-
-    const highlight = new Highlight(range, highlightData, { formatMessage: jest.fn() });
 
     const result = getContentPath(
       {
         referenceElementId: 'test-container',
-        startContainer: "./*[name()='section'][1]/*[name()='div'][1]/*[name()='p'][1]/text()[1]"
+        // tslint:disable-next-line quotemark
+        startContainer: "./*[name()='section'][1]/*[name()='div'][1]/*[name()='p'][1]/text()[1]",
+        startOffset: 4,
       } as IData,
-      highlighter,
-      highlight
+      highlighter
     );
 
     expect(result).toEqual([3, 1, 1, 0, 4]);
+  });
+
+  it('handles adjacent text highlights', () => {
+    document.body.innerHTML = `<div id="page">
+      <div id="test-container">
+      <p id="test-p">
+        <span data-highlighted>A shortcut called</span> FOIL is sometimes used to find the product of two binomials.
+        </p>
+      </div>
+    </div>`;
+
+    const container = document.getElementById('test-container')!;
+    const highlighter = new Highlighter(container, { formatMessage: jest.fn() });
+
+    const range: any = {
+      collapse: false,
+      commonAncestorContainer: container,
+      endContainer: './text()[1]',
+      endOffset: 31,
+      setEndAfter: jest.fn(),
+      setStartBefore: jest.fn(),
+      startContainer: './text()[1]',
+      startOffset: 27,
+    };
+
+    const result = getContentPath(
+      {
+        referenceElementId: 'test-p',
+        startContainer: range.startContainer,
+        startOffset: range.startOffset,
+      } as IData,
+      highlighter
+    );
+
+    expect(result).toEqual([0, 27]);
   });
 });
