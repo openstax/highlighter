@@ -87,7 +87,7 @@ const floatThroughText = (element: Node, offset: number, container: Node): [Node
   }
 };
 
-const resolveToNextElementOffsetIfPossible = (element: Node, offset: number) => {
+const resolveToNextElementOffsetIfPossible = (element: Node, offset: number): [Node, number] => {
   if (isTextOrTextHighlightOrScreenReaderNode(element) && element.parentNode && offset === getMaxOffset(element) && (!element.nextSibling || !isHighlightOrScreenReaderNode(element.nextSibling))) {
     return [element.parentNode, nodeIndex(element.parentNode.childNodes, element) + 1] as const;
   }
@@ -95,7 +95,7 @@ const resolveToNextElementOffsetIfPossible = (element: Node, offset: number) => 
   return [element, offset] as const;
 };
 
-const resolveToPreviousElementOffsetIfPossible = (element: Node, offset: number) => {
+const resolveToPreviousElementOffsetIfPossible = (element: Node, offset: number): [Node, number] => {
 
   if (isTextOrTextHighlightOrScreenReaderNode(element) && element.parentNode && offset === 0 && (!element.previousSibling || !isHighlightOrScreenReaderNode(element.previousSibling))) {
     return [element.parentNode, nodeIndex(element.parentNode.childNodes, element)] as const;
