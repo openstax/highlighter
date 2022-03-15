@@ -87,7 +87,7 @@ const floatThroughText = (element: Node, offset: number, container: Node): [Node
   }
 };
 
-const resolveToNextElementOffsetIfPossible = (element: Node, offset: number) => {
+const resolveToNextElementOffsetIfPossible = (element: Node, offset: number): [Node, number] => {
   if (isTextOrTextHighlightOrScreenReaderNode(element) && element.parentNode && offset === getMaxOffset(element) && (!element.nextSibling || !isHighlightOrScreenReaderNode(element.nextSibling))) {
     return [element.parentNode, nodeIndex(element.parentNode.childNodes, element) + 1];
   }
@@ -95,7 +95,7 @@ const resolveToNextElementOffsetIfPossible = (element: Node, offset: number) => 
   return [element, offset];
 };
 
-const resolveToPreviousElementOffsetIfPossible = (element: Node, offset: number) => {
+const resolveToPreviousElementOffsetIfPossible = (element: Node, offset: number): [Node, number] => {
 
   if (isTextOrTextHighlightOrScreenReaderNode(element) && element.parentNode && offset === 0 && (!element.previousSibling || !isHighlightOrScreenReaderNode(element.previousSibling))) {
     return [element.parentNode, nodeIndex(element.parentNode.childNodes, element)];
@@ -234,7 +234,7 @@ function followPart(node: Node, part: string) {
   const findFirst = (nodeList: NodeList, predicate: (node: Node) => boolean) =>
     Array.prototype.find.call(nodeList, (node: Node) => predicate(node));
   const findFirstAfter = (nodeList: NodeList, afterThis: Node, predicate: (node: Node) => boolean) => findFirst(
-    Array.prototype.slice.call(nodeList, Array.prototype.indexOf.call(nodeList, afterThis) + 1),
+    Array.prototype.slice.call(nodeList, Array.prototype.indexOf.call(nodeList, afterThis) + 1) as unknown as NodeList,
     predicate
   );
 
