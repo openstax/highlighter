@@ -26,10 +26,56 @@ const getDirection = (selection: Selection): 'forward' | 'backward' => {
   return 'forward';
 };
 
+const snapToCode = (range: Range) => {
+  const getCode = (node: Node) => dom(node).farthest('[data-type="code"]');
+
+  const startCode = getCode(range.startContainer.nodeType === 3 /* #text */
+    ? range.startContainer
+    : range.startContainer.childNodes[range.startOffset] || range.startContainer
+  );
+  if (startCode) {
+    range.setStartBefore(startCode);
+  }
+
+  const endCode = getCode(range.endContainer.nodeType === 3 /* #text */
+    ? range.endContainer
+    : range.endContainer.childNodes[range.endOffset - 1] || range.endContainer
+  );
+
+  if (endCode) {
+    const endContainer = endCode.parentNode;
+    range.setEnd(endContainer, Array.prototype.indexOf.call(endContainer.childNodes, endCode) + 1);
+  }
+};
+
+const snapToMath = (range: Range) => {
+  const getMath = (node: Node) => dom(node).farthest('.MathJax,.MathJax_Display');
+
+  const startMath = getMath(range.startContainer.nodeType === 3 /* #text */
+    ? range.startContainer
+    : range.startContainer.childNodes[range.startOffset] || range.startContainer
+  );
+  if (startMath) {
+    range.setStartBefore(startMath);
+  }
+
+  const endMath = getMath(range.endContainer.nodeType === 3 /* #text */
+    ? range.endContainer
+    : range.endContainer.childNodes[range.endOffset - 1] || range.endContainer
+  );
+
+  if (endMath) {
+    const endElement = dom(endMath.nextSibling).matches('script[type="math/mml"]') ? endMath.nextSibling : endMath;
+    const endContainer = endElement.parentNode;
+    range.setEnd(endContainer, Array.prototype.indexOf.call(endContainer.childNodes, endElement) + 1);
+  }
+};
+
 interface IOptions {
   snapTableRows?: boolean;
   snapMathJax?: boolean;
   snapWords?: boolean;
+  snapCode?: boolean;
 }
 
 export const snapSelection = (selection: Selection, options: IOptions): Range | undefined => {
@@ -54,27 +100,12 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
     }
   }
 
+  if (options.snapCode) {
+    snapToCode(range);
+  }
+
   if (options.snapMathJax) {
-    const getMath = (node: Node) => dom(node).farthest('.MathJax,.MathJax_Display');
-
-    const startMath = getMath(range.startContainer.nodeType === 3 /* #text */
-      ? range.startContainer
-      : range.startContainer.childNodes[range.startOffset] || range.startContainer
-    );
-    if (startMath) {
-      range.setStartBefore(startMath);
-    }
-
-    const endMath = getMath(range.endContainer.nodeType === 3 /* #text */
-      ? range.endContainer
-      : range.endContainer.childNodes[range.endOffset - 1] || range.endContainer
-    );
-
-    if (endMath) {
-      const endElement = dom(endMath.nextSibling).matches('script[type="math/mml"]') ? endMath.nextSibling : endMath;
-      const endContainer = endElement.parentNode;
-      range.setEnd(endContainer, Array.prototype.indexOf.call(endContainer.childNodes, endElement) + 1);
-    }
+    snapToMath(range);
   }
 
   if (options.snapWords) {
