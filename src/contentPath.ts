@@ -1,8 +1,14 @@
 import Highlighter from './Highlighter';
-import { IData } from './serializationStrategies/XpathRangeSelector';
+import { IData as TextPositionData } from './serializationStrategies/TextPositionSelector';
+import { IData as XpathData } from './serializationStrategies/XpathRangeSelector';
 import { getFirstByXPath, isText, isTextHighlightOrScreenReaderNode } from './serializationStrategies/XpathRangeSelector/xpath';
 
+type IData = XpathData | TextPositionData;
+
 export function getContentPath(serializationData: IData, highlighter: Highlighter) {
+  if (serializationData.type === 'TextPositionSelector') {
+    return [0, serializationData.start];
+  }
 
   const referenceElement = highlighter.getReferenceElement(serializationData.referenceElementId);
   if (!referenceElement) { return; }
