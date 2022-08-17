@@ -29,11 +29,11 @@ describe('getContentPath', () => {
     it('handles adjacent text highlights', () => {
       document.body.innerHTML = `<div id="page">
       <div id="test-container">
-        <p id="test-p">
-          <span data-highlighted>A shortcut called</span> FOIL is sometimes used to find the product of two binomials.
+      <p id="test-p">
+        <span data-highlighted>A shortcut called</span> FOIL is sometimes used to find the product of two binomials.
         </p>
       </div>
-      </div>`;
+    </div>`;
 
       const container = document.getElementById('test-container')!;
       const highlighter = new Highlighter(container, { formatMessage: jest.fn() });
