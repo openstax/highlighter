@@ -4,7 +4,7 @@ import { getContentPath } from './contentPath';
 import Highlight, { IHighlightData } from './Highlight';
 import Highlighter from './Highlighter';
 import { getDeserializer, IDeserializer, ISerializationData } from './serializationStrategies';
-import { discriminator as xPathDiscriminator, serialize as defaultSerializer } from './serializationStrategies/XpathRangeSelector';
+import { serialize as defaultSerializer } from './serializationStrategies/XpathRangeSelector';
 
 const mapKeys = (transform: (key: string) => string, obj: {[key: string]: any}) => Object.keys(obj).reduce((result, key) => ({
   ...result, [transform(key)]: obj[key],
@@ -86,9 +86,7 @@ export default class SerializedHighlight {
 
     let contentPath: number[] | undefined;
 
-    if (serializationData.type === xPathDiscriminator) {
-      contentPath = getContentPath({ referenceElementId, ...serializationData }, highlighter);
-    }
+    contentPath = getContentPath({ referenceElementId, ...serializationData }, highlighter);
 
     if (!style) {
       throw new Error('a style is requred to create an api payload');
