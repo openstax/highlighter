@@ -9,9 +9,9 @@ const findNonTextChild = (node: Node) => Array.prototype.find.call(node.childNod
 const isHighlight = (node: Nullable<Node>): node is HTMLElement => !!node && (node as Element).getAttribute && (node as Element).getAttribute(DATA_ATTR) !== null;
 const isHighlightOrScreenReaderNode = (node: Nullable<Node>) => isHighlight(node) || isScreenReaderNode(node);
 const isTextHighlight = (node: Nullable<Node>): node is HTMLElement => isHighlight(node) && !findNonTextChild(node);
-const isTextHighlightOrScreenReaderNode = (node: Nullable<Node>): node is HTMLElement => (isHighlight(node) || isScreenReaderNode(node)) && !findNonTextChild(node);
-const isText = (node: Nullable<Node>): node is Text => !!node && node.nodeType === 3;
-const isTextOrTextHighlight  = (node: Nullable<Node>): node is Text | HTMLElement => isText(node) || isTextHighlight(node);
+export const isTextHighlightOrScreenReaderNode = (node: Nullable<Node>): node is HTMLElement => (isHighlight(node) || isScreenReaderNode(node)) && !findNonTextChild(node);
+export const isText = (node: Nullable<Node>): node is Text => !!node && node.nodeType === 3;
+const isTextOrTextHighlight = (node: Nullable<Node>): node is Text | HTMLElement => isText(node) || isTextHighlight(node);
 const isTextOrTextHighlightOrScreenReaderNode = (node: Nullable<Node | HTMLElement>) => isText(node) || isTextHighlightOrScreenReaderNode(node) || isScreenReaderNode(node);
 const isElement = (node: Node): node is HTMLElement => node && node.nodeType === 1;
 const isElementNotHighlight = (node: Node) => isElement(node) && !isHighlight(node);
@@ -87,7 +87,7 @@ const floatThroughText = (element: Node, offset: number, container: Node): [Node
   }
 };
 
-const resolveToNextElementOffsetIfPossible = (element: Node, offset: number) => {
+const resolveToNextElementOffsetIfPossible = (element: Node, offset: number): [Node, number] => {
   if (isTextOrTextHighlightOrScreenReaderNode(element) && element.parentNode && offset === getMaxOffset(element) && (!element.nextSibling || !isHighlightOrScreenReaderNode(element.nextSibling))) {
     return [element.parentNode, nodeIndex(element.parentNode.childNodes, element) + 1];
   }
@@ -95,7 +95,7 @@ const resolveToNextElementOffsetIfPossible = (element: Node, offset: number) => 
   return [element, offset];
 };
 
-const resolveToPreviousElementOffsetIfPossible = (element: Node, offset: number) => {
+const resolveToPreviousElementOffsetIfPossible = (element: Node, offset: number): [Node, number] => {
 
   if (isTextOrTextHighlightOrScreenReaderNode(element) && element.parentNode && offset === 0 && (!element.previousSibling || !isHighlightOrScreenReaderNode(element.previousSibling))) {
     return [element.parentNode, nodeIndex(element.parentNode.childNodes, element)];
@@ -234,7 +234,7 @@ function followPart(node: Node, part: string) {
   const findFirst = (nodeList: NodeList, predicate: (node: Node) => boolean) =>
     Array.prototype.find.call(nodeList, (node: Node) => predicate(node));
   const findFirstAfter = (nodeList: NodeList, afterThis: Node, predicate: (node: Node) => boolean) => findFirst(
-    Array.prototype.slice.call(nodeList, Array.prototype.indexOf.call(nodeList, afterThis) + 1),
+    Array.prototype.slice.call(nodeList, Array.prototype.indexOf.call(nodeList, afterThis) + 1) as unknown as NodeList,
     predicate
   );
 

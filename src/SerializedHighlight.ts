@@ -1,9 +1,10 @@
-import {camelCase, snakeCase} from 'change-case';
-import {Highlight as ApiHighlight, NewHighlight as NewApiHighlight, styleIsColor } from './api';
-import Highlight, {IHighlightData} from './Highlight';
+import { camelCase, snakeCase } from 'change-case';
+import { Highlight as ApiHighlight, NewHighlight as NewApiHighlight, styleIsColor } from './api';
+import { getContentPath } from './contentPath';
+import Highlight, { IHighlightData } from './Highlight';
 import Highlighter from './Highlighter';
-import {getDeserializer, IDeserializer, ISerializationData} from './serializationStrategies';
-import {serialize as defaultSerializer} from './serializationStrategies/XpathRangeSelector';
+import { getDeserializer, IDeserializer, ISerializationData } from './serializationStrategies';
+import { serialize as defaultSerializer } from './serializationStrategies/XpathRangeSelector';
 
 const mapKeys = (transform: (key: string) => string, obj: {[key: string]: any}) => Object.keys(obj).reduce((result, key) => ({
   ...result, [transform(key)]: obj[key],
@@ -83,6 +84,10 @@ export default class SerializedHighlight {
     const prevHighlight = highlighter.getHighlightBefore(highlight);
     const nextHighlight = highlighter.getHighlightAfter(highlight);
 
+    let contentPath: number[] | undefined;
+
+    contentPath = getContentPath({ referenceElementId, ...serializationData }, highlighter);
+
     if (!style) {
       throw new Error('a style is requred to create an api payload');
     }
@@ -94,12 +99,12 @@ export default class SerializedHighlight {
       anchor: referenceElementId,
       annotation,
       color: style,
+      contentPath,
       highlightedContent: content,
       id,
       locationStrategies: [mapKeys(snakeCase, serializationData)],
       nextHighlightId: nextHighlight && nextHighlight.id,
       prevHighlightId: prevHighlight && prevHighlight.id,
-
     };
   }
 
