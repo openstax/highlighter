@@ -394,15 +394,15 @@ function mergeSiblingHighlights(highlights: Node[]) {
  * Creates wrapper for highlights.
  */
 function createWrapper(options: any) {
-  const span = document.createElement('span');
-  span.className = options.className;
+  const el = document.createElement('mark');
+  el.className = options.className;
   if (options.timestamp) {
-    span.setAttribute(TIMESTAMP_ATTR, options.timestamp);
+    el.setAttribute(TIMESTAMP_ATTR, options.timestamp);
   }
   if (options.id) {
-    span.setAttribute(DATA_ID_ATTR, options.id);
+    el.setAttribute(DATA_ID_ATTR, options.id);
   }
-  return span;
+  return el;
 }
 
 function isHighlight(el: any): el is HTMLElement {
