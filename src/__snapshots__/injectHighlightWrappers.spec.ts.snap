@@ -10,7 +10,6 @@ exports[`inject highlight wrappers for figure with caption for highlight ending 
     aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
   />
   hardware store sells 16-ft ladders and 24-ft ladders. A window is located 12 feet above the ground. A ladder needs to be purchased that will reach the window from a point on the ground 5 feet from the building.
 </mark>
@@ -46,7 +45,6 @@ exports[`inject highlight wrappers for figure with caption for highlight ending 
     aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
   />
   hardware store sells 16-ft ladders and 24-ft ladders. A window is located 12 feet above the ground. A ladder needs to be purchased that will reach the window from a point on the ground 5 feet from the building.
 </mark>
@@ -82,7 +80,6 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
     aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
   />
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
@@ -108,7 +105,6 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
     aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
   />
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
@@ -134,7 +130,6 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
     aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
   />
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
@@ -170,7 +165,6 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
     aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
   />
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
@@ -206,7 +200,6 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
     aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
   />
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
@@ -232,7 +225,6 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
     aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
   />
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
@@ -258,7 +250,6 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
     aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
   />
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
@@ -284,7 +275,6 @@ exports[`inject highlight wrappers for img between paragraphs in chrome and safa
     aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
   />
   the first terms, the outer terms, the inner terms, and then the last terms of each binomial.
 </mark>
@@ -320,7 +310,6 @@ exports[`inject highlight wrappers for img between paragraphs in firefox 1`] = `
     aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
   />
   the first terms, the outer terms, the inner terms, and then the last terms of each binomial.
 </mark>
@@ -356,7 +345,6 @@ exports[`inject highlight wrappers for text followed by section in chrome and sa
     aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
   />
   How To
   <span
@@ -377,7 +365,6 @@ exports[`inject highlight wrappers for text followed by section in firefox 1`] =
     aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
   />
   How To
   <span
