@@ -12,6 +12,7 @@ export interface IHighlightData {
 export interface IOptions {
   skipIDsBy?: RegExp;
   formatMessage: (descriptor: { id: string }, values: { style: IHighlightData['style'] }) => string;
+  tabbable?: boolean;
 }
 
 export default class Highlight {
