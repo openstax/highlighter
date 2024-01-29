@@ -21,6 +21,7 @@ interface IOptions {
   onSelect?: (highlights: Highlight[], newHighlight?: Highlight) => void;
   onFocusIn?: (highlight: Highlight) => void;
   onFocusOut?: (highlight: Highlight) => void;
+  tabbable?: boolean;
 }
 
 export default class Highlighter {
@@ -42,6 +43,7 @@ export default class Highlighter {
       onFocusOut: () => {
         this.clearFocusedStyles();
       },
+      tabbable: true,
       ...options,
     };
     this.debouncedSnapSelection = debounce(this.snapSelection, ON_SELECT_DELAY);
@@ -109,11 +111,12 @@ export default class Highlighter {
   }
 
   public getHighlightOptions(): HighlightOptions {
-    const { formatMessage, skipIDsBy } = this.options;
+    const { formatMessage, skipIDsBy, tabbable } = this.options;
 
     return {
       formatMessage,
       skipIDsBy,
+      tabbable,
     };
   }
 
