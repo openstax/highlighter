@@ -101,7 +101,7 @@ describe('inject highlight wrappers for figure with caption', () => {
         startOffset: textNode.nodeValue!.length,
       };
 
-      const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages });
+      const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages, tabbable: true });
 
       const highlighter = new Highlighter(page, {onClick: jest.fn(), formatMessage: mockMessages});
       highlighter.highlight(highlight);
