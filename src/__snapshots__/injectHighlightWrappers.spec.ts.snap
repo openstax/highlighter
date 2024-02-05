@@ -130,6 +130,7 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
     aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    tabindex="0"
   />
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
