@@ -97,7 +97,10 @@ export default class Highlight {
    * Add class 'focus' to all elements of this highlight.
    */
   public addFocusedStyles(): Highlight {
-    this.elements.forEach((el: HTMLElement) => el.classList.add(FOCUS_CSS));
+    this.elements.forEach((el: HTMLElement) => {
+      el.classList.add(FOCUS_CSS);
+      el.setAttribute('aria-current', 'true');
+    });
     return this;
   }
 

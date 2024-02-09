@@ -98,7 +98,10 @@ export default class Highlighter {
 
   public clearFocusedStyles(): void {
     this.container.querySelectorAll(`.${this.options.className}.${FOCUS_CSS}`)
-      .forEach((el: Element) => el.classList.remove(FOCUS_CSS));
+      .forEach((el: Element) => {
+        el.classList.remove(FOCUS_CSS);
+        el.removeAttribute('aria-current');
+      });
   }
 
   public getHighlights(): Highlight[] {
