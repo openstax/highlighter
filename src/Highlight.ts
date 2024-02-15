@@ -1,9 +1,7 @@
 import * as uuid from 'uuid/v4';
 import dom from './dom';
-import { DATA_SCREEN_READERS_ATTR_SELECTOR } from './injectHighlightWrappers';
+import { DATA_SCREEN_READERS_ATTR, DATA_SCREEN_READERS_ATTR_SELECTOR } from './injectHighlightWrappers';
 import SerializedHighlight from './SerializedHighlight';
-
-export const FOCUS_CSS = 'focus';
 
 export interface IHighlightData {
   style?: string;
@@ -93,13 +91,22 @@ export default class Highlight {
     return this;
   }
 
+  public updateStartMarker(el: Element, position: string) {
+    const marker = el.querySelector(`[${DATA_SCREEN_READERS_ATTR}][tabindex]`);
+    const ariaLabel = this.getMessage(`i18n:highlighter:highlight:${position}`);
+
+    if (!marker) {
+      return;
+    }
+    marker.setAttribute('aria-label', ariaLabel);
+  }
   /**
    * Add class 'focus' to all elements of this highlight.
    */
   public addFocusedStyles(): Highlight {
     this.elements.forEach((el: HTMLElement) => {
-      el.classList.add(FOCUS_CSS);
       el.setAttribute('aria-current', 'true');
+      this.updateStartMarker(el, 'start-selected');
     });
     return this;
   }
