@@ -71,9 +71,9 @@ function createAndInsertNodeForScreenReaders(highlight: Highlight, element: HTML
   node.setAttribute(DATA_SCREEN_READERS_ATTR, 'true');
   node.setAttribute(DATA_ID_ATTR, highlight.id);
 
-  const ariaLabel = highlight.getMessage(`i18n:highlighter:highlight:${position}`);
+  const message = highlight.getMessage(`i18n:highlighter:highlight:${position}`);
 
-  node.setAttribute('aria-label', ariaLabel);
+  node.textContent = message;
 
   if (position === 'start') {
     node.setAttribute('tabindex', '0');
