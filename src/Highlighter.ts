@@ -1,6 +1,6 @@
 import { debounce } from 'lodash';
 import dom, { isHtmlElement } from './dom';
-import Highlight, { FOCUS_CSS, IHighlightData, IOptions as HighlightOptions } from './Highlight';
+import Highlight, { IHighlightData, IOptions as HighlightOptions } from './Highlight';
 import injectHighlightWrappers, { DATA_ATTR, DATA_ID_ATTR, DATA_SCREEN_READERS_ATTR } from './injectHighlightWrappers';
 import { rangeContentsString } from './rangeContents';
 import removeHighlightWrappers from './removeHighlightWrappers';
@@ -21,6 +21,7 @@ interface IOptions {
   onSelect?: (highlights: Highlight[], newHighlight?: Highlight) => void;
   onFocusIn?: (highlight: Highlight) => void;
   onFocusOut?: (highlight: Highlight) => void;
+  tabbable?: boolean;
 }
 
 export default class Highlighter {
@@ -42,6 +43,7 @@ export default class Highlighter {
       onFocusOut: () => {
         this.clearFocusedStyles();
       },
+      tabbable: true,
       ...options,
     };
     this.debouncedSnapSelection = debounce(this.snapSelection, ON_SELECT_DELAY);
@@ -96,9 +98,26 @@ export default class Highlighter {
     return this.container.querySelector(`[id="${id}"]`);
   }
 
+  public getHighlightFromElement(el: Element) {
+    const highlightId = el.getAttribute('data-highlight-id');
+
+    if (!highlightId) {
+      return null;
+    }
+    return this.getHighlight(highlightId);
+  }
+
   public clearFocusedStyles(): void {
-    this.container.querySelectorAll(`.${this.options.className}.${FOCUS_CSS}`)
-      .forEach((el: Element) => el.classList.remove(FOCUS_CSS));
+    this.container.querySelectorAll(`.${this.options.className}[aria-current]`)
+      .forEach((el: Element) => {
+        el.removeAttribute('aria-current');
+        const highlight = this.getHighlightFromElement(el);
+
+        if (!highlight) {
+          return;
+        }
+        highlight.updateStartMarker(el, 'start');
+      });
   }
 
   public getHighlights(): Highlight[] {
@@ -106,11 +125,12 @@ export default class Highlighter {
   }
 
   public getHighlightOptions(): HighlightOptions {
-    const { formatMessage, skipIDsBy } = this.options;
+    const { formatMessage, skipIDsBy, tabbable } = this.options;
 
     return {
       formatMessage,
       skipIDsBy,
+      tabbable,
     };
   }
 
