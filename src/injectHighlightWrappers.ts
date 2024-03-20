@@ -71,9 +71,12 @@ function createAndInsertNodeForScreenReaders(highlight: Highlight, element: HTML
   node.setAttribute(DATA_SCREEN_READERS_ATTR, 'true');
   node.setAttribute(DATA_ID_ATTR, highlight.id);
 
-  const message = highlight.getMessage(`i18n:highlighter:highlight:${position}`);
+  const language = highlight.getMessage(`i18n:highlighter:language`);
 
-  node.textContent = message;
+  if (language) {
+    node.classList.add(language);
+  }
+  node.classList.add(position);
 
   if (position === 'start') {
     if (highlight.options.tabbable) {

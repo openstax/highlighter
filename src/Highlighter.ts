@@ -116,7 +116,6 @@ export default class Highlighter {
         if (!highlight) {
           return;
         }
-        highlight.updateStartMarker(el, 'start');
       });
   }
 
