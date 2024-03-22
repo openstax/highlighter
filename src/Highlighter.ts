@@ -108,14 +108,15 @@ export default class Highlighter {
   }
 
   public clearFocusedStyles(): void {
-    this.container.querySelectorAll(`.${this.options.className}[aria-current]`)
-      .forEach((el: Element) => {
+    this.container.querySelectorAll<HTMLElement>(`.${this.options.className}[aria-current]`)
+      .forEach((el) => {
         el.removeAttribute('aria-current');
         const highlight = this.getHighlightFromElement(el);
 
         if (!highlight) {
           return;
         }
+        highlight.updateStartMarker(el, 'start');
       });
   }
 

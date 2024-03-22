@@ -92,9 +92,14 @@ export default class Highlight {
     return this;
   }
 
+  public updateStartMarker(el: HTMLElement, position: string) {
+    el.dataset.startMessage = this.getMessage(`i18n:highlighter:highlight:${position}`);
+  }
+
   public addFocusedStyles(): Highlight {
     this.elements.forEach((el: HTMLElement) => {
       el.setAttribute('aria-current', 'true');
+      this.updateStartMarker(el, 'start-selected');
     });
     return this;
   }

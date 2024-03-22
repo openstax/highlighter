@@ -4,7 +4,8 @@ import { DATA_ATTR } from './injectHighlightWrappers';
 import { adjacentTextSections, imageBetweenParagraphs, paragraphFigureAndCaption } from './injectHighlightWrappers.spec.data';
 
 const messages: { [key: string]: string } = {
-  'i18n:highlighter:language': 'spanish',
+  'i18n:highlighter:highlight:end': 'End of highlight',
+  'i18n:highlighter:highlight:start': 'Start of highlight',
 };
 
 describe('inject highlight wrappers for figure with caption', () => {

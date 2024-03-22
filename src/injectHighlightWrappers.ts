@@ -60,32 +60,15 @@ export default function injectHighlightWrappers(highlight: Highlight, options: I
 }
 
 /**
- * Create empty span with tabindex=0 and all necessary information taken from @param highlight
- * and insert this node at the first position inside @param element.
+ * Create data-startMessage or data-endMessage attributes, as appropriate
  * @param highlight Highlight
  * @param element HTMLElement highlight element for which we will insert the starting or ending element for screenreader
  * @param position start | end
  */
-function createAndInsertNodeForScreenReaders(highlight: Highlight, element: HTMLElement, position: 'start' | 'end'): void {
-  const node = document.createElement('span');
-  node.setAttribute(DATA_SCREEN_READERS_ATTR, 'true');
-  node.setAttribute(DATA_ID_ATTR, highlight.id);
+function createMarkerDataForScreenReaders(highlight: Highlight, element: HTMLElement, position: 'start' | 'end'): void {
+  const markerName = `${position}Message`;
 
-  const language = highlight.getMessage(`i18n:highlighter:language`);
-
-  if (language) {
-    node.classList.add(language);
-  }
-  node.classList.add(position);
-
-  if (position === 'start') {
-    if (highlight.options.tabbable) {
-      node.setAttribute('tabindex', '0');
-    }
-    element.prepend(node);
-  } else {
-    element.append(node);
-  }
+  element.dataset[markerName] = highlight.getMessage(`i18n:highlighter:highlight:${position}`);
 }
 
 /**
@@ -128,7 +111,7 @@ function normalizeHighlights(highlight: Highlight, highlights: HTMLElement[]) {
   for (const [index, node] of normalizedHighlights.entries()) {
     if (index === 0) {
       node.classList.add('first');
-      createAndInsertNodeForScreenReaders(highlight, node, 'start');
+      createMarkerDataForScreenReaders(highlight, node, 'start');
     }
 
     if (hasBlockContent(node)) {
@@ -139,7 +122,7 @@ function normalizeHighlights(highlight: Highlight, highlights: HTMLElement[]) {
 
     if (index === (normalizedHighlights.length - 1)) {
       node.classList.add('last');
-      createAndInsertNodeForScreenReaders(highlight, node, 'end');
+      createMarkerDataForScreenReaders(highlight, node, 'end');
     }
   }
 
