@@ -3,8 +3,6 @@ import dom from './dom';
 import { DATA_SCREEN_READERS_ATTR_SELECTOR } from './injectHighlightWrappers';
 import SerializedHighlight from './SerializedHighlight';
 
-export const FOCUS_CSS = 'focus';
-
 export interface IHighlightData {
   style?: string;
   id: string;
@@ -14,6 +12,7 @@ export interface IHighlightData {
 export interface IOptions {
   skipIDsBy?: RegExp;
   formatMessage: (descriptor: { id: string }, values: { style: IHighlightData['style'] }) => string;
+  tabbable?: boolean;
 }
 
 export default class Highlight {
@@ -93,11 +92,15 @@ export default class Highlight {
     return this;
   }
 
-  /**
-   * Add class 'focus' to all elements of this highlight.
-   */
+  public updateStartMarker(el: HTMLElement, position: string) {
+    el.dataset.startMessage = this.getMessage(`i18n:highlighter:highlight:${position}`);
+  }
+
   public addFocusedStyles(): Highlight {
-    this.elements.forEach((el: HTMLElement) => el.classList.add(FOCUS_CSS));
+    this.elements.forEach((el: HTMLElement) => {
+      el.setAttribute('aria-current', 'true');
+      this.updateStartMarker(el, 'start-selected');
+    });
     return this;
   }
 
