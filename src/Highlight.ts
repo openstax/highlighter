@@ -1,6 +1,5 @@
 import * as uuid from 'uuid/v4';
 import dom from './dom';
-import { DATA_SCREEN_READERS_ATTR_SELECTOR } from './injectHighlightWrappers';
 import SerializedHighlight from './SerializedHighlight';
 
 export interface IHighlightData {
@@ -109,12 +108,8 @@ export default class Highlight {
    * @return boolean indicating if the action was a success.
    */
   public focus(): boolean {
-    const focusableElement = this.elements[0].querySelector(DATA_SCREEN_READERS_ATTR_SELECTOR) as HTMLElement | null;
-    if (focusableElement) {
-      focusableElement.focus();
-      return true;
-    }
-    return false;
+    this.elements[0].focus();
+    return true;
   }
 
   public intersects(range: Range): boolean {
