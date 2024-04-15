@@ -69,6 +69,9 @@ function createMarkerDataForScreenReaders(highlight: Highlight, element: HTMLEle
   const markerName = `${position}Message`;
 
   element.dataset[markerName] = highlight.getMessage(`i18n:highlighter:highlight:${position}`);
+  if (highlight.options.tabbable) {
+    element.setAttribute('tabIndex', '0');
+  }
 }
 
 /**
