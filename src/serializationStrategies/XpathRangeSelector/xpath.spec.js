@@ -126,7 +126,7 @@ describe('getXPathForElement', () => {
     expect(result3).toEqual(expectedPath);
     expect(offset3).toEqual(expectedOffset);
 
-    const [result4, offset4] = xpath.getXPathForElement(target3.childNodes[1], 8, reference);
+    const [result4, offset4] = xpath.getXPathForElement(target3.childNodes[0], 8, reference);
     expect(result4).toEqual(expectedPath);
     expect(offset4).toEqual(expectedOffset);
   });
@@ -202,16 +202,16 @@ describe('getXPathForElement', () => {
     expect(offset1).toEqual(expectedOffset);
 
     const target2 = document.getElementById('target2');
-    const [result2, offset2] = xpath.getXPathForElement(target2, 3, reference);
+    const [result2, offset2] = xpath.getXPathForElement(target2, 1, reference);
     expect(result2).toEqual(expectedPath);
     expect(offset2).toEqual(expectedOffset);
 
     const target3 = document.getElementById('target3');
-    const [result3, offset3] = xpath.getXPathForElement(target3, 3, reference);
+    const [result3, offset3] = xpath.getXPathForElement(target3, 1, reference);
     expect(result3).toEqual(expectedPath);
     expect(offset3).toEqual(expectedOffset);
 
-    const [result4, offset4] = xpath.getXPathForElement(target3.childNodes[1], 8, reference);
+    const [result4, offset4] = xpath.getXPathForElement(target3.childNodes[0], 8, reference);
     expect(result4).toEqual(expectedPath);
     expect(offset4).toEqual(expectedOffset);
   });
