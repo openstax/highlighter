@@ -1,7 +1,7 @@
 import { debounce } from 'lodash';
 import dom, { isHtmlElement } from './dom';
 import Highlight, { IHighlightData, IOptions as HighlightOptions } from './Highlight';
-import injectHighlightWrappers, { DATA_ATTR, DATA_ID_ATTR, DATA_SCREEN_READERS_ATTR } from './injectHighlightWrappers';
+import injectHighlightWrappers, { DATA_ATTR, DATA_ID_ATTR } from './injectHighlightWrappers';
 import { rangeContentsString } from './rangeContents';
 import removeHighlightWrappers from './removeHighlightWrappers';
 import { getRange, snapSelection } from './selection';
@@ -209,7 +209,7 @@ export default class Highlighter {
       return;
     }
 
-    const highlightId = isHtmlElement(ev.target) && ev.target.hasAttribute(DATA_SCREEN_READERS_ATTR)
+    const highlightId = isHtmlElement(ev.target)
       ? ev.target.getAttribute(DATA_ID_ATTR)
       : null;
     const highlight = highlightId ? this.getHighlight(highlightId) : null;

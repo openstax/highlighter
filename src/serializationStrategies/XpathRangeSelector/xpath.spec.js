@@ -1,7 +1,5 @@
-import {DATA_ATTR, DATA_SCREEN_READERS_ATTR} from '../../injectHighlightWrappers';
+import {DATA_ATTR} from '../../injectHighlightWrappers';
 import * as xpath from './xpath';
-
-const screenReaderNode = `<span ${DATA_SCREEN_READERS_ATTR}></span>`;
 
 describe('getXPathForElement', () => {
   it('creates path to self', () => {
@@ -100,7 +98,7 @@ describe('getXPathForElement', () => {
         <div>
           werwerwerwer
           <div id="target1">
-            <mark id="target2" ${DATA_ATTR}>${screenReaderNode}<mark id="target3" ${DATA_ATTR}>${screenReaderNode}asdfasdf${screenReaderNode}</mark>${screenReaderNode}</mark>
+            <mark id="target2" ${DATA_ATTR}><mark id="target3" ${DATA_ATTR}>asdfasdf</mark></mark>
             qwer
             werewwer
           </div>
@@ -142,7 +140,7 @@ describe('getXPathForElement', () => {
         <div>
           werwerwerwer
           <div id="target1">
-            <mark id="target2" ${DATA_ATTR}>${screenReaderNode}<mark id="target3" ${DATA_ATTR}>${screenReaderNode}asdfasdf${screenReaderNode}</mark>${screenReaderNode}</mark>
+            <mark id="target2" ${DATA_ATTR}><mark id="target3" ${DATA_ATTR}>asdfasdf</mark></mark>
             qwer
             werewwer
           </div>
@@ -184,11 +182,9 @@ describe('getXPathForElement', () => {
         <div>` +
           `<div id="target1">` +
             `<mark id="target2" ${DATA_ATTR}>` +
-              screenReaderNode +
               `<mark id="target3" ${DATA_ATTR}>` +
-                `${screenReaderNode}asdfasdf${screenReaderNode}` +
+                `asdfasdf` +
               `</mark>` +
-              screenReaderNode +
             `</mark>` +
           `</div>` +
         `</div>` +
@@ -226,7 +222,7 @@ describe('getXPathForElement', () => {
         <div></div>
         <div></div>
         <span></span>
-        <div><div id="target1"><mark id="target2" ${DATA_ATTR}>${screenReaderNode}<mark id="target3" ${DATA_ATTR}>${screenReaderNode}asdfasdf${screenReaderNode}</mark>${screenReaderNode}</mark></div></div>
+        <div><div id="target1"><mark id="target2" ${DATA_ATTR}><mark id="target3" ${DATA_ATTR}>asdfasdf</mark></mark></div></div>
         <div></div>
       </div>
     `;
@@ -285,7 +281,7 @@ describe('getXPathForElement', () => {
     document.body.innerHTML = `
       <div id="reference">
         <div></div>
-        <mark ${DATA_ATTR}>${screenReaderNode}${screenReaderNode}</mark>
+        <mark ${DATA_ATTR}></mark>
         <div></div>
         <span>
           werwerwerwer
@@ -312,15 +308,11 @@ describe('getXPathForElement', () => {
       <div id="reference">` +
         `qwer` +
         `<mark ${DATA_ATTR}>` +
-          screenReaderNode +
           `asdf` +
-          screenReaderNode +
         `</mark>` +
         `<div id="target"></div>` +
         `<mark ${DATA_ATTR}>` +
-          screenReaderNode +
           `as` +
-          screenReaderNode +
         `</mark>` +
         `asdfasdf` +
       `</div>
@@ -340,7 +332,7 @@ describe('getXPathForElement', () => {
         <div></div>
         <div>
           werwerwerwer
-          <div id="target"><mark ${DATA_ATTR}>${screenReaderNode}asdf${screenReaderNode}</mark></div>
+          <div id="target"><mark ${DATA_ATTR}>asdf</mark></div>
         </div>
         <div></div>
       </div>
@@ -362,7 +354,7 @@ describe('getXPathForElement', () => {
         <div>
           werwerwerwer
           <div>
-            qwer <mark ${DATA_ATTR}>${screenReaderNode}asdf${screenReaderNode}</mark> werewwer
+            qwer <mark ${DATA_ATTR}>asdf</mark> werewwer
             <div id="target"></div>
             asdfasdf
           </div>
@@ -386,7 +378,7 @@ describe('getXPathForElement', () => {
         <div>
           werwerwerwer
           <div>
-            qwer <mark ${DATA_ATTR}>${screenReaderNode}asdf${screenReaderNode}</mark> werewwer
+            qwer <mark ${DATA_ATTR}>asdf</mark> werewwer
             <div id="target"></div>
             asdfasdf
           </div>
@@ -418,7 +410,7 @@ describe('getXPathForElement', () => {
 
   it('if target specifies the beginning of a highlight, move it ', () => {
     document.body.innerHTML = `
-      <div id="reference">asdf<span></span>qwer <mark ${DATA_ATTR}>${screenReaderNode}asdf${screenReaderNode}</mark> werewwer</div>
+      <div id="reference">asdf<span></span>qwer <mark ${DATA_ATTR}>asdf</mark> werewwer</div>
     `;
 
     const reference = document.getElementById('reference');
@@ -430,7 +422,7 @@ describe('getXPathForElement', () => {
 
   it('if target is between two highlights, move it ', () => {
     document.body.innerHTML = `
-      <div id="reference">qwer <mark ${DATA_ATTR}>${screenReaderNode}zxcv ${screenReaderNode}</mark><mark ${DATA_ATTR}>${screenReaderNode}asdf${screenReaderNode}</mark> werewwer</div>
+      <div id="reference">qwer <mark ${DATA_ATTR}>zxcv </mark><mark ${DATA_ATTR}>asdf</mark> werewwer</div>
     `;
 
     const reference = document.getElementById('reference');
@@ -442,7 +434,7 @@ describe('getXPathForElement', () => {
 
   it('if target specifies the end of a highlight, move it ', () => {
     document.body.innerHTML = `
-      <div id="reference">qwer <mark ${DATA_ATTR}>${screenReaderNode}asdf${screenReaderNode}</mark> werewwer</div>
+      <div id="reference">qwer <mark ${DATA_ATTR}>asdf</mark> werewwer</div>
     `;
 
     const reference = document.getElementById('reference');
@@ -564,7 +556,7 @@ describe('getFirstByXPath', () => {
     document.body.innerHTML = `
       <div id="reference">
         <div></div>
-        <mark ${DATA_ATTR}>${screenReaderNode}${screenReaderNode}</mark>
+        <mark ${DATA_ATTR}></mark>
         <div></div>
         <span>
           werwerwerwer
@@ -589,7 +581,7 @@ describe('getFirstByXPath', () => {
   it('modifies element offset to account for highlights', () => {
     document.body.innerHTML = `
       <div id="reference">
-        qwer <mark ${DATA_ATTR}>${screenReaderNode}zxcv${screenReaderNode}</mark><mark ${DATA_ATTR}>${screenReaderNode}asdf${screenReaderNode}</mark> werewwer
+        qwer <mark ${DATA_ATTR}>zxcv</mark><mark ${DATA_ATTR}>asdf</mark> werewwer
       </div>
     `;
 
@@ -603,7 +595,7 @@ describe('getFirstByXPath', () => {
   it('modifies element offset to account for highlights (with extra elements)', () => {
     document.body.innerHTML = `
       <div id="reference">
-        qwer <mark ${DATA_ATTR}>${screenReaderNode}zxcv${screenReaderNode}</mark><mark class="ASdf"></mark><mark ${DATA_ATTR}>${screenReaderNode}asdf${screenReaderNode}</mark> werewwer
+        qwer <mark ${DATA_ATTR}>zxcv</mark><mark class="ASdf"></mark><mark ${DATA_ATTR}>asdf</mark> werewwer
       </div>
     `;
 
@@ -617,7 +609,7 @@ describe('getFirstByXPath', () => {
   it('doesn\'t over-modify element offset to account for highlights', () => {
     document.body.innerHTML = `
       <div id="reference">
-        qwer <mark ${DATA_ATTR}>${screenReaderNode}zxcv${screenReaderNode}</mark><span class="ASdf"></span><mark ${DATA_ATTR}>${screenReaderNode}asdf${screenReaderNode}</span><span ${DATA_ATTR}>${screenReaderNode}asdf${screenReaderNode}</mark><mark ${DATA_ATTR}>${screenReaderNode}asdf${screenReaderNode}</mark> werewwer
+        qwer <mark ${DATA_ATTR}>zxcv</mark><span class="ASdf"></span><mark ${DATA_ATTR}>asdf</span><span ${DATA_ATTR}>asdf</mark><mark ${DATA_ATTR}>asdf</mark> werewwer
       </div>
     `;
 
@@ -636,7 +628,7 @@ describe('getFirstByXPath', () => {
         <div>
           werwerwerwer
           <div>
-            qwer <mark ${DATA_ATTR}>${screenReaderNode}asdf${screenReaderNode}</mark> werewwer
+            qwer <mark ${DATA_ATTR}>asdf</mark> werewwer
             <div></div>
             asdfasdf
           </div>
@@ -659,7 +651,7 @@ describe('getFirstByXPath', () => {
         <div>
           werwerwerwer
           <div>
-            qwer <mark ${DATA_ATTR}>${screenReaderNode}asdf${screenReaderNode}</mark> werewwer
+            qwer <mark ${DATA_ATTR}>asdf</mark> werewwer
             <div></div>
             asdfasdf
           </div>
@@ -689,7 +681,7 @@ describe('getFirstByXPath', () => {
   it('if the offset specifies the end boundary of highlight and text, it returns the text', () => {
     document.body.innerHTML = `
       <div id="reference">
-        qwer <mark ${DATA_ATTR}>${screenReaderNode}asdf${screenReaderNode}</mark> werewwer
+        qwer <mark ${DATA_ATTR}>asdf</mark> werewwer
       </div>
     `;
 
@@ -702,7 +694,7 @@ describe('getFirstByXPath', () => {
   it('if the offset specifies the start boundary of highlight and text, it returns the text', () => {
     document.body.innerHTML = `
       <div id="reference">
-        qwer <mark ${DATA_ATTR}>${screenReaderNode}asdf${screenReaderNode}</mark> werewwer
+        qwer <mark ${DATA_ATTR}>asdf</mark> werewwer
       </div>
     `;
 

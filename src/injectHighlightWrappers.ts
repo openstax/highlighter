@@ -6,8 +6,6 @@ export const TIMESTAMP_ATTR = 'data-timestamp';
 export const DATA_ATTR = 'data-highlighted';
 export const DATA_ATTR_SELECTOR = '[' + DATA_ATTR + ']';
 export const DATA_ID_ATTR = 'data-highlight-id';
-export const DATA_SCREEN_READERS_ATTR = 'data-for-screenreaders';
-export const DATA_SCREEN_READERS_ATTR_SELECTOR = '[' + DATA_SCREEN_READERS_ATTR + ']';
 const NODE_TYPE = {
   ELEMENT_NODE: 1,
   TEXT_NODE: 3,

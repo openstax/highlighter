@@ -1,7 +1,7 @@
 // tslint:disable
 import dom from './dom';
 import Highlight from './Highlight';
-import { DATA_ATTR_SELECTOR, DATA_SCREEN_READERS_ATTR_SELECTOR } from './injectHighlightWrappers';
+import { DATA_ATTR_SELECTOR } from './injectHighlightWrappers';
 
 const NODE_TYPE = {
   ELEMENT_NODE: 1,
@@ -22,8 +22,6 @@ export default function(highlight: Highlight) {
 }
 
 function removeHighlightElement(element: HTMLElement) {
-  getScreenReaderLabels(element).forEach((label) => label.remove());
-
   const container = element,
     highlights = getHighlights(container);
 
@@ -68,22 +66,6 @@ function getHighlights(container: HTMLElement) {
   }
 
   return highlights;
-}
-
-/**
- * Returns screenreader labels from given container.
- * @param {HTMLElement} container - return nodes created for screenreder from this element
- * @returns {Array} - array of screenreader HTMLElements.
- */
-function getScreenReaderLabels(container: HTMLElement) {
-  const nodeList = container.querySelectorAll(DATA_SCREEN_READERS_ATTR_SELECTOR),
-    screenreaderLabels: HTMLElement[] = Array.prototype.slice.call(nodeList);
-
-  if (container.matches(DATA_SCREEN_READERS_ATTR_SELECTOR)) {
-    screenreaderLabels.push(container);
-  }
-
-  return screenreaderLabels;
 }
 
 /**
