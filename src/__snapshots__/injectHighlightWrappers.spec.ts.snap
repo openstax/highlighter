@@ -111,7 +111,6 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
   data-end-message="End of highlight"
   data-highlight-id="some-highlight"
   data-highlighted="true"
-  tabindex="0"
 >
   Figure
 </mark>
