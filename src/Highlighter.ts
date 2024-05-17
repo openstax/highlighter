@@ -1,6 +1,6 @@
 import { debounce } from 'lodash';
 import dom, { isHtmlElement } from './dom';
-import Highlight, { IHighlightData, IOptions as HighlightOptions } from './Highlight';
+import Highlight, { FOCUS_CSS, IHighlightData, IOptions as HighlightOptions } from './Highlight';
 import injectHighlightWrappers, { DATA_ATTR, DATA_ID_ATTR } from './injectHighlightWrappers';
 import { rangeContentsString } from './rangeContents';
 import removeHighlightWrappers from './removeHighlightWrappers';
@@ -108,13 +108,14 @@ export default class Highlighter {
   }
 
   public clearFocusedStyles(): void {
-    this.container.querySelectorAll<HTMLElement>(`.${this.options.className}[start-message$='start-selected']`)
+    this.container.querySelectorAll<HTMLElement>(`.${this.options.className}.${FOCUS_CSS}`)
       .forEach((el) => {
         const highlight = this.getHighlightFromElement(el);
 
         if (!highlight) {
           return;
         }
+        el.classList.remove(FOCUS_CSS);
         highlight.updateStartMarker(el, 'start');
       });
   }

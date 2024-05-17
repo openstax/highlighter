@@ -2,6 +2,8 @@ import * as uuid from 'uuid/v4';
 import dom from './dom';
 import SerializedHighlight from './SerializedHighlight';
 
+export const FOCUS_CSS = 'focus';
+
 export interface IHighlightData {
   style?: string;
   id: string;
@@ -97,6 +99,7 @@ export default class Highlight {
 
   public addFocusedStyles(): Highlight {
     this.elements.forEach((el: HTMLElement) => {
+      el.classList.add(FOCUS_CSS);
       this.updateStartMarker(el, 'start-selected');
     });
     return this;
