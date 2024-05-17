@@ -97,7 +97,6 @@ export default class Highlight {
 
   public addFocusedStyles(): Highlight {
     this.elements.forEach((el: HTMLElement) => {
-      el.setAttribute('aria-current', 'true');
       this.updateStartMarker(el, 'start-selected');
     });
     return this;

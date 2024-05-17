@@ -108,9 +108,8 @@ export default class Highlighter {
   }
 
   public clearFocusedStyles(): void {
-    this.container.querySelectorAll<HTMLElement>(`.${this.options.className}[aria-current]`)
+    this.container.querySelectorAll<HTMLElement>(`.${this.options.className}[start-message$='start-selected']`)
       .forEach((el) => {
-        el.removeAttribute('aria-current');
         const highlight = this.getHighlightFromElement(el);
 
         if (!highlight) {
