@@ -71,14 +71,12 @@ function createAndInsertNodeForScreenReaders(highlight: Highlight, element: HTML
   node.setAttribute(DATA_SCREEN_READERS_ATTR, 'true');
   node.setAttribute(DATA_ID_ATTR, highlight.id);
 
-  const ariaLabel = highlight.getMessage(`i18n:highlighter:highlight:${position}`);
+  const message = highlight.getMessage(`i18n:highlighter:highlight:${position}`);
 
-  node.setAttribute('aria-label', ariaLabel);
+  node.setAttribute('data-message', message);
 
   if (position === 'start') {
-    if (highlight.options.tabbable) {
-      node.setAttribute('tabindex', '0');
-    }
+    node.setAttribute('tabindex', highlight.options.tabbable ? '0' : '-1');
     element.prepend(node);
   } else {
     element.append(node);

@@ -94,12 +94,12 @@ export default class Highlight {
 
   public updateStartMarker(el: Element, position: string) {
     const marker = el.querySelector(`[${DATA_SCREEN_READERS_ATTR}][tabindex]`);
-    const ariaLabel = this.getMessage(`i18n:highlighter:highlight:${position}`);
+    const message = this.getMessage(`i18n:highlighter:highlight:${position}`);
 
     if (!marker) {
       return;
     }
-    marker.setAttribute('aria-label', ariaLabel);
+    marker.setAttribute('data-message', message);
   }
   /**
    * Add class 'focus' to all elements of this highlight.
