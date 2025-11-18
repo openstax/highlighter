@@ -295,3 +295,60 @@ describe('onSelect', () => {
     expect(spyOnSelect).not.toHaveBeenCalled();
   });
 });
+describe('setSnapValues', () => {
+  test('sets all snap options to true', () => {
+    const container = document.createElement('div');
+    const highlighter = new Highlighter(container, { formatMessage: jest.fn() });
+
+    highlighter.setSnapValues(true);
+
+    // @ts-ignore: access private property for test
+    expect(highlighter['options'].snapCode).toBe(true);
+    // @ts-ignore
+    expect(highlighter['options'].snapTableRows).toBe(true);
+    // @ts-ignore
+    expect(highlighter['options'].snapMathJax).toBe(true);
+    // @ts-ignore
+    expect(highlighter['options'].snapWords).toBe(true);
+  });
+
+  test('sets all snap options to false', () => {
+    const container = document.createElement('div');
+    const highlighter = new Highlighter(container, { formatMessage: jest.fn() });
+
+    // Set to true first to ensure change
+    highlighter.setSnapValues(true);
+    highlighter.setSnapValues(false);
+
+    // @ts-ignore: access private property for test
+    expect(highlighter['options'].snapCode).toBe(false);
+    // @ts-ignore
+    expect(highlighter['options'].snapTableRows).toBe(false);
+    // @ts-ignore
+    expect(highlighter['options'].snapMathJax).toBe(false);
+    // @ts-ignore
+    expect(highlighter['options'].snapWords).toBe(false);
+  });
+
+  test('overwrites previous snap option values', () => {
+    const container = document.createElement('div');
+    const highlighter = new Highlighter(container, {
+      formatMessage: jest.fn(),
+      snapCode: false,
+      snapTableRows: true,
+      snapMathJax: false,
+      snapWords: true,
+    });
+
+    highlighter.setSnapValues(true);
+
+    // @ts-ignore
+    expect(highlighter['options'].snapCode).toBe(true);
+    // @ts-ignore
+    expect(highlighter['options'].snapTableRows).toBe(true);
+    // @ts-ignore
+    expect(highlighter['options'].snapMathJax).toBe(true);
+    // @ts-ignore
+    expect(highlighter['options'].snapWords).toBe(true);
+  });
+});
