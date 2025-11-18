@@ -12,13 +12,13 @@ jobs:
         suite: [test, lint, build]
         node: [10, 12]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@4
       with:
         ref: ${{ github.event.pull_request.head.sha }}
-    - uses: actions/setup-node@v2
+    - uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node }}
-    - uses: actions/cache@v2
+    - uses: actions/cache@v4
       id: node_modules
       with:
         path: node_modules
