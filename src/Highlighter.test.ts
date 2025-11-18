@@ -302,32 +302,23 @@ describe('setSnapValues', () => {
 
     highlighter.setSnapValues(true);
 
-    // @ts-ignore: access private property for test
-    expect(highlighter['options'].snapCode).toBe(true);
-    // @ts-ignore
-    expect(highlighter['options'].snapTableRows).toBe(true);
-    // @ts-ignore
-    expect(highlighter['options'].snapMathJax).toBe(true);
-    // @ts-ignore
-    expect(highlighter['options'].snapWords).toBe(true);
+    expect((highlighter as any).options.snapCode).toBe(true);
+    expect((highlighter as any).options.snapTableRows).toBe(true);
+    expect((highlighter as any).options.snapMathJax).toBe(true);
+    expect((highlighter as any).options.snapWords).toBe(true);
   });
 
   test('sets all snap options to false', () => {
     const container = document.createElement('div');
     const highlighter = new Highlighter(container, { formatMessage: jest.fn() });
 
-    // Set to true first to ensure change
     highlighter.setSnapValues(true);
     highlighter.setSnapValues(false);
 
-    // @ts-ignore: access private property for test
-    expect(highlighter['options'].snapCode).toBe(false);
-    // @ts-ignore
-    expect(highlighter['options'].snapTableRows).toBe(false);
-    // @ts-ignore
-    expect(highlighter['options'].snapMathJax).toBe(false);
-    // @ts-ignore
-    expect(highlighter['options'].snapWords).toBe(false);
+    expect((highlighter as any).options.snapCode).toBe(false);
+    expect((highlighter as any).options.snapTableRows).toBe(false);
+    expect((highlighter as any).options.snapMathJax).toBe(false);
+    expect((highlighter as any).options.snapWords).toBe(false);
   });
 
   test('overwrites previous snap option values', () => {
@@ -335,20 +326,41 @@ describe('setSnapValues', () => {
     const highlighter = new Highlighter(container, {
       formatMessage: jest.fn(),
       snapCode: false,
-      snapTableRows: true,
       snapMathJax: false,
+      snapTableRows: true,
       snapWords: true,
     });
 
     highlighter.setSnapValues(true);
 
-    // @ts-ignore
-    expect(highlighter['options'].snapCode).toBe(true);
-    // @ts-ignore
-    expect(highlighter['options'].snapTableRows).toBe(true);
-    // @ts-ignore
-    expect(highlighter['options'].snapMathJax).toBe(true);
-    // @ts-ignore
-    expect(highlighter['options'].snapWords).toBe(true);
+    expect((highlighter as any).options.snapCode).toBe(true);
+    expect((highlighter as any).options.snapTableRows).toBe(true);
+    expect((highlighter as any).options.snapMathJax).toBe(true);
+    expect((highlighter as any).options.snapWords).toBe(true);
+  });
+
+  test('does not throw if snap options are initially undefined', () => {
+    const container = document.createElement('div');
+    const highlighter = new Highlighter(container, { formatMessage: jest.fn() });
+
+    expect(() => highlighter.setSnapValues(false)).not.toThrow();
+    expect((highlighter as any).options.snapCode).toBe(false);
+    expect((highlighter as any).options.snapTableRows).toBe(false);
+    expect((highlighter as any).options.snapMathJax).toBe(false);
+    expect((highlighter as any).options.snapWords).toBe(false);
+  });
+
+  test('can toggle snap options multiple times', () => {
+    const container = document.createElement('div');
+    const highlighter = new Highlighter(container, { formatMessage: jest.fn() });
+
+    highlighter.setSnapValues(true);
+    expect((highlighter as any).options.snapCode).toBe(true);
+
+    highlighter.setSnapValues(false);
+    expect((highlighter as any).options.snapCode).toBe(false);
+
+    highlighter.setSnapValues(true);
+    expect((highlighter as any).options.snapCode).toBe(true);
   });
 });
