@@ -12,7 +12,7 @@ jobs:
         suite: [test, lint, build]
         node: [10, 12]
     steps:
-    - uses: actions/checkout@4
+    - uses: actions/checkout@v4
       with:
         ref: ${{ github.event.pull_request.head.sha }}
     - uses: actions/setup-node@v4
