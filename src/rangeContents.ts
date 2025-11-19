@@ -7,10 +7,13 @@ export const rangeContentsString = (range: Range): string => {
   const removeAll = (nodes: NodeListOf<Element>) => nodes.forEach((element: Element) => element.remove());
 
   container.appendChild(fragment);
+  // MathJax 2
   removeAll(container.querySelectorAll('.MathJax'));
   removeAll(container.querySelectorAll('.MathJax_Display'));
   removeAll(container.querySelectorAll('.MathJax_Preview'));
   removeAll(container.querySelectorAll('.MJX_Assistive_MathML'));
+  // MathJax 4
+  removeAll(container.querySelectorAll('mjx-container'));
 
   removeAllHighlights(container);
 
