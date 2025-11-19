@@ -1,23 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`inject highlight wrappers for figure with caption for highlight ending on an <img> in chrome and safari 1`] = `
-<span
+<mark
   class="highlight first text yellow"
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
   <span
-    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
+    data-message="Start of highlight"
+    tabindex="-1"
   />
   hardware store sells 16-ft ladders and 24-ft ladders. A window is located 12 feet above the ground. A ladder needs to be purchased that will reach the window from a point on the ground 5 feet from the building.
-</span>
+</mark>
 `;
 
 exports[`inject highlight wrappers for figure with caption for highlight ending on an <img> in chrome and safari 2`] = `
-<span
+<mark
   class="highlight block last yellow"
   data-highlight-id="some-highlight"
   data-highlighted="true"
@@ -29,31 +29,31 @@ exports[`inject highlight wrappers for figure with caption for highlight ending 
     src="/apps/archive/20210713.205645/resources/b1b5ba97150addc831c534413ca324a72c4e374b"
   />
   <span
-    aria-label="End of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    data-message="End of highlight"
   />
-</span>
+</mark>
 `;
 
 exports[`inject highlight wrappers for figure with caption for highlight ending on an <img> in firefox 1`] = `
-<span
+<mark
   class="highlight first text yellow"
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
   <span
-    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
+    data-message="Start of highlight"
+    tabindex="-1"
   />
   hardware store sells 16-ft ladders and 24-ft ladders. A window is located 12 feet above the ground. A ladder needs to be purchased that will reach the window from a point on the ground 5 feet from the building.
-</span>
+</mark>
 `;
 
 exports[`inject highlight wrappers for figure with caption for highlight ending on an <img> in firefox 2`] = `
-<span
+<mark
   class="highlight block last yellow"
   data-highlight-id="some-highlight"
   data-highlighted="true"
@@ -65,24 +65,24 @@ exports[`inject highlight wrappers for figure with caption for highlight ending 
     src="/apps/archive/20210713.205645/resources/b1b5ba97150addc831c534413ca324a72c4e374b"
   />
   <span
-    aria-label="End of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    data-message="End of highlight"
   />
-</span>
+</mark>
 `;
 
 exports[`inject highlight wrappers for figure with caption for highlight starting and ending on an <img> in chrome and safari 1`] = `
-<span
+<mark
   class="highlight first block last yellow"
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
   <span
-    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
+    data-message="Start of highlight"
+    tabindex="-1"
   />
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
@@ -91,24 +91,24 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
     src="/apps/archive/20210713.205645/resources/b1b5ba97150addc831c534413ca324a72c4e374b"
   />
   <span
-    aria-label="End of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    data-message="End of highlight"
   />
-</span>
+</mark>
 `;
 
 exports[`inject highlight wrappers for figure with caption for highlight starting and ending on an <img> in firefox 1`] = `
-<span
+<mark
   class="highlight first block last yellow"
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
   <span
-    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
+    data-message="Start of highlight"
+    tabindex="-1"
   />
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
@@ -117,23 +117,23 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
     src="/apps/archive/20210713.205645/resources/b1b5ba97150addc831c534413ca324a72c4e374b"
   />
   <span
-    aria-label="End of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    data-message="End of highlight"
   />
-</span>
+</mark>
 `;
 
 exports[`inject highlight wrappers for figure with caption for highlight starting on an <img> in chrome and safari 1`] = `
-<span
+<mark
   class="highlight first block yellow"
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
   <span
-    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    data-message="Start of highlight"
     tabindex="0"
   />
   <img
@@ -142,35 +142,35 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
     id="test-img"
     src="/apps/archive/20210713.205645/resources/b1b5ba97150addc831c534413ca324a72c4e374b"
   />
-</span>
+</mark>
 `;
 
 exports[`inject highlight wrappers for figure with caption for highlight starting on an <img> in chrome and safari 2`] = `
-<span
+<mark
   class="highlight text last yellow"
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
   Figure
   <span
-    aria-label="End of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    data-message="End of highlight"
   />
-</span>
+</mark>
 `;
 
 exports[`inject highlight wrappers for figure with caption for highlight starting on an <img> in firefox 1`] = `
-<span
+<mark
   class="highlight first block yellow"
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
   <span
-    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
+    data-message="Start of highlight"
+    tabindex="-1"
   />
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
@@ -178,35 +178,35 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
     id="test-img"
     src="/apps/archive/20210713.205645/resources/b1b5ba97150addc831c534413ca324a72c4e374b"
   />
-</span>
+</mark>
 `;
 
 exports[`inject highlight wrappers for figure with caption for highlight starting on an <img> in firefox 2`] = `
-<span
+<mark
   class="highlight text last yellow"
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
   Figure
   <span
-    aria-label="End of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    data-message="End of highlight"
   />
-</span>
+</mark>
 `;
 
 exports[`inject highlight wrappers for figure with caption for highlight starting on an <img> where img is first element on page in chrome 1`] = `
-<span
+<mark
   class="highlight first block last yellow"
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
   <span
-    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
+    data-message="Start of highlight"
+    tabindex="-1"
   />
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
@@ -215,24 +215,24 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
     src="/apps/archive/20210713.205645/resources/b1b5ba97150addc831c534413ca324a72c4e374b"
   />
   <span
-    aria-label="End of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    data-message="End of highlight"
   />
-</span>
+</mark>
 `;
 
 exports[`inject highlight wrappers for figure with caption for highlight starting on an <img> where img is first element on page in firefox 1`] = `
-<span
+<mark
   class="highlight first block last yellow"
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
   <span
-    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
+    data-message="Start of highlight"
+    tabindex="-1"
   />
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
@@ -241,24 +241,24 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
     src="/apps/archive/20210713.205645/resources/b1b5ba97150addc831c534413ca324a72c4e374b"
   />
   <span
-    aria-label="End of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    data-message="End of highlight"
   />
-</span>
+</mark>
 `;
 
 exports[`inject highlight wrappers for figure with caption for highlight starting on an <img> where img is first element on page in safari 1`] = `
-<span
+<mark
   class="highlight first block last yellow"
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
   <span
-    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
+    data-message="Start of highlight"
+    tabindex="-1"
   />
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
@@ -267,31 +267,31 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
     src="/apps/archive/20210713.205645/resources/b1b5ba97150addc831c534413ca324a72c4e374b"
   />
   <span
-    aria-label="End of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    data-message="End of highlight"
   />
-</span>
+</mark>
 `;
 
 exports[`inject highlight wrappers for img between paragraphs in chrome and safari 1`] = `
-<span
+<mark
   class="highlight first text yellow"
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
   <span
-    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
+    data-message="Start of highlight"
+    tabindex="-1"
   />
   the first terms, the outer terms, the inner terms, and then the last terms of each binomial.
-</span>
+</mark>
 `;
 
 exports[`inject highlight wrappers for img between paragraphs in chrome and safari 2`] = `
-<span
+<mark
   class="highlight block last yellow"
   data-highlight-id="some-highlight"
   data-highlighted="true"
@@ -303,31 +303,31 @@ exports[`inject highlight wrappers for img between paragraphs in chrome and safa
     src="/apps/archive/20210713.205645/resources/eb942bf030580de7cb1d8c7d484771addceb7da6"
   />
   <span
-    aria-label="End of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    data-message="End of highlight"
   />
-</span>
+</mark>
 `;
 
 exports[`inject highlight wrappers for img between paragraphs in firefox 1`] = `
-<span
+<mark
   class="highlight first text yellow"
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
   <span
-    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
+    data-message="Start of highlight"
+    tabindex="-1"
   />
   the first terms, the outer terms, the inner terms, and then the last terms of each binomial.
-</span>
+</mark>
 `;
 
 exports[`inject highlight wrappers for img between paragraphs in firefox 2`] = `
-<span
+<mark
   class="highlight block last yellow"
   data-highlight-id="some-highlight"
   data-highlighted="true"
@@ -339,51 +339,51 @@ exports[`inject highlight wrappers for img between paragraphs in firefox 2`] = `
     src="/apps/archive/20210713.205645/resources/eb942bf030580de7cb1d8c7d484771addceb7da6"
   />
   <span
-    aria-label="End of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    data-message="End of highlight"
   />
-</span>
+</mark>
 `;
 
 exports[`inject highlight wrappers for text followed by section in chrome and safari 1`] = `
-<span
+<mark
   class="highlight first text last yellow"
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
   <span
-    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
+    data-message="Start of highlight"
+    tabindex="-1"
   />
   How To
   <span
-    aria-label="End of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    data-message="End of highlight"
   />
-</span>
+</mark>
 `;
 
 exports[`inject highlight wrappers for text followed by section in firefox 1`] = `
-<span
+<mark
   class="highlight first text last yellow"
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
   <span
-    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
-    tabindex="0"
+    data-message="Start of highlight"
+    tabindex="-1"
   />
   How To
   <span
-    aria-label="End of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    data-message="End of highlight"
   />
-</span>
+</mark>
 `;
