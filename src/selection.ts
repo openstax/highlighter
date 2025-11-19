@@ -49,7 +49,7 @@ const snapToCode = (range: Range) => {
 };
 
 const snapToMath = (range: Range) => {
-  const getMath = (node: Node) => dom(node).farthest('.MathJax,.MathJax_Display');
+  const getMath = (node: Node) => dom(node).farthest('.MathJax,.MathJax_Display,mjx-container');
 
   const startMath = getMath(range.startContainer.nodeType === 3 /* #text */
     ? range.startContainer

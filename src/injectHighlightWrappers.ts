@@ -24,7 +24,7 @@ const IGNORE_TAGS = [
  * Highlights can be created around these block and text elements.
  */
 const BLOCK_ELEMENTS = ['img', 'iframe'];
-const TEXT_ELEMENTS = ['.MathJax'];
+const TEXT_ELEMENTS = ['.MathJax', 'mjx-container'];
 const ALLOWED_ELEMENTS = BLOCK_ELEMENTS.concat(TEXT_ELEMENTS).join(',');
 
 interface IOptions {
@@ -272,13 +272,13 @@ function refineRangeBoundaries(range: Range) {
 
   // BEGIN this might not be necessary, test removing it
   const getMath = (node: Node) => {
-    const mathjax = dom(node).farthest('.MathJax');
+    const mathjax = dom(node).farthest('.MathJax,mjx-container');
     if (mathjax) {
       return mathjax;
     }
 
     const mml = dom(node).farthest('script[type="math/mml"]');
-    if (mml && mml.previousSibling.matches('.MathJax')) {
+    if (mml && mml.previousSibling.matches('.MathJax,mjx-container')) {
       return mml.previousSibling;
     }
     if (mml && mml.previousSibling.matches('.MathJax_Display')) {
