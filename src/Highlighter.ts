@@ -165,6 +165,13 @@ export default class Highlighter {
     return this.container.ownerDocument;
   }
 
+  public setSnapValues(value: boolean): void {
+    this.options.snapCode = value;
+    this.options.snapTableRows = value;
+    this.options.snapMathJax = value;
+    this.options.snapWords = value;
+  }
+
   private snapSelection = () => {
     const selection = this.document.getSelection();
 
