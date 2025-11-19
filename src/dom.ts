@@ -226,6 +226,7 @@ export default function dom(el: any) {
     },
 
     matches(selector: any) {
+      if (!el) { return false; }
       const method = el.matches || el.mozMatchesSelector || el.msMatchesSelector || el.oMatchesSelector || el.webkitMatchesSelector;
       return (method != null ? method.call(el, selector) : undefined);
     },
