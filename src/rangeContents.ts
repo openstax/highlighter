@@ -7,14 +7,21 @@ export const rangeContentsString = (range: Range): string => {
   const removeAll = (nodes: NodeListOf<Element>) => nodes.forEach((element: Element) => element.remove());
 
   container.appendChild(fragment);
-  // MathJax 2
+  // REX creates math/mml script tags inside mjx-container elements for MathJax 4.
+  // Timing issues prevent placing them outside like MathJax 2 used to do,
+  // so we need to move them to match the MathJax 2 location.
+  const mjxContainers = container.querySelectorAll('mjx-container');
+  mjxContainers.forEach((mjxContainer: Element) => {
+    const scriptTag = mjxContainer.querySelector('script[type="math/mml"]');
+    if (scriptTag && mjxContainer.parentElement) {
+      mjxContainer.parentElement.insertBefore(scriptTag, mjxContainer);
+    }
+  });
+
   removeAll(container.querySelectorAll('.MathJax'));
   removeAll(container.querySelectorAll('.MathJax_Display'));
   removeAll(container.querySelectorAll('.MathJax_Preview'));
   removeAll(container.querySelectorAll('.MJX_Assistive_MathML'));
-  // MathJax 4
-  removeAll(container.querySelectorAll('mjx-container'));
-
   removeAllHighlights(container);
 
   container.querySelectorAll('script[type="math/mml"]').forEach((element: Element) => {
