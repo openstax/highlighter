@@ -277,11 +277,21 @@ function refineRangeBoundaries(range: Range) {
       return mathjax;
     }
 
+    // MathJax 4: <mjx-assistive-mml> is inside <mjx-container>
+    const assistiveMml = dom(node).farthest('mjx-assistive-mml');
+    if (assistiveMml) {
+      const container = dom(assistiveMml).farthest('mjx-container');
+      if (container) {
+        return container;
+      }
+    }
+
+    // Legacy: <script type="math/mml"> after the MathJax container
     const mml = dom(node).farthest('script[type="math/mml"]');
-    if (mml && mml.previousSibling.matches('.MathJax,mjx-container')) {
+    if (mml && mml.previousSibling && mml.previousSibling.matches('.MathJax')) {
       return mml.previousSibling;
     }
-    if (mml && mml.previousSibling.matches('.MathJax_Display')) {
+    if (mml && mml.previousSibling && mml.previousSibling.matches('.MathJax_Display')) {
       return mml.previousSibling.querySelector('.MathJax');
     }
 
