@@ -165,9 +165,9 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
 
   normalizeStartWhitespace(range);
 
-  console.log(
-    JSON.stringify(range.startContainer.textContent?.slice(range.startOffset, range.startOffset + 10))
-  );
+  const test = JSON.stringify(range.startContainer.textContent?.slice(range.startOffset, range.startOffset + 10));
+
+  console.log(test);
 
   if (selectionDirection === 'backward') {
     // https://stackoverflow.com/a/10705853
