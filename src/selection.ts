@@ -71,6 +71,25 @@ const snapToMath = (range: Range) => {
   }
 };
 
+const normalizeStartWhitespace = (range: Range) => {
+  const node = range.startContainer;
+
+  if (node.nodeType !== Node.TEXT_NODE) {
+    return;
+  }
+
+  const text = node.textContent || '';
+  let offset = range.startOffset;
+
+  while (offset < text.length && /\s/.test(text[offset])) {
+    offset++;
+  }
+
+  if (offset !== range.startOffset) {
+    range.setStart(node, offset);
+  }
+};
+
 interface IOptions {
   snapTableRows?: boolean;
   snapMathJax?: boolean;
@@ -143,6 +162,8 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
       }
     }
   }
+
+  normalizeStartWhitespace(range);
 
   if (selectionDirection === 'backward') {
     // https://stackoverflow.com/a/10705853
