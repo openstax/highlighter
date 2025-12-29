@@ -72,21 +72,39 @@ const snapToMath = (range: Range) => {
 };
 
 const normalizeStartWhitespace = (range: Range) => {
-  const node = range.startContainer;
-
-  if (node.nodeType !== Node.TEXT_NODE) {
-    return;
-  }
-
-  const text = node.textContent || '';
+  let node: Node | null = range.startContainer;
   let offset = range.startOffset;
 
-  while (offset < text.length && /\s/.test(text[offset])) {
-    offset++;
+  if (node.nodeType === Node.TEXT_NODE) {
+    const text = node.textContent ?? '';
+
+    while (offset < text.length && /\s/.test(text[offset])) {
+      offset++;
+    }
+
+    if (offset < text.length) {
+      range.setStart(node, offset);
+      return;
+    }
   }
 
-  if (offset !== range.startOffset) {
-    range.setStart(node, offset);
+  let walker = document.createTreeWalker(
+    range.commonAncestorContainer,
+    NodeFilter.SHOW_TEXT,
+    null
+  );
+
+  walker.currentNode = node;
+
+  let next: Node | null;
+  while ((next = walker.nextNode())) {
+    const text = next.textContent ?? '';
+    const firstNonWs = text.search(/\S/);
+
+    if (firstNonWs !== -1) {
+      range.setStart(next, firstNonWs);
+      return;
+    }
   }
 };
 
@@ -163,7 +181,17 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
     }
   }
 
+  const test0 = JSON.stringify(
+  range.startContainer.textContent
+    ? range.startContainer.textContent.slice(range.startOffset, range.startOffset + 10)
+    : ''
+  );
+  console.log(test0);
+  console.log(range.startContainer.textContent);
+  console.log(range.startOffset);
+
   normalizeStartWhitespace(range);
+  
 
   const test = JSON.stringify(
   range.startContainer.textContent
@@ -171,6 +199,8 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
     : ''
   );
   console.log(test);
+  console.log(range.startContainer.textContent);
+  console.log(range.startOffset);
 
   if (selectionDirection === 'backward') {
     // https://stackoverflow.com/a/10705853
