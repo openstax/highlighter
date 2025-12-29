@@ -98,7 +98,7 @@ const normalizeStartWhitespace = (range: Range) => {
 
   let next: Node | null;
   while ((next = walker.nextNode())) {
-    const text = next.textContent ?? '';
+    const text = next.textContent ? next.textContent : '';
     const firstNonWs = text.search(/\S/);
 
     if (firstNonWs !== -1) {
