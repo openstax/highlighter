@@ -76,7 +76,7 @@ const normalizeStartWhitespace = (range: Range) => {
   let offset = range.startOffset;
 
   if (node.nodeType === Node.TEXT_NODE) {
-    const text = node.textContent ?? '';
+    const text = node.textContent ? node.textContent : '';
 
     while (offset < text.length && /\s/.test(text[offset])) {
       offset++;
