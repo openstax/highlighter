@@ -165,6 +165,12 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
 
   normalizeStartWhitespace(range);
 
+  console.log(
+  JSON.stringify(
+    range.startContainer.textContent?.slice(range.startOffset, range.startOffset + 10)
+  )
+);
+
   if (selectionDirection === 'backward') {
     // https://stackoverflow.com/a/10705853
     const endRange = range.cloneRange();
