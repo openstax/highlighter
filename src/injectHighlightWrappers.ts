@@ -73,7 +73,7 @@ function createAndInsertNodeForScreenReaders(highlight: Highlight, element: HTML
 
   const message = highlight.getMessage(`i18n:highlighter:highlight:${position}`);
 
-  node.setAttribute('data-message', message);
+  node.textContent = message;
 
   if (position === 'start') {
     node.setAttribute('tabindex', highlight.options.tabbable ? '0' : '-1');
