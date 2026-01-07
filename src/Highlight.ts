@@ -99,7 +99,7 @@ export default class Highlight {
     if (!marker) {
       return;
     }
-    marker.setAttribute('data-message', message);
+    marker.textContent = message;
   }
   /**
    * Add class 'focus' to all elements of this highlight.
