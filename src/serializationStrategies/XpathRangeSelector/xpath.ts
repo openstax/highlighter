@@ -89,19 +89,19 @@ const floatThroughText = (element: Node, offset: number, container: Node): [Node
 
 const resolveToNextElementOffsetIfPossible = (element: Node, offset: number) => {
   if (isTextOrTextHighlightOrScreenReaderNode(element) && element.parentNode && offset === getMaxOffset(element) && (!element.nextSibling || !isHighlightOrScreenReaderNode(element.nextSibling))) {
-    return [element.parentNode, nodeIndex(element.parentNode.childNodes, element) + 1];
+    return [element.parentNode, nodeIndex(element.parentNode.childNodes, element) + 1] as const;
   }
 
-  return [element, offset];
+  return [element, offset] as const;
 };
 
 const resolveToPreviousElementOffsetIfPossible = (element: Node, offset: number) => {
 
   if (isTextOrTextHighlightOrScreenReaderNode(element) && element.parentNode && offset === 0 && (!element.previousSibling || !isHighlightOrScreenReaderNode(element.previousSibling))) {
-    return [element.parentNode, nodeIndex(element.parentNode.childNodes, element)];
+    return [element.parentNode, nodeIndex(element.parentNode.childNodes, element)] as const;
   }
 
-  return [element, offset];
+  return [element, offset] as const;
 };
 
 // kinda copied from https://developer.mozilla.org/en-US/docs/Web/XPath/Snippets#getXPathForElement
@@ -146,7 +146,7 @@ export function getXPathForElement(targetElement: Node, offset: number, referenc
         }
         pos += 1;
       } else {
-        if (isElementNotHighlight(focus) && isElementNotHighlight(element) && element.nodeName === focus.nodeName) {
+        if (isElementNotHighlight(focus) && isElementNotHighlight(element) && (element as Node).nodeName === (focus as Node).nodeName) {
           pos += 1;
         }
         element = element.previousSibling!;
@@ -222,7 +222,7 @@ export function getFirstByXPath(path: string, offset: number, referenceElement: 
     node = null;
   }
 
-  if (isElement(node!) && node!.childNodes.length < offset) {
+  if (isElement(node!) && (node as Node).childNodes.length < offset) {
     node = null;
   }
 
@@ -234,7 +234,7 @@ function followPart(node: Node, part: string) {
   const findFirst = (nodeList: NodeList, predicate: (node: Node) => boolean) =>
     Array.prototype.find.call(nodeList, (node: Node) => predicate(node));
   const findFirstAfter = (nodeList: NodeList, afterThis: Node, predicate: (node: Node) => boolean) => findFirst(
-    Array.prototype.slice.call(nodeList, Array.prototype.indexOf.call(nodeList, afterThis) + 1),
+    Array.prototype.slice.call(nodeList, Array.prototype.indexOf.call(nodeList, afterThis) + 1) as unknown as NodeList,
     predicate
   );
 
