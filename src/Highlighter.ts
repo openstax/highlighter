@@ -276,7 +276,9 @@ export default class Highlighter {
       return;
     }
 
-    this.previousRange = range || null;
+    // range is also the browser selection's live range (and the new highlight's range), which other code
+    // can change in place, so keep a copy of the boundaries that were reported
+    this.previousRange = range ? range.cloneRange() : null;
 
     if (onSelect && range) {
       const highlights: Highlight[] = Object.values(this.highlights)

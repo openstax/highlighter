@@ -317,6 +317,13 @@ describe('onSelect', () => {
       snapSelectionSpy.mockImplementation(() => snappedRange);
     };
 
+    const rangeInNode = (start: number, end: number) => {
+      const range = new Range();
+      range.setStart(node, start);
+      range.setEnd(node, end);
+      return range;
+    };
+
     beforeEach(() => {
       container = document.createElement('div');
       node = document.createElement('div');
@@ -331,7 +338,7 @@ describe('onSelect', () => {
     });
 
     it('reports a selection only once', () => {
-      selectInContainer(new Range());
+      selectInContainer(rangeInNode(0, 5));
 
       dispatch(container, 'mouseup');
       dispatch(container, 'keyup');
@@ -340,18 +347,40 @@ describe('onSelect', () => {
       expect(spyOnSelect).toHaveBeenCalledTimes(1);
     });
 
-    it('reports a different selection', () => {
-      selectInContainer(new Range());
+    it('treats a separate range with the same boundaries as the same selection', () => {
+      selectInContainer(rangeInNode(0, 5));
       dispatch(container, 'mouseup');
 
-      selectInContainer(new Range());
+      selectInContainer(rangeInNode(0, 5));
+      dispatch(container, 'mouseup');
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports a different selection', () => {
+      selectInContainer(rangeInNode(0, 5));
+      dispatch(container, 'mouseup');
+
+      selectInContainer(rangeInNode(0, 8));
+      dispatch(container, 'mouseup');
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(2);
+    });
+
+    it('reports a selection whose range was changed in place after it was reported', () => {
+      const range = rangeInNode(0, 5);
+      selectInContainer(range);
+      dispatch(container, 'mouseup');
+
+      // e.g. a consumer calling getSelection().getRangeAt(0).setEnd(...) on the live range
+      range.setEnd(node, 8);
       dispatch(container, 'mouseup');
 
       expect(spyOnSelect).toHaveBeenCalledTimes(2);
     });
 
     it('reports the same selection again after the selection is cleared', () => {
-      const range = new Range();
+      const range = rangeInNode(0, 5);
       selectInContainer(range);
       dispatch(container, 'mouseup');
 
@@ -365,7 +394,7 @@ describe('onSelect', () => {
     });
 
     it('does not forget the selection when it changes to a range inside the container', () => {
-      const range = new Range();
+      const range = rangeInNode(0, 5);
       selectInContainer(range);
       dispatch(container, 'mouseup');
       dispatch(document, 'selectionchange');
