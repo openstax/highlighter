@@ -2,6 +2,8 @@ class Range {
   cloneRange = () => new Range();
   setEnd = () => {};
   setStart = () => {};
+  // Stub ranges have no real boundaries, so a range is only treated as equal to itself
+  compareBoundaryPoints = (_how, other) => (other === this ? 0 : -1);
   getBoundingClientRect = () => {};
   getClientRects = () => {};
   createContextualFragment = (html) => {

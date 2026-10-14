@@ -197,7 +197,14 @@ export default class Highlighter {
       || selection.type === 'None'
       || !dom(this.container).contains(selection.anchorNode)
       || !dom(this.container).contains(selection.focusNode)
-      || this.compareRanges(selection ? getRange(selection) : null, this.previousRange)
+    ) {
+      // The selection is gone, so selecting the same text again should be reported as a new selection
+      this.previousRange = null;
+      return;
+    }
+
+    if (
+      this.compareRanges(getRange(selection), this.previousRange)
       || window.matchMedia('not all and (pointer: fine), (hover: none)').matches // noop for touch devices
     ) {
       return;
@@ -262,6 +269,13 @@ export default class Highlighter {
     }
 
     const range = this.snapSelection();
+
+    // keyup and mouseup fire for many reasons other than selecting text (e.g. Tab moving focus),
+    // so only report a selection the first time it is seen
+    if (range && this.compareRanges(range, this.previousRange)) {
+      return;
+    }
+
     this.previousRange = range || null;
 
     if (onSelect && range) {
