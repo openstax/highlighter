@@ -6,6 +6,19 @@ const comparePoints = (aContainer, aOffset, bContainer, bOffset) => {
   if (!aContainer || !bContainer) {
     return aContainer ? 1 : -1;
   }
+  const childIndex = (ancestor, descendant) => {
+    let child = descendant;
+    while (child.parentNode !== ancestor) {
+      child = child.parentNode;
+    }
+    return Array.prototype.indexOf.call(ancestor.childNodes, child);
+  };
+  if (aContainer.contains(bContainer)) {
+    return aOffset <= childIndex(aContainer, bContainer) ? -1 : 1;
+  }
+  if (bContainer.contains(aContainer)) {
+    return bOffset <= childIndex(bContainer, aContainer) ? 1 : -1;
+  }
   // eslint-disable-next-line no-bitwise
   return aContainer.compareDocumentPosition(bContainer) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
 };
