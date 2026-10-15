@@ -379,6 +379,23 @@ describe('onSelect', () => {
       expect(spyOnSelect).toHaveBeenCalledTimes(2);
     });
 
+    it('snaps a selection that was changed in place only once', () => {
+      const range = rangeInNode(0, 5);
+      selectInContainer(range);
+      dispatch(container, 'mouseup');
+      expect(snapSelectionSpy).toHaveBeenCalledTimes(1);
+
+      // changing the live range fires selectionchange, which snaps it
+      range.setEnd(node, 8);
+      dispatch(document, 'selectionchange');
+      expect(snapSelectionSpy).toHaveBeenCalledTimes(2);
+
+      // snapping replaced the selection, which fires selectionchange again
+      dispatch(document, 'selectionchange');
+      dispatch(document, 'selectionchange');
+      expect(snapSelectionSpy).toHaveBeenCalledTimes(2);
+    });
+
     it('reports the same selection again after the selection is cleared', () => {
       const range = rangeInNode(0, 5);
       selectInContainer(range);
