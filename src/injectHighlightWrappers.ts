@@ -73,18 +73,25 @@ function createAndInsertNodeForScreenReaders(highlight: Highlight, element: HTML
 
   const message = highlight.getMessage(`i18n:highlighter:highlight:${position}`);
 
-  node.textContent = message;
-
   if (position === 'start') {
     // The start span can take focus. A span with no role has no accessible name in Firefox, so
-    // NVDA has nothing to read when focus lands on it. `note` allows a name, set from the message.
+    // NVDA has nothing to read when focus lands on it. `note` allows a name.
     node.setAttribute('role', 'note');
-    node.setAttribute('aria-label', message);
+    setStartMarkerMessage(node, message);
     node.setAttribute('tabindex', highlight.options.tabbable ? '0' : '-1');
     element.prepend(node);
   } else {
+    node.textContent = message;
     element.append(node);
   }
+}
+
+/**
+ * Sets the start span's text and its accessible name together, so they always agree.
+ */
+export function setStartMarkerMessage(marker: Element, message: string): void {
+  marker.textContent = message;
+  marker.setAttribute('aria-label', message);
 }
 
 /**

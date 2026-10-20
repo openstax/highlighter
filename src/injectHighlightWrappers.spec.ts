@@ -6,6 +6,7 @@ import { adjacentTextSections, imageBetweenParagraphs, paragraphFigureAndCaption
 const messages: { [key: string]: string } = {
   'i18n:highlighter:highlight:end': 'End of highlight',
   'i18n:highlighter:highlight:start': 'Start of highlight',
+  'i18n:highlighter:highlight:start-selected': 'Start of selected highlight',
 };
 
 const START_MESSAGE = messages['i18n:highlighter:highlight:start'];
@@ -440,15 +441,17 @@ describe('screen reader spans', () => {
     };
     const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages, ...options });
 
-    new Highlighter(page, { onClick: jest.fn(), formatMessage: mockMessages }).highlight(highlight);
+    const highlighter = new Highlighter(page, { onClick: jest.fn(), formatMessage: mockMessages });
 
-    return document.querySelectorAll('[data-for-screenreaders]');
+    highlighter.highlight(highlight);
+
+    return { highlight, highlighter, spans: document.querySelectorAll('[data-for-screenreaders]') };
   };
 
   const highlightData = { id: 'some-highlight', content: 'asd', style: 'yellow' };
 
   it('names the start span, which can take focus, with its text', () => {
-    const [start] = Array.from(highlightText({ tabbable: true }));
+    const [start] = Array.from(highlightText({ tabbable: true }).spans);
 
     expect(start.textContent).toBe('Start of highlight');
     expect(start.getAttribute('role')).toBe('note');
@@ -457,17 +460,53 @@ describe('screen reader spans', () => {
   });
 
   it('names the start span when it is not tabbable too', () => {
-    const [start] = Array.from(highlightText());
+    const [start] = Array.from(highlightText().spans);
 
     expect(start.getAttribute('aria-label')).toBe('Start of highlight');
     expect(start.getAttribute('tabindex')).toBe('-1');
   });
 
   it('leaves the end span as plain text', () => {
-    const [, end] = Array.from(highlightText({ tabbable: true }));
+    const [, end] = Array.from(highlightText({ tabbable: true }).spans);
 
     expect(end.textContent).toBe('End of highlight');
     expect(end.hasAttribute('role')).toBe(false);
     expect(end.hasAttribute('aria-label')).toBe(false);
+  });
+
+  describe('when the highlight is selected', () => {
+    it('changes the start span\'s name along with its text', () => {
+      const { highlight, spans } = highlightText({ tabbable: true });
+      const [start] = Array.from(spans);
+
+      highlight.addFocusedStyles();
+
+      expect(start.textContent).toBe('Start of selected highlight');
+      expect(start.getAttribute('aria-label')).toBe('Start of selected highlight');
+    });
+
+    it('puts the name back when the selection is cleared', () => {
+      const { highlight, highlighter, spans } = highlightText({ tabbable: true });
+      const [start] = Array.from(spans);
+
+      highlight.addFocusedStyles();
+
+      expect(start.getAttribute('aria-label')).toBe('Start of selected highlight');
+
+      highlighter.clearFocusedStyles();
+
+      expect(start.textContent).toBe('Start of highlight');
+      expect(start.getAttribute('aria-label')).toBe('Start of highlight');
+    });
+
+    it('leaves the end span alone', () => {
+      const { highlight, spans } = highlightText({ tabbable: true });
+      const [, end] = Array.from(spans);
+
+      highlight.addFocusedStyles();
+
+      expect(end.textContent).toBe('End of highlight');
+      expect(end.hasAttribute('aria-label')).toBe(false);
+    });
   });
 });
