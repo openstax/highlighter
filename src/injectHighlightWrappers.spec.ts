@@ -399,3 +399,54 @@ describe('inject highlight wrappers for text followed by section', () => {
     });
   });
 });
+
+describe('screen reader spans', () => {
+  const mockMessages = jest.fn((descriptor: { id: string }) => messages[descriptor.id]);
+
+  const highlightText = (options: { tabbable?: boolean } = {}) => {
+    document.body.innerHTML = paragraphFigureAndCaption;
+    const page = document.getElementById('container')!;
+    const textNode = document.getElementById('test-p')!.childNodes[0];
+    const range: any = {
+      collapse: false,
+      commonAncestorContainer: page,
+      endContainer: textNode,
+      endOffset: 6,
+      setEndAfter: jest.fn(),
+      setStartBefore: jest.fn(),
+      startContainer: textNode,
+      startOffset: 2,
+    };
+    const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages, ...options });
+
+    new Highlighter(page, { onClick: jest.fn(), formatMessage: mockMessages }).highlight(highlight);
+
+    return document.querySelectorAll('[data-for-screenreaders]');
+  };
+
+  const highlightData = { id: 'some-highlight', content: 'asd', style: 'yellow' };
+
+  it('names the start span, which can take focus, with its text', () => {
+    const [start] = Array.from(highlightText({ tabbable: true }));
+
+    expect(start.textContent).toBe('Start of highlight');
+    expect(start.getAttribute('role')).toBe('note');
+    expect(start.getAttribute('aria-label')).toBe('Start of highlight');
+    expect(start.getAttribute('tabindex')).toBe('0');
+  });
+
+  it('names the start span when it is not tabbable too', () => {
+    const [start] = Array.from(highlightText());
+
+    expect(start.getAttribute('aria-label')).toBe('Start of highlight');
+    expect(start.getAttribute('tabindex')).toBe('-1');
+  });
+
+  it('leaves the end span as plain text', () => {
+    const [, end] = Array.from(highlightText({ tabbable: true }));
+
+    expect(end.textContent).toBe('End of highlight');
+    expect(end.hasAttribute('role')).toBe(false);
+    expect(end.hasAttribute('aria-label')).toBe(false);
+  });
+});

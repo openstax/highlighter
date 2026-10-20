@@ -7,8 +7,10 @@ exports[`inject highlight wrappers for figure with caption for highlight ending 
   data-highlighted="true"
 >
   <span
+    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    role="note"
     tabindex="-1"
   >
     Start of highlight
@@ -45,8 +47,10 @@ exports[`inject highlight wrappers for figure with caption for highlight ending 
   data-highlighted="true"
 >
   <span
+    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    role="note"
     tabindex="-1"
   >
     Start of highlight
@@ -83,8 +87,10 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
   data-highlighted="true"
 >
   <span
+    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    role="note"
     tabindex="-1"
   >
     Start of highlight
@@ -111,8 +117,10 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
   data-highlighted="true"
 >
   <span
+    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    role="note"
     tabindex="-1"
   >
     Start of highlight
@@ -139,8 +147,10 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
   data-highlighted="true"
 >
   <span
+    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    role="note"
     tabindex="0"
   >
     Start of highlight
@@ -177,8 +187,10 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
   data-highlighted="true"
 >
   <span
+    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    role="note"
     tabindex="-1"
   >
     Start of highlight
@@ -215,8 +227,10 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
   data-highlighted="true"
 >
   <span
+    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    role="note"
     tabindex="-1"
   >
     Start of highlight
@@ -243,8 +257,10 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
   data-highlighted="true"
 >
   <span
+    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    role="note"
     tabindex="-1"
   >
     Start of highlight
@@ -271,8 +287,10 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
   data-highlighted="true"
 >
   <span
+    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    role="note"
     tabindex="-1"
   >
     Start of highlight
@@ -299,8 +317,10 @@ exports[`inject highlight wrappers for img between paragraphs in chrome and safa
   data-highlighted="true"
 >
   <span
+    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    role="note"
     tabindex="-1"
   >
     Start of highlight
@@ -337,8 +357,10 @@ exports[`inject highlight wrappers for img between paragraphs in firefox 1`] = `
   data-highlighted="true"
 >
   <span
+    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    role="note"
     tabindex="-1"
   >
     Start of highlight
@@ -375,8 +397,10 @@ exports[`inject highlight wrappers for text followed by section in chrome and sa
   data-highlighted="true"
 >
   <span
+    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    role="note"
     tabindex="-1"
   >
     Start of highlight
@@ -398,8 +422,10 @@ exports[`inject highlight wrappers for text followed by section in firefox 1`] =
   data-highlighted="true"
 >
   <span
+    aria-label="Start of highlight"
     data-for-screenreaders="true"
     data-highlight-id="some-highlight"
+    role="note"
     tabindex="-1"
   >
     Start of highlight

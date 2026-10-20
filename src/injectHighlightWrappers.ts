@@ -76,6 +76,10 @@ function createAndInsertNodeForScreenReaders(highlight: Highlight, element: HTML
   node.textContent = message;
 
   if (position === 'start') {
+    // The start span can take focus. A span with no role has no accessible name in Firefox, so
+    // NVDA has nothing to read when focus lands on it. `note` allows a name, set from the message.
+    node.setAttribute('role', 'note');
+    node.setAttribute('aria-label', message);
     node.setAttribute('tabindex', highlight.options.tabbable ? '0' : '-1');
     element.prepend(node);
   } else {
