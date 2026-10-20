@@ -6,15 +6,6 @@ exports[`inject highlight wrappers for figure with caption for highlight ending 
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
-  <span
-    aria-label="Start of highlight"
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-    role="note"
-    tabindex="-1"
-  >
-    Start of highlight
-  </span>
   hardware store sells 16-ft ladders and 24-ft ladders. A window is located 12 feet above the ground. A ladder needs to be purchased that will reach the window from a point on the ground 5 feet from the building.
 </mark>
 `;
@@ -31,12 +22,6 @@ exports[`inject highlight wrappers for figure with caption for highlight ending 
     id="test-img"
     src="/apps/archive/20210713.205645/resources/b1b5ba97150addc831c534413ca324a72c4e374b"
   />
-  <span
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-  >
-    End of highlight
-  </span>
 </mark>
 `;
 
@@ -46,15 +31,6 @@ exports[`inject highlight wrappers for figure with caption for highlight ending 
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
-  <span
-    aria-label="Start of highlight"
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-    role="note"
-    tabindex="-1"
-  >
-    Start of highlight
-  </span>
   hardware store sells 16-ft ladders and 24-ft ladders. A window is located 12 feet above the ground. A ladder needs to be purchased that will reach the window from a point on the ground 5 feet from the building.
 </mark>
 `;
@@ -71,12 +47,6 @@ exports[`inject highlight wrappers for figure with caption for highlight ending 
     id="test-img"
     src="/apps/archive/20210713.205645/resources/b1b5ba97150addc831c534413ca324a72c4e374b"
   />
-  <span
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-  >
-    End of highlight
-  </span>
 </mark>
 `;
 
@@ -86,27 +56,12 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
-  <span
-    aria-label="Start of highlight"
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-    role="note"
-    tabindex="-1"
-  >
-    Start of highlight
-  </span>
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
     data-media-type="image/jpg"
     id="test-img"
     src="/apps/archive/20210713.205645/resources/b1b5ba97150addc831c534413ca324a72c4e374b"
   />
-  <span
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-  >
-    End of highlight
-  </span>
 </mark>
 `;
 
@@ -116,27 +71,12 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
-  <span
-    aria-label="Start of highlight"
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-    role="note"
-    tabindex="-1"
-  >
-    Start of highlight
-  </span>
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
     data-media-type="image/jpg"
     id="test-img"
     src="/apps/archive/20210713.205645/resources/b1b5ba97150addc831c534413ca324a72c4e374b"
   />
-  <span
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-  >
-    End of highlight
-  </span>
 </mark>
 `;
 
@@ -146,15 +86,6 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
-  <span
-    aria-label="Start of highlight"
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-    role="note"
-    tabindex="0"
-  >
-    Start of highlight
-  </span>
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
     data-media-type="image/jpg"
@@ -171,12 +102,6 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
   data-highlighted="true"
 >
   Figure
-  <span
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-  >
-    End of highlight
-  </span>
 </mark>
 `;
 
@@ -186,15 +111,6 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
-  <span
-    aria-label="Start of highlight"
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-    role="note"
-    tabindex="-1"
-  >
-    Start of highlight
-  </span>
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
     data-media-type="image/jpg"
@@ -211,12 +127,6 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
   data-highlighted="true"
 >
   Figure
-  <span
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-  >
-    End of highlight
-  </span>
 </mark>
 `;
 
@@ -226,27 +136,12 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
-  <span
-    aria-label="Start of highlight"
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-    role="note"
-    tabindex="-1"
-  >
-    Start of highlight
-  </span>
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
     data-media-type="image/jpg"
     id="test-img"
     src="/apps/archive/20210713.205645/resources/b1b5ba97150addc831c534413ca324a72c4e374b"
   />
-  <span
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-  >
-    End of highlight
-  </span>
 </mark>
 `;
 
@@ -256,27 +151,12 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
-  <span
-    aria-label="Start of highlight"
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-    role="note"
-    tabindex="-1"
-  >
-    Start of highlight
-  </span>
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
     data-media-type="image/jpg"
     id="test-img"
     src="/apps/archive/20210713.205645/resources/b1b5ba97150addc831c534413ca324a72c4e374b"
   />
-  <span
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-  >
-    End of highlight
-  </span>
 </mark>
 `;
 
@@ -286,27 +166,12 @@ exports[`inject highlight wrappers for figure with caption for highlight startin
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
-  <span
-    aria-label="Start of highlight"
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-    role="note"
-    tabindex="-1"
-  >
-    Start of highlight
-  </span>
   <img
     alt="A right triangle with a base of 5 feet, a height of 12 feet, and a hypotenuse labeled c"
     data-media-type="image/jpg"
     id="test-img"
     src="/apps/archive/20210713.205645/resources/b1b5ba97150addc831c534413ca324a72c4e374b"
   />
-  <span
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-  >
-    End of highlight
-  </span>
 </mark>
 `;
 
@@ -316,15 +181,6 @@ exports[`inject highlight wrappers for img between paragraphs in chrome and safa
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
-  <span
-    aria-label="Start of highlight"
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-    role="note"
-    tabindex="-1"
-  >
-    Start of highlight
-  </span>
   the first terms, the outer terms, the inner terms, and then the last terms of each binomial.
 </mark>
 `;
@@ -341,12 +197,6 @@ exports[`inject highlight wrappers for img between paragraphs in chrome and safa
     id="test-img"
     src="/apps/archive/20210713.205645/resources/eb942bf030580de7cb1d8c7d484771addceb7da6"
   />
-  <span
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-  >
-    End of highlight
-  </span>
 </mark>
 `;
 
@@ -356,15 +206,6 @@ exports[`inject highlight wrappers for img between paragraphs in firefox 1`] = `
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
-  <span
-    aria-label="Start of highlight"
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-    role="note"
-    tabindex="-1"
-  >
-    Start of highlight
-  </span>
   the first terms, the outer terms, the inner terms, and then the last terms of each binomial.
 </mark>
 `;
@@ -381,12 +222,6 @@ exports[`inject highlight wrappers for img between paragraphs in firefox 2`] = `
     id="test-img"
     src="/apps/archive/20210713.205645/resources/eb942bf030580de7cb1d8c7d484771addceb7da6"
   />
-  <span
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-  >
-    End of highlight
-  </span>
 </mark>
 `;
 
@@ -396,22 +231,7 @@ exports[`inject highlight wrappers for text followed by section in chrome and sa
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
-  <span
-    aria-label="Start of highlight"
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-    role="note"
-    tabindex="-1"
-  >
-    Start of highlight
-  </span>
   How To
-  <span
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-  >
-    End of highlight
-  </span>
 </mark>
 `;
 
@@ -421,21 +241,6 @@ exports[`inject highlight wrappers for text followed by section in firefox 1`] =
   data-highlight-id="some-highlight"
   data-highlighted="true"
 >
-  <span
-    aria-label="Start of highlight"
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-    role="note"
-    tabindex="-1"
-  >
-    Start of highlight
-  </span>
   How To
-  <span
-    data-for-screenreaders="true"
-    data-highlight-id="some-highlight"
-  >
-    End of highlight
-  </span>
 </mark>
 `;

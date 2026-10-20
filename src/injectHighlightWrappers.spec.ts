@@ -8,6 +8,53 @@ const messages: { [key: string]: string } = {
   'i18n:highlighter:highlight:start': 'Start of highlight',
 };
 
+const START_MESSAGE = messages['i18n:highlighter:highlight:start'];
+const END_MESSAGE = messages['i18n:highlighter:highlight:end'];
+
+const screenReaderSpans = (wrapper: Element) => Array.from(wrapper.querySelectorAll('[data-for-screenreaders]'));
+
+/**
+ * A highlight has one start span at the top of its first wrapper and one end span at the bottom of
+ * its last wrapper. No other wrapper has either.
+ */
+const expectSpansOnlyAtTheEnds = (wrappers: NodeListOf<Element>) => {
+  wrappers.forEach((wrapper) => {
+    const spans = screenReaderSpans(wrapper);
+    const starts = spans.filter((span) => span.textContent === START_MESSAGE);
+    const ends = spans.filter((span) => span.textContent === END_MESSAGE);
+    const isFirst = wrapper.classList.contains('first');
+    const isLast = wrapper.classList.contains('last');
+
+    expect(starts).toHaveLength(isFirst ? 1 : 0);
+    expect(ends).toHaveLength(isLast ? 1 : 0);
+    expect(spans).toHaveLength(starts.length + ends.length);
+
+    if (isFirst) {
+      expect(wrapper.firstElementChild).toBe(starts[0]);
+    }
+    if (isLast) {
+      expect(wrapper.lastElementChild).toBe(ends[0]);
+    }
+  });
+};
+
+/**
+ * Checks where the screen reader spans are, then snapshots the wrappers without them, so the
+ * snapshots only change when the wrapping does. The spans themselves are tested in
+ * "screen reader spans".
+ */
+const expectWrappers = (wrappers: NodeListOf<Element>) => {
+  expectSpansOnlyAtTheEnds(wrappers);
+
+  wrappers.forEach((wrapper) => {
+    const copy = wrapper.cloneNode(true) as Element;
+
+    screenReaderSpans(copy).forEach((span) => span.remove());
+    copy.normalize();
+    expect(copy).toMatchSnapshot();
+  });
+};
+
 describe('inject highlight wrappers for figure with caption', () => {
   let page: HTMLElement;
   let img: HTMLElement;
@@ -62,10 +109,8 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      highlightSpans.forEach((el) => {
-        el.classList.add('highlight');
-        expect(el).toMatchSnapshot();
-      });
+      highlightSpans.forEach((el) => el.classList.add('highlight'));
+      expectWrappers(highlightSpans);
     });
 
     it('in firefox', () => {
@@ -84,9 +129,7 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      highlightSpans.forEach((el) => {
-        expect(el).toMatchSnapshot();
-      });
+      expectWrappers(highlightSpans);
     });
   });
 
@@ -108,9 +151,7 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      highlightSpans.forEach((el) => {
-        expect(el).toMatchSnapshot();
-      });
+      expectWrappers(highlightSpans);
     });
 
     it('in firefox', () => {
@@ -129,9 +170,7 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      highlightSpans.forEach((el) => {
-        expect(el).toMatchSnapshot();
-      });
+      expectWrappers(highlightSpans);
     });
   });
 
@@ -155,9 +194,7 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      highlightSpans.forEach((el) => {
-        expect(el).toMatchSnapshot();
-      });
+      expectWrappers(highlightSpans);
     });
 
     it('in firefox', () => {
@@ -178,9 +215,7 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      highlightSpans.forEach((el) => {
-        expect(el).toMatchSnapshot();
-      });
+      expectWrappers(highlightSpans);
     });
 
     it('in safari', () => {
@@ -201,9 +236,7 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      highlightSpans.forEach((el) => {
-        expect(el).toMatchSnapshot();
-      });
+      expectWrappers(highlightSpans);
     });
   });
 
@@ -224,9 +257,7 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      highlightSpans.forEach((el) => {
-        expect(el).toMatchSnapshot();
-      });
+      expectWrappers(highlightSpans);
     });
 
     it('in firefox', () => {
@@ -245,9 +276,7 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      highlightSpans.forEach((el) => {
-        expect(el).toMatchSnapshot();
-      });
+      expectWrappers(highlightSpans);
     });
   });
 });
@@ -299,9 +328,7 @@ describe('inject highlight wrappers for img between paragraphs', () => {
 
     const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-    highlightSpans.forEach((el) => {
-      expect(el).toMatchSnapshot();
-    });
+    expectWrappers(highlightSpans);
   });
 
   it('in chrome and safari', () => {
@@ -320,9 +347,7 @@ describe('inject highlight wrappers for img between paragraphs', () => {
 
     const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-    highlightSpans.forEach((el) => {
-      expect(el).toMatchSnapshot();
-    });
+    expectWrappers(highlightSpans);
   });
 });
 
@@ -373,9 +398,7 @@ describe('inject highlight wrappers for text followed by section', () => {
 
     const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-    highlightSpans.forEach((el) => {
-      expect(el).toMatchSnapshot();
-    });
+    expectWrappers(highlightSpans);
   });
 
   it('in firefox', () => {
@@ -394,9 +417,7 @@ describe('inject highlight wrappers for text followed by section', () => {
 
     const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-    highlightSpans.forEach((el) => {
-      expect(el).toMatchSnapshot();
-    });
+    expectWrappers(highlightSpans);
   });
 });
 
