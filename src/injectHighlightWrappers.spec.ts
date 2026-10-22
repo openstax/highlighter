@@ -6,6 +6,54 @@ import { adjacentTextSections, imageBetweenParagraphs, paragraphFigureAndCaption
 const messages: { [key: string]: string } = {
   'i18n:highlighter:highlight:end': 'End of highlight',
   'i18n:highlighter:highlight:start': 'Start of highlight',
+  'i18n:highlighter:highlight:start-selected': 'Start of selected highlight',
+};
+
+const START_MESSAGE = messages['i18n:highlighter:highlight:start'];
+const END_MESSAGE = messages['i18n:highlighter:highlight:end'];
+
+const screenReaderSpans = (wrapper: Element) => Array.from(wrapper.querySelectorAll('[data-for-screenreaders]'));
+
+/**
+ * A highlight has one start span at the top of its first wrapper and one end span at the bottom of
+ * its last wrapper. No other wrapper has either.
+ */
+const expectSpansOnlyAtTheEnds = (wrappers: NodeListOf<Element>) => {
+  wrappers.forEach((wrapper) => {
+    const spans = screenReaderSpans(wrapper);
+    const starts = spans.filter((span) => span.textContent === START_MESSAGE);
+    const ends = spans.filter((span) => span.textContent === END_MESSAGE);
+    const isFirst = wrapper.classList.contains('first');
+    const isLast = wrapper.classList.contains('last');
+
+    expect(starts).toHaveLength(isFirst ? 1 : 0);
+    expect(ends).toHaveLength(isLast ? 1 : 0);
+    expect(spans).toHaveLength(starts.length + ends.length);
+
+    if (isFirst) {
+      expect(wrapper.firstElementChild).toBe(starts[0]);
+    }
+    if (isLast) {
+      expect(wrapper.lastElementChild).toBe(ends[0]);
+    }
+  });
+};
+
+/**
+ * Checks where the screen reader spans are, then snapshots the wrappers without them, so the
+ * snapshots only change when the wrapping does. The spans themselves are tested in
+ * "screen reader spans".
+ */
+const expectWrappers = (wrappers: NodeListOf<Element>) => {
+  expectSpansOnlyAtTheEnds(wrappers);
+
+  wrappers.forEach((wrapper) => {
+    const copy = wrapper.cloneNode(true) as Element;
+
+    screenReaderSpans(copy).forEach((span) => span.remove());
+    copy.normalize();
+    expect(copy).toMatchSnapshot();
+  });
 };
 
 describe('inject highlight wrappers for figure with caption', () => {
@@ -62,10 +110,8 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      highlightSpans.forEach((el) => {
-        el.classList.add('highlight');
-        expect(el).toMatchSnapshot();
-      });
+      highlightSpans.forEach((el) => el.classList.add('highlight'));
+      expectWrappers(highlightSpans);
     });
 
     it('in firefox', () => {
@@ -84,9 +130,7 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      highlightSpans.forEach((el) => {
-        expect(el).toMatchSnapshot();
-      });
+      expectWrappers(highlightSpans);
     });
   });
 
@@ -108,9 +152,7 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      highlightSpans.forEach((el) => {
-        expect(el).toMatchSnapshot();
-      });
+      expectWrappers(highlightSpans);
     });
 
     it('in firefox', () => {
@@ -129,9 +171,7 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      highlightSpans.forEach((el) => {
-        expect(el).toMatchSnapshot();
-      });
+      expectWrappers(highlightSpans);
     });
   });
 
@@ -155,9 +195,7 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      highlightSpans.forEach((el) => {
-        expect(el).toMatchSnapshot();
-      });
+      expectWrappers(highlightSpans);
     });
 
     it('in firefox', () => {
@@ -178,9 +216,7 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      highlightSpans.forEach((el) => {
-        expect(el).toMatchSnapshot();
-      });
+      expectWrappers(highlightSpans);
     });
 
     it('in safari', () => {
@@ -201,9 +237,7 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      highlightSpans.forEach((el) => {
-        expect(el).toMatchSnapshot();
-      });
+      expectWrappers(highlightSpans);
     });
   });
 
@@ -224,9 +258,7 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      highlightSpans.forEach((el) => {
-        expect(el).toMatchSnapshot();
-      });
+      expectWrappers(highlightSpans);
     });
 
     it('in firefox', () => {
@@ -245,9 +277,7 @@ describe('inject highlight wrappers for figure with caption', () => {
 
       const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-      highlightSpans.forEach((el) => {
-        expect(el).toMatchSnapshot();
-      });
+      expectWrappers(highlightSpans);
     });
   });
 });
@@ -299,9 +329,7 @@ describe('inject highlight wrappers for img between paragraphs', () => {
 
     const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-    highlightSpans.forEach((el) => {
-      expect(el).toMatchSnapshot();
-    });
+    expectWrappers(highlightSpans);
   });
 
   it('in chrome and safari', () => {
@@ -320,9 +348,7 @@ describe('inject highlight wrappers for img between paragraphs', () => {
 
     const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-    highlightSpans.forEach((el) => {
-      expect(el).toMatchSnapshot();
-    });
+    expectWrappers(highlightSpans);
   });
 });
 
@@ -373,9 +399,7 @@ describe('inject highlight wrappers for text followed by section', () => {
 
     const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-    highlightSpans.forEach((el) => {
-      expect(el).toMatchSnapshot();
-    });
+    expectWrappers(highlightSpans);
   });
 
   it('in firefox', () => {
@@ -394,8 +418,95 @@ describe('inject highlight wrappers for text followed by section', () => {
 
     const highlightSpans = document.querySelectorAll(`[${DATA_ATTR}='true']`);
 
-    highlightSpans.forEach((el) => {
-      expect(el).toMatchSnapshot();
+    expectWrappers(highlightSpans);
+  });
+});
+
+describe('screen reader spans', () => {
+  const mockMessages = jest.fn((descriptor: { id: string }) => messages[descriptor.id]);
+
+  const highlightText = (options: { tabbable?: boolean } = {}) => {
+    document.body.innerHTML = paragraphFigureAndCaption;
+    const page = document.getElementById('container')!;
+    const textNode = document.getElementById('test-p')!.childNodes[0];
+    const range: any = {
+      collapse: false,
+      commonAncestorContainer: page,
+      endContainer: textNode,
+      endOffset: 6,
+      setEndAfter: jest.fn(),
+      setStartBefore: jest.fn(),
+      startContainer: textNode,
+      startOffset: 2,
+    };
+    const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages, ...options });
+
+    const highlighter = new Highlighter(page, { onClick: jest.fn(), formatMessage: mockMessages });
+
+    highlighter.highlight(highlight);
+
+    return { highlight, highlighter, spans: document.querySelectorAll('[data-for-screenreaders]') };
+  };
+
+  const highlightData = { id: 'some-highlight', content: 'asd', style: 'yellow' };
+
+  it('names the start span, which can take focus, with its text', () => {
+    const [start] = Array.from(highlightText({ tabbable: true }).spans);
+
+    expect(start.textContent).toBe('Start of highlight');
+    expect(start.getAttribute('role')).toBe('note');
+    expect(start.getAttribute('aria-label')).toBe('Start of highlight');
+    expect(start.getAttribute('tabindex')).toBe('0');
+  });
+
+  it('names the start span when it is not tabbable too', () => {
+    const [start] = Array.from(highlightText().spans);
+
+    expect(start.getAttribute('aria-label')).toBe('Start of highlight');
+    expect(start.getAttribute('tabindex')).toBe('-1');
+  });
+
+  it('leaves the end span as plain text', () => {
+    const [, end] = Array.from(highlightText({ tabbable: true }).spans);
+
+    expect(end.textContent).toBe('End of highlight');
+    expect(end.hasAttribute('role')).toBe(false);
+    expect(end.hasAttribute('aria-label')).toBe(false);
+  });
+
+  describe('when the highlight is selected', () => {
+    it('changes the start span\'s name along with its text', () => {
+      const { highlight, spans } = highlightText({ tabbable: true });
+      const [start] = Array.from(spans);
+
+      highlight.addFocusedStyles();
+
+      expect(start.textContent).toBe('Start of selected highlight');
+      expect(start.getAttribute('aria-label')).toBe('Start of selected highlight');
+    });
+
+    it('puts the name back when the selection is cleared', () => {
+      const { highlight, highlighter, spans } = highlightText({ tabbable: true });
+      const [start] = Array.from(spans);
+
+      highlight.addFocusedStyles();
+
+      expect(start.getAttribute('aria-label')).toBe('Start of selected highlight');
+
+      highlighter.clearFocusedStyles();
+
+      expect(start.textContent).toBe('Start of highlight');
+      expect(start.getAttribute('aria-label')).toBe('Start of highlight');
+    });
+
+    it('leaves the end span alone', () => {
+      const { highlight, spans } = highlightText({ tabbable: true });
+      const [, end] = Array.from(spans);
+
+      highlight.addFocusedStyles();
+
+      expect(end.textContent).toBe('End of highlight');
+      expect(end.hasAttribute('aria-label')).toBe(false);
     });
   });
 });
