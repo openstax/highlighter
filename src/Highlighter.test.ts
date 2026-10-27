@@ -294,6 +294,132 @@ describe('onSelect', () => {
 
     expect(spyOnSelect).not.toHaveBeenCalled();
   });
+
+  describe('repeated events for the same selection', () => {
+    let container: HTMLElement;
+    let node: HTMLElement;
+    let spyOnSelect: jest.Mock;
+
+    const dispatch = (target: EventTarget, type: string) => {
+      const event = document.createEvent('Event');
+      event.initEvent(type, true, true);
+      target.dispatchEvent(event);
+    };
+
+    const selectInContainer = (snappedRange: Range) => {
+      getSelectionSpy.mockImplementation(() => ({
+        anchorNode: node,
+        focusNode: node,
+        getRangeAt: () => snappedRange,
+        isCollapsed: false,
+        rangeCount: 1,
+      }));
+      snapSelectionSpy.mockImplementation(() => snappedRange);
+    };
+
+    const rangeInNode = (start: number, end: number) => {
+      const range = new Range();
+      range.setStart(node, start);
+      range.setEnd(node, end);
+      return range;
+    };
+
+    beforeEach(() => {
+      container = document.createElement('div');
+      node = document.createElement('div');
+      container.appendChild(node);
+      spyOnSelect = jest.fn();
+
+      window.matchMedia = () => ({ matches: false }) as any; // doesnt match touch device media query
+      jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => fn);
+
+      // tslint:disable-next-line no-unused-expression
+      new Highlighter(container, {onSelect: spyOnSelect, formatMessage: jest.fn()});
+    });
+
+    it('reports a selection only once', () => {
+      selectInContainer(rangeInNode(0, 5));
+
+      dispatch(container, 'mouseup');
+      dispatch(container, 'keyup');
+      dispatch(container, 'mouseup');
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('treats a separate range with the same boundaries as the same selection', () => {
+      selectInContainer(rangeInNode(0, 5));
+      dispatch(container, 'mouseup');
+
+      selectInContainer(rangeInNode(0, 5));
+      dispatch(container, 'mouseup');
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports a different selection', () => {
+      selectInContainer(rangeInNode(0, 5));
+      dispatch(container, 'mouseup');
+
+      selectInContainer(rangeInNode(0, 8));
+      dispatch(container, 'mouseup');
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(2);
+    });
+
+    it('reports a selection whose range was changed in place after it was reported', () => {
+      const range = rangeInNode(0, 5);
+      selectInContainer(range);
+      dispatch(container, 'mouseup');
+
+      // e.g. a consumer calling getSelection().getRangeAt(0).setEnd(...) on the live range
+      range.setEnd(node, 8);
+      dispatch(container, 'mouseup');
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(2);
+    });
+
+    it('snaps a selection that was changed in place only once', () => {
+      const range = rangeInNode(0, 5);
+      selectInContainer(range);
+      dispatch(container, 'mouseup');
+      expect(snapSelectionSpy).toHaveBeenCalledTimes(1);
+
+      // changing the live range fires selectionchange, which snaps it
+      range.setEnd(node, 8);
+      dispatch(document, 'selectionchange');
+      expect(snapSelectionSpy).toHaveBeenCalledTimes(2);
+
+      // snapping replaced the selection, which fires selectionchange again
+      dispatch(document, 'selectionchange');
+      dispatch(document, 'selectionchange');
+      expect(snapSelectionSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it('reports the same selection again after the selection is cleared', () => {
+      const range = rangeInNode(0, 5);
+      selectInContainer(range);
+      dispatch(container, 'mouseup');
+
+      getSelectionSpy.mockImplementation(() => ({ isCollapsed: true }));
+      dispatch(document, 'selectionchange');
+
+      selectInContainer(range);
+      dispatch(container, 'mouseup');
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not forget the selection when it changes to a range inside the container', () => {
+      const range = rangeInNode(0, 5);
+      selectInContainer(range);
+      dispatch(container, 'mouseup');
+      dispatch(document, 'selectionchange');
+      dispatch(container, 'keyup');
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+  });
 });
 describe('setSnapValues', () => {
   test('sets all snap options to true', () => {

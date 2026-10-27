@@ -28,7 +28,9 @@ export default class Highlighter {
   public readonly container: HTMLElement;
   private highlights: { [key: string]: Highlight } = {};
   private options: IOptions;
-  private previousRange: Range | null = null;
+  // Copies, because the ranges themselves are the browser selection's live range, which can change in place
+  private reportedRange: Range | null = null; // last range passed to onSelect
+  private snappedRange: Range | null = null; // last range snapping put into the selection
   private focusInHandler: (ev: Event) => void;
   private focusOutHandler: (ev: Event) => void;
 
@@ -179,7 +181,9 @@ export default class Highlighter {
       return;
     }
 
-    return snapSelection(selection, this.options);
+    const range = snapSelection(selection, this.options);
+    this.snappedRange = range ? range.cloneRange() : null;
+    return range;
   }
 
   // Created in the constructor
@@ -197,7 +201,17 @@ export default class Highlighter {
       || selection.type === 'None'
       || !dom(this.container).contains(selection.anchorNode)
       || !dom(this.container).contains(selection.focusNode)
-      || this.compareRanges(selection ? getRange(selection) : null, this.previousRange)
+    ) {
+      // The selection is gone, so selecting the same text again should be reported as a new selection
+      this.reportedRange = null;
+      this.snappedRange = null;
+      return;
+    }
+
+    // Snapping replaces the selection, which fires selectionchange again, so skip a selection that is
+    // already snapped or it would be snapped over and over
+    if (
+      this.compareRanges(getRange(selection), this.snappedRange)
       || window.matchMedia('not all and (pointer: fine), (hover: none)').matches // noop for touch devices
     ) {
       return;
@@ -262,7 +276,14 @@ export default class Highlighter {
     }
 
     const range = this.snapSelection();
-    this.previousRange = range || null;
+
+    // keyup and mouseup fire for many reasons other than selecting text (e.g. Tab moving focus),
+    // so only report a selection the first time it is seen
+    if (range && this.compareRanges(range, this.reportedRange)) {
+      return;
+    }
+
+    this.reportedRange = range ? range.cloneRange() : null;
 
     if (onSelect && range) {
       const highlights: Highlight[] = Object.values(this.highlights)
