@@ -244,3 +244,53 @@ exports[`inject highlight wrappers for text followed by section in firefox 1`] =
   How To
 </mark>
 `;
+
+exports[`screen reader spans markup when not tabbable 1`] = `
+<mark
+  class="highlight first text last yellow"
+  data-highlight-id="some-highlight"
+  data-highlighted="true"
+>
+  <span
+    aria-label="Start of highlight"
+    data-for-screenreaders="true"
+    data-highlight-id="some-highlight"
+    role="note"
+    tabindex="-1"
+  >
+    Start of highlight
+  </span>
+  hard
+  <span
+    data-for-screenreaders="true"
+    data-highlight-id="some-highlight"
+  >
+    End of highlight
+  </span>
+</mark>
+`;
+
+exports[`screen reader spans markup when tabbable 1`] = `
+<mark
+  class="highlight first text last yellow"
+  data-highlight-id="some-highlight"
+  data-highlighted="true"
+>
+  <span
+    aria-label="Start of highlight"
+    data-for-screenreaders="true"
+    data-highlight-id="some-highlight"
+    role="note"
+    tabindex="0"
+  >
+    Start of highlight
+  </span>
+  hard
+  <span
+    data-for-screenreaders="true"
+    data-highlight-id="some-highlight"
+  >
+    End of highlight
+  </span>
+</mark>
+`;

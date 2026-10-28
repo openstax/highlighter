@@ -425,21 +425,25 @@ describe('inject highlight wrappers for text followed by section', () => {
 describe('screen reader spans', () => {
   const mockMessages = jest.fn((descriptor: { id: string }) => messages[descriptor.id]);
 
-  const highlightText = (options: { tabbable?: boolean } = {}) => {
+  /**
+   * Highlights some text in the first paragraph. With `acrossElements` the highlight ends in the
+   * figure that follows, so it gets more than one wrapper.
+   */
+  const highlightText = (options: { tabbable?: boolean, acrossElements?: boolean } = {}) => {
     document.body.innerHTML = paragraphFigureAndCaption;
     const page = document.getElementById('container')!;
     const textNode = document.getElementById('test-p')!.childNodes[0];
     const range: any = {
       collapse: false,
       commonAncestorContainer: page,
-      endContainer: textNode,
-      endOffset: 6,
+      endContainer: options.acrossElements ? document.getElementById('test-span')! : textNode,
+      endOffset: options.acrossElements ? 2 : 6,
       setEndAfter: jest.fn(),
       setStartBefore: jest.fn(),
       startContainer: textNode,
       startOffset: 2,
     };
-    const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages, ...options });
+    const highlight = new Highlight(range, highlightData, { formatMessage: mockMessages, tabbable: options.tabbable });
 
     const highlighter = new Highlighter(page, { onClick: jest.fn(), formatMessage: mockMessages });
 
@@ -449,6 +453,24 @@ describe('screen reader spans', () => {
   };
 
   const highlightData = { id: 'some-highlight', content: 'asd', style: 'yellow' };
+
+  // The only snapshots that keep the spans. The wrapper snapshots above leave them out so they only
+  // change when the wrapping does; these pin the exact markup a screen reader gets.
+  describe('markup', () => {
+    const wrapper = () => document.querySelector(`[${DATA_ATTR}='true']`);
+
+    it('when tabbable', () => {
+      highlightText({ tabbable: true });
+
+      expect(wrapper()).toMatchSnapshot();
+    });
+
+    it('when not tabbable', () => {
+      highlightText();
+
+      expect(wrapper()).toMatchSnapshot();
+    });
+  });
 
   it('names the start span, which can take focus, with its text', () => {
     const [start] = Array.from(highlightText({ tabbable: true }).spans);
@@ -507,6 +529,38 @@ describe('screen reader spans', () => {
 
       expect(end.textContent).toBe('End of highlight');
       expect(end.hasAttribute('aria-label')).toBe(false);
+    });
+
+    describe('across several wrappers', () => {
+      const wrappers = () => Array.from(document.querySelectorAll(`[${DATA_ATTR}='true']`));
+
+      it('changes only the start span, which is in the first wrapper', () => {
+        const { highlight, spans } = highlightText({ tabbable: true, acrossElements: true });
+        const [start, end] = Array.from(spans);
+
+        expect(wrappers().length).toBeGreaterThan(1);
+        expect(spans).toHaveLength(2);
+
+        highlight.addFocusedStyles();
+
+        expect(start.textContent).toBe('Start of selected highlight');
+        expect(start.getAttribute('aria-label')).toBe('Start of selected highlight');
+        expect(end.textContent).toBe('End of highlight');
+        expect(end.hasAttribute('aria-label')).toBe(false);
+        expect(wrappers().every((el) => el.getAttribute('aria-current') === 'true')).toBe(true);
+      });
+
+      it('puts the start span back when the selection is cleared', () => {
+        const { highlight, highlighter, spans } = highlightText({ tabbable: true, acrossElements: true });
+        const [start] = Array.from(spans);
+
+        highlight.addFocusedStyles();
+        highlighter.clearFocusedStyles();
+
+        expect(start.textContent).toBe('Start of highlight');
+        expect(start.getAttribute('aria-label')).toBe('Start of highlight');
+        expect(wrappers().some((el) => el.hasAttribute('aria-current'))).toBe(false);
+      });
     });
   });
 });
