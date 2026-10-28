@@ -1,4 +1,4 @@
-import * as uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import dom from './dom';
 import { DATA_SCREEN_READERS_ATTR, DATA_SCREEN_READERS_ATTR_SELECTOR } from './injectHighlightWrappers';
 import SerializedHighlight from './SerializedHighlight';
