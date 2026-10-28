@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import dom from './dom';
-import { DATA_SCREEN_READERS_ATTR, DATA_SCREEN_READERS_ATTR_SELECTOR } from './injectHighlightWrappers';
+import { DATA_SCREEN_READERS_ATTR, DATA_SCREEN_READERS_ATTR_SELECTOR, setStartMarkerMessage } from './injectHighlightWrappers';
 import SerializedHighlight from './SerializedHighlight';
 
 export interface IHighlightData {
@@ -99,7 +99,7 @@ export default class Highlight {
     if (!marker) {
       return;
     }
-    marker.textContent = message;
+    setStartMarkerMessage(marker, message);
   }
   /**
    * Add class 'focus' to all elements of this highlight.
