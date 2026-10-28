@@ -2,7 +2,7 @@ version: '3.5'
 services:
   build:
     command: yarn build
-    image: node:10
+    image: node:24
     working_dir: /code
     volumes:
       - .:/code

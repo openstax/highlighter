@@ -1,6 +1,6 @@
 {
   "name": "@openstax/highlighter",
-  "version": "1.16.6",
+  "version": "1.17.1",
   "main": "dist/index.js",
   "license": "MIT",
   "files": [
@@ -73,6 +73,6 @@
     "change-case": "^4.0.0",
     "lodash": "^4.18.1",
     "serialize-selection": "^1.1.1",
-    "uuid": "^3.3.3"
+    "uuid": "^9.0.1"
   }
 }
