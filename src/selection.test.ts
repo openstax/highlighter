@@ -1,6 +1,6 @@
 import { snapSelection } from './selection';
 
-const snap = (text: string, start: number, end: number) => {
+const snapOffsets = (text: string, start: number, end: number) => {
   document.body.innerHTML = '<p id="p"></p>';
   const node = document.createTextNode(text);
   document.getElementById('p')!.appendChild(node);
@@ -19,7 +19,11 @@ const snap = (text: string, start: number, end: number) => {
     removeAllRanges: jest.fn(),
   } as unknown as Selection;
 
-  const snapped = snapSelection(selection, { snapWords: true })!;
+  return snapSelection(selection, { snapWords: true })!;
+};
+
+const snap = (text: string, start: number, end: number) => {
+  const snapped = snapOffsets(text, start, end);
   return text.slice(snapped.startOffset, snapped.endOffset);
 };
 
@@ -28,6 +32,16 @@ describe('snapSelection with snapWords', () => {
 
   it('expands a partial word to the whole word', () => {
     expect(snap('individuals who are being studied', 28, 31)).toBe('studied');
+  });
+
+  it('stops at the edges of the text node instead of going past them', () => {
+    const text = 'individuals who are being studied';
+    const snapped = snapOffsets(text, 28, 31);
+    expect(snapped.startOffset).toBe(text.indexOf('studied'));
+    expect(snapped.endOffset).toBe(text.length);
+
+    const atStart = snapOffsets(text, 2, 5);
+    expect(atStart.startOffset).toBe(0);
   });
 
   it('does not extend past an em dash at the end of the selection', () => {

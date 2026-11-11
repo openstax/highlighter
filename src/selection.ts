@@ -114,7 +114,7 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
 
   if (options.snapWords) {
     const shouldGobbleCharacter = (container: string, targetOffset: number) =>
-      targetOffset >= 0 && container.length >= targetOffset && !WORD_BREAK.test(container.substr(targetOffset, 1));
+      targetOffset >= 0 && container.length > targetOffset && !WORD_BREAK.test(container.substr(targetOffset, 1));
 
     const shouldGobbleBackward = () => {
       return range.startContainer.textContent &&
