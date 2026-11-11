@@ -78,6 +78,10 @@ interface IOptions {
   snapCode?: boolean;
 }
 
+// characters that end a word even though they are not whitespace:
+// en dash, em dash and horizontal bar (ASCII hyphens stay part of the word)
+const WORD_BREAK = /[\s\u2013\u2014\u2015]/;
+
 export const snapSelection = (selection: Selection, options: IOptions): Range | undefined => {
   const selectionDirection = getDirection(selection);
   const range = getRange(selection);
@@ -110,7 +114,7 @@ export const snapSelection = (selection: Selection, options: IOptions): Range | 
 
   if (options.snapWords) {
     const shouldGobbleCharacter = (container: string, targetOffset: number) =>
-      targetOffset >= 0 && container.length >= targetOffset && /\S/.test(container.substr(targetOffset, 1));
+      targetOffset >= 0 && container.length >= targetOffset && !WORD_BREAK.test(container.substr(targetOffset, 1));
 
     const shouldGobbleBackward = () => {
       return range.startContainer.textContent &&
