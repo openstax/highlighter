@@ -22,15 +22,29 @@ const IS_PATH_PART_SELF = /^\.$/;
 const IS_PATH_PART_TEXT = /^text\(\)\[(\d+)\]$/;
 const IS_PATH_PART_ELEMENT = /\*\[name\(\)='(.+)'\]\[(\d+)\]/;
 
-const getTextLength = (node: Node) => {
-  if (isText(node)) {
-    return node.length;
-  } else if (node && node.textContent) {
-    return node.textContent.length;
-  } else {
+type MeasureTextLength = (node: Node) => number;
+
+/**
+ * Returns the length of the text a reader sees in this node, which leaves out screen reader labels.
+ * XpathRangeSelectorV2 counts text offsets this way, because the labels change with what is on the page
+ * (search results, which highlight is focused, highlight colors).
+ */
+export const getVisibleTextLength = (node: Node): number => {
+  if (isScreenReaderNode(node)) {
     return 0;
+  } else if (isText(node)) {
+    return node.length;
+  } else {
+    return Array.from(node.childNodes).reduce((length, child) => length + getVisibleTextLength(child), 0);
   }
 };
+
+/**
+ * Returns the length of all text in this node, including screen reader labels. XpathRangeSelector counts text
+ * offsets this way.
+ */
+const getTextLengthCountingScreenReaderText = (node: Node) => (node.textContent || '').length;
+
 const getMaxOffset = (node: Node) => {
   if (isText(node)) {
     return node.length;
@@ -39,30 +53,30 @@ const getMaxOffset = (node: Node) => {
   }
 };
 
-const recurseBackwardsThroughText = (current: Node, container: Node, resultOffset: number): [Node, number] => {
+const recurseBackwardsThroughText = (current: Node, container: Node, resultOffset: number, getTextLength: MeasureTextLength): [Node, number] => {
   // we don't count the current, we count the previous
   const previous = current.previousSibling;
 
   if (previous && isTextOrTextHighlightOrScreenReaderNode(previous)) {
-    return recurseBackwardsThroughText(previous, container, resultOffset + getTextLength(previous));
+    return recurseBackwardsThroughText(previous, container, resultOffset + getTextLength(previous), getTextLength);
   } else if (current.parentNode && isTextHighlightOrScreenReaderNode(current.parentNode)) {
-    return recurseBackwardsThroughText(current.parentNode, container, resultOffset);
+    return recurseBackwardsThroughText(current.parentNode, container, resultOffset, getTextLength);
   } else {
     return [current, resultOffset];
   }
 };
 
-const resolveTextHighlightsToTextOffset = (element: Node, offset: number, container: Node): [Node, number] => {
+const resolveTextHighlightsToTextOffset = (element: Node, offset: number, container: Node, getTextLength: MeasureTextLength): [Node, number] => {
   // this won't catch things that are right at the tail of the container, which is good, because we
   // want to contiue using element offset if possible
   if (isElement(element) && isTextOrTextHighlightOrScreenReaderNode(element.childNodes[offset])) {
-    return recurseBackwardsThroughText(element.childNodes[offset], container, 0);
+    return recurseBackwardsThroughText(element.childNodes[offset], container, 0, getTextLength);
     // however, if the element, is a highlgiht, then we should float
   } else if (isTextHighlightOrScreenReaderNode(element)) {
-    return recurseBackwardsThroughText(element, container, getTextLength(element));
+    return recurseBackwardsThroughText(element, container, getTextLength(element), getTextLength);
     // preserve the offset if the elment is text
   } else if (isText(element)) {
-    return recurseBackwardsThroughText(element, container, offset);
+    return recurseBackwardsThroughText(element, container, offset, getTextLength);
   } else {
     return [element, offset];
   }
@@ -105,10 +119,15 @@ const resolveToPreviousElementOffsetIfPossible = (element: Node, offset: number)
 };
 
 // kinda copied from https://developer.mozilla.org/en-US/docs/Web/XPath/Snippets#getXPathForElement
-export function getXPathForElement(targetElement: Node, offset: number, reference: HTMLElement): [string, number] {
+export function getXPathForElement(
+  targetElement: Node,
+  offset: number,
+  reference: HTMLElement,
+  getTextLength: MeasureTextLength = getTextLengthCountingScreenReaderText
+): [string, number] {
   [targetElement, offset] = floatThroughText(targetElement, offset, reference);
   [targetElement, offset] = resolveToNextElementOffsetIfPossible(targetElement, offset);
-  [targetElement, offset] = resolveTextHighlightsToTextOffset(targetElement, offset, reference);
+  [targetElement, offset] = resolveTextHighlightsToTextOffset(targetElement, offset, reference, getTextLength);
   [targetElement, offset] = resolveToPreviousElementOffsetIfPossible(targetElement, offset);
 
   let xpath = '';
@@ -168,7 +187,12 @@ export function getXPathForElement(targetElement: Node, offset: number, referenc
   return [xpath, offset];
 }
 
-export function getFirstByXPath(path: string, offset: number, referenceElement: HTMLElement): [HTMLElement | null, number] {
+export function getFirstByXPath(
+  path: string,
+  offset: number,
+  referenceElement: HTMLElement,
+  getTextLength: MeasureTextLength = getTextLengthCountingScreenReaderText
+): [HTMLElement | null, number] {
   const parts = path.split('/');
 
   let node: HTMLElement | null = referenceElement;
@@ -188,8 +212,8 @@ export function getFirstByXPath(path: string, offset: number, referenceElement: 
   // until we find the text node that the offset specifies, modifying the offset
   // as we go. prefer leaving highlights if we have the option to deal with
   // adjacent highlights.
-  while ((isTextHighlightOrScreenReaderNode(node!) && offset >= node!.textContent!.length) || (isText(node!) && offset > node!.textContent!.length)) {
-    offset -= node!.textContent!.length;
+  while ((isTextHighlightOrScreenReaderNode(node!) && offset >= getTextLength(node!)) || (isText(node!) && offset > getTextLength(node!))) {
+    offset -= getTextLength(node!);
     node = isTextOrTextHighlightOrScreenReaderNode(node!.nextSibling!) ? node!.nextSibling as HTMLElement : null;
   }
 

@@ -779,3 +779,45 @@ describe('getFirstByXPath', () => {
     expect(result).not.toEqual(null);
   });
 });
+
+describe('text offsets next to a highlight with screen reader labels', () => {
+  const START_LABEL = 'Start search result';
+  const END_LABEL = 'End of search result';
+  const labelledHighlight = (text) => `<span ${DATA_ATTR}>`
+    + `<span ${DATA_SCREEN_READERS_ATTR}>${START_LABEL}</span>${text}<span ${DATA_SCREEN_READERS_ATTR}>${END_LABEL}</span>`
+    + '</span>';
+  const OFFSET_OF_ZXCV = 'qwer asdf '.length;
+  const LABELS_LENGTH = START_LABEL.length + END_LABEL.length;
+
+  beforeEach(() => {
+    document.body.innerHTML = `<div id="reference">qwer ${labelledHighlight('asdf')} zxcv</div>`;
+  });
+
+  const textAfterHighlight = () => document.getElementById('reference').lastChild;
+
+  it('counts the labels by default, like older highlights', () => {
+    const reference = document.getElementById('reference');
+
+    expect(xpath.getXPathForElement(textAfterHighlight(), 1, reference))
+      .toEqual(['./text()[1]', OFFSET_OF_ZXCV + LABELS_LENGTH]);
+    expect(xpath.getFirstByXPath('./text()[1]', OFFSET_OF_ZXCV + LABELS_LENGTH, reference))
+      .toEqual([textAfterHighlight(), 1]);
+  });
+
+  it('leaves the labels out when measuring visible text', () => {
+    const reference = document.getElementById('reference');
+
+    expect(xpath.getXPathForElement(textAfterHighlight(), 1, reference, xpath.getVisibleTextLength))
+      .toEqual(['./text()[1]', OFFSET_OF_ZXCV]);
+    expect(xpath.getFirstByXPath('./text()[1]', OFFSET_OF_ZXCV, reference, xpath.getVisibleTextLength))
+      .toEqual([textAfterHighlight(), 1]);
+  });
+
+  it('leaves the labels out of a point inside the highlight', () => {
+    const reference = document.getElementById('reference');
+    const highlightedText = reference.childNodes[1].childNodes[1];
+
+    expect(xpath.getXPathForElement(highlightedText, 2, reference, xpath.getVisibleTextLength))
+      .toEqual(['./text()[1]', 'qwer as'.length]);
+  });
+});
