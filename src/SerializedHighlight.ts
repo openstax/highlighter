@@ -13,6 +13,21 @@ const mapKeys = (transform: (key: string) => string, obj: {[key: string]: any}) 
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
+/**
+ * Returns the range with its start moved into the text node it sits just before. A selection that starts at the
+ * beginning of a text node is saved, and so loads, as a position in the parent element, but older versions built
+ * the saved content from the selection, whose start was inside the text node.
+ */
+const moveStartIntoText = (range: Range): Range => {
+  const nodeAfterStart = range.startContainer.childNodes[range.startOffset];
+  if (!nodeAfterStart || nodeAfterStart.nodeType !== Node.TEXT_NODE) {
+    return range;
+  }
+  const result = range.cloneRange();
+  result.setStart(nodeAfterStart, 0);
+  return result;
+};
+
 interface IOptionalApiData {
   annotation?: string;
 }
@@ -117,7 +132,7 @@ export default class SerializedHighlight {
   public shouldMigrateLocation(highlighter: Highlighter): boolean {
     return this.data.type === xpathRangeSelectorDiscriminator
       && this.isLoadable(highlighter)
-      && rangeContentsString(this.deserializer.load(highlighter), true) === this.content;
+      && rangeContentsString(moveStartIntoText(this.deserializer.load(highlighter)), true) === this.content;
   }
 
   public load(highlighter: Highlighter): Highlight {

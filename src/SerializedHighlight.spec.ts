@@ -70,6 +70,22 @@ describe('migrating an XpathRangeSelector location', () => {
     expect(serialized.shouldMigrateLocation(page.highlighter)).toBe(true);
   });
 
+  it('migrates a highlight that starts at the beginning of the paragraph', () => {
+    const savingPage = createPage();
+    const range = rangeOver(savingPage.reference, 'aaaa');
+    const serialized = new SerializedHighlight({
+      ...XpathRangeSelector.serialize(range, savingPage.reference),
+      // Older versions saved one character past the end of a range inside a single text node.
+      content: 'aaaa ',
+      id: 'older',
+      style: 'yellow',
+    });
+    const page = createPage();
+
+    expect(serialized.data).toMatchObject({ startContainer: '.', startOffset: 0 });
+    expect(serialized.shouldMigrateLocation(page.highlighter)).toBe(true);
+  });
+
   it('does not migrate a highlight whose location finds other text', () => {
     const serialized = savedAfterEarlierHighlight();
     // The earlier highlight was deleted, so the saved offsets point past 'kkkk'.
