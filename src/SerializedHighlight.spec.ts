@@ -33,7 +33,7 @@ describe('migrating an XpathRangeSelector location', () => {
 
     return new SerializedHighlight({
       ...XpathRangeSelector.serialize(range, page.reference),
-      content: rangeContentsString(range),
+      content: rangeContentsString(range, true),
       id: 'older',
       style: 'yellow',
     });
@@ -47,6 +47,23 @@ describe('migrating an XpathRangeSelector location', () => {
 
   it('migrates a highlight whose location finds its saved content', () => {
     const serialized = savedAfterEarlierHighlight();
+    const page = createPage();
+    page.drawUserHighlight('aaaa');
+
+    expect(serialized.shouldMigrateLocation(page.highlighter)).toBe(true);
+  });
+
+  it('migrates a highlight over a word with text after it', () => {
+    const savingPage = createPage();
+    savingPage.drawUserHighlight('aaaa');
+    const range = rangeOver(savingPage.reference, 'jjjj');
+    const serialized = new SerializedHighlight({
+      ...XpathRangeSelector.serialize(range, savingPage.reference),
+      // Older versions saved one character past the end of a range inside a single text node.
+      content: 'jjjj ',
+      id: 'older',
+      style: 'yellow',
+    });
     const page = createPage();
     page.drawUserHighlight('aaaa');
 

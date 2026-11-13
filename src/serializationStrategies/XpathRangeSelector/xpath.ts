@@ -43,7 +43,7 @@ export const getVisibleTextLength = (node: Node): number => {
  * Returns the length of all text in this node, including screen reader labels. XpathRangeSelector counts text
  * offsets this way.
  */
-const getTextLengthCountingScreenReaderText = (node: Node) => (node.textContent || '').length;
+export const getTextLengthCountingScreenReaderText = (node: Node) => (node.textContent || '').length;
 
 /**
  * Returns the text node inside a highlight that holds the given offset, and the offset into that text node.
@@ -141,7 +141,7 @@ export function getXPathForElement(
   targetElement: Node,
   offset: number,
   reference: HTMLElement,
-  getTextLength: MeasureTextLength = getTextLengthCountingScreenReaderText
+  getTextLength: MeasureTextLength = getVisibleTextLength
 ): [string, number] {
   [targetElement, offset] = floatThroughText(targetElement, offset, reference);
   [targetElement, offset] = resolveToNextElementOffsetIfPossible(targetElement, offset);
@@ -209,8 +209,8 @@ export function getFirstByXPath(
   path: string,
   offset: number,
   referenceElement: HTMLElement,
-  getTextLength: MeasureTextLength = getTextLengthCountingScreenReaderText,
-  findTextInsideHighlights = false
+  getTextLength: MeasureTextLength = getVisibleTextLength,
+  findTextInsideHighlights = true
 ): [HTMLElement | null, number] {
   const parts = path.split('/');
 
@@ -236,8 +236,8 @@ export function getFirstByXPath(
     node = isTextOrTextHighlightOrScreenReaderNode(node!.nextSibling!) ? node!.nextSibling as HTMLElement : null;
   }
 
-  // The point is inside another highlight, such as a search result drawn after this location was saved. Only
-  // XpathRangeSelectorV2 looks for the text inside it; XpathRangeSelector keeps returning null here as it always has.
+  // The point is inside another highlight, such as a search result drawn after this location was saved.
+  // XpathRangeSelector turns this off and keeps returning null here as it always has.
   if (node && isTextHighlight(node) && findTextInsideHighlights) {
     [node, offset] = findVisibleTextInHighlight(node, offset) as [HTMLElement | null, number];
   }

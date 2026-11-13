@@ -1,5 +1,5 @@
 import Highlighter from '../../Highlighter';
-import { getFirstByXPath, getVisibleTextLength, getXPathForElement } from '../XpathRangeSelector/xpath';
+import { getFirstByXPath, getXPathForElement } from '../XpathRangeSelector/xpath';
 
 /**
  * Same as XpathRangeSelector, except that text offsets leave out the hidden screen reader labels inside other
@@ -18,12 +18,8 @@ export interface IData {
 }
 
 export function serialize(range: Range, referenceElement: HTMLElement): IData {
-  const [endContainer, endOffset] = getXPathForElement(
-    range.endContainer, range.endOffset, referenceElement, getVisibleTextLength
-  );
-  const [startContainer, startOffset] = getXPathForElement(
-    range.startContainer, range.startOffset, referenceElement, getVisibleTextLength
-  );
+  const [endContainer, endOffset] = getXPathForElement(range.endContainer, range.endOffset, referenceElement);
+  const [startContainer, startOffset] = getXPathForElement(range.startContainer, range.startOffset, referenceElement);
 
   return {
     endContainer,
@@ -36,8 +32,8 @@ export function serialize(range: Range, referenceElement: HTMLElement): IData {
 }
 
 const findBoundaries = (referenceElement: HTMLElement, data: IData) => ({
-  end: getFirstByXPath(data.endContainer, data.endOffset, referenceElement, getVisibleTextLength, true),
-  start: getFirstByXPath(data.startContainer, data.startOffset, referenceElement, getVisibleTextLength, true),
+  end: getFirstByXPath(data.endContainer, data.endOffset, referenceElement),
+  start: getFirstByXPath(data.startContainer, data.startOffset, referenceElement),
 });
 
 export function isLoadable(highlighter: Highlighter, data: IData): boolean {

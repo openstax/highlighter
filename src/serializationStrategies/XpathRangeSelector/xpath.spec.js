@@ -3,6 +3,13 @@ import * as xpath from './xpath';
 
 const screenReaderNode = `<span ${DATA_SCREEN_READERS_ATTR}></span>`;
 
+// These call the xpath functions the way XpathRangeSelector does: offsets count screen reader labels, and a point
+// inside another highlight is not found.
+const getXPathForElementCountingLabels = (node, offset, reference) =>
+  xpath.getXPathForElement(node, offset, reference, xpath.getTextLengthCountingScreenReaderText);
+const getFirstByXPathCountingLabels = (path, offset, reference) =>
+  xpath.getFirstByXPath(path, offset, reference, xpath.getTextLengthCountingScreenReaderText, false);
+
 describe('getXPathForElement', () => {
   it('creates path to self', () => {
     document.body.innerHTML = `
@@ -10,7 +17,7 @@ describe('getXPathForElement', () => {
     `;
 
     const reference = document.getElementById('reference');
-    const [result] = xpath.getXPathForElement(reference, 0, reference);
+    const [result] = getXPathForElementCountingLabels(reference, 0, reference);
     expect(result).toEqual('.');
   });
 
@@ -23,7 +30,7 @@ describe('getXPathForElement', () => {
 
     const reference = document.getElementById('reference');
     const element = document.getElementById('element');
-    const [result] = xpath.getXPathForElement(element, 0, reference);
+    const [result] = getXPathForElementCountingLabels(element, 0, reference);
     expect(result).toEqual("./*[name()='div'][1]");
   });
 
@@ -34,7 +41,7 @@ describe('getXPathForElement', () => {
 
     const reference = document.getElementById('reference');
     const text = reference.firstChild;
-    const [result, offset] = xpath.getXPathForElement(text, 3, reference);
+    const [result, offset] = getXPathForElementCountingLabels(text, 3, reference);
 
     expect(result).toEqual("./text()[1]");
     expect(offset).toEqual(3);
@@ -59,7 +66,7 @@ describe('getXPathForElement', () => {
 
     const reference = document.getElementById('reference');
     const element = document.getElementById('element');
-    const [result] = xpath.getXPathForElement(element, 0, reference);
+    const [result] = getXPathForElementCountingLabels(element, 0, reference);
     expect(result).toEqual("./*[name()='div'][3]/*[name()='div'][1]/*[name()='section'][1]/*[name()='div'][1]");
   });
 
@@ -72,7 +79,7 @@ describe('getXPathForElement', () => {
 
     const reference = document.getElementById('reference');
     const text = document.getElementById('target').childNodes[0];
-    const [result, offset] = xpath.getXPathForElement(text, 4, reference);
+    const [result, offset] = getXPathForElementCountingLabels(text, 4, reference);
     expect(result).toEqual("./*[name()='div'][1]");
     expect(offset).toEqual(1);
   });
@@ -86,7 +93,7 @@ describe('getXPathForElement', () => {
 
     const reference = document.getElementById('reference');
     const text = document.getElementById('target').childNodes[0];
-    const [result, offset] = xpath.getXPathForElement(text, 0, reference);
+    const [result, offset] = getXPathForElementCountingLabels(text, 0, reference);
     expect(result).toEqual("./*[name()='div'][1]");
     expect(offset).toEqual(0);
   });
@@ -114,21 +121,21 @@ describe('getXPathForElement', () => {
     const expectedOffset = 21;
 
     const target1 = document.getElementById('target1');
-    const [result1, offset1] = xpath.getXPathForElement(target1, 2, reference);
+    const [result1, offset1] = getXPathForElementCountingLabels(target1, 2, reference);
     expect(result1).toEqual(expectedPath);
     expect(offset1).toEqual(expectedOffset);
 
     const target2 = document.getElementById('target2');
-    const [result2, offset2] = xpath.getXPathForElement(target2, 2, reference);
+    const [result2, offset2] = getXPathForElementCountingLabels(target2, 2, reference);
     expect(result2).toEqual(expectedPath);
     expect(offset2).toEqual(expectedOffset);
 
     const target3 = document.getElementById('target3');
-    const [result3, offset3] = xpath.getXPathForElement(target3, 2, reference);
+    const [result3, offset3] = getXPathForElementCountingLabels(target3, 2, reference);
     expect(result3).toEqual(expectedPath);
     expect(offset3).toEqual(expectedOffset);
 
-    const [result4, offset4] = xpath.getXPathForElement(target3.childNodes[1], 8, reference);
+    const [result4, offset4] = getXPathForElementCountingLabels(target3.childNodes[1], 8, reference);
     expect(result4).toEqual(expectedPath);
     expect(offset4).toEqual(expectedOffset);
   });
@@ -156,21 +163,21 @@ describe('getXPathForElement', () => {
     const expectedOffset = 13;
 
     const target1 = document.getElementById('target1');
-    const [result1, offset1] = xpath.getXPathForElement(target1, 1, reference);
+    const [result1, offset1] = getXPathForElementCountingLabels(target1, 1, reference);
     expect(result1).toEqual(expectedPath);
     expect(offset1).toEqual(expectedOffset);
 
     const target2 = document.getElementById('target2');
-    const [result2, offset2] = xpath.getXPathForElement(target2, 0, reference);
+    const [result2, offset2] = getXPathForElementCountingLabels(target2, 0, reference);
     expect(result2).toEqual(expectedPath);
     expect(offset2).toEqual(expectedOffset);
 
     const target3 = document.getElementById('target3');
-    const [result3, offset3] = xpath.getXPathForElement(target3, 0, reference);
+    const [result3, offset3] = getXPathForElementCountingLabels(target3, 0, reference);
     expect(result3).toEqual(expectedPath);
     expect(offset3).toEqual(expectedOffset);
 
-    const [result4, offset4] = xpath.getXPathForElement(target3.childNodes[0], 0, reference);
+    const [result4, offset4] = getXPathForElementCountingLabels(target3.childNodes[0], 0, reference);
     expect(result4).toEqual(expectedPath);
     expect(offset4).toEqual(expectedOffset);
   });
@@ -201,21 +208,21 @@ describe('getXPathForElement', () => {
     const expectedOffset = 1;
 
     const target1 = document.getElementById('target1');
-    const [result1, offset1] = xpath.getXPathForElement(target1, 1, reference);
+    const [result1, offset1] = getXPathForElementCountingLabels(target1, 1, reference);
     expect(result1).toEqual(expectedPath);
     expect(offset1).toEqual(expectedOffset);
 
     const target2 = document.getElementById('target2');
-    const [result2, offset2] = xpath.getXPathForElement(target2, 3, reference);
+    const [result2, offset2] = getXPathForElementCountingLabels(target2, 3, reference);
     expect(result2).toEqual(expectedPath);
     expect(offset2).toEqual(expectedOffset);
 
     const target3 = document.getElementById('target3');
-    const [result3, offset3] = xpath.getXPathForElement(target3, 3, reference);
+    const [result3, offset3] = getXPathForElementCountingLabels(target3, 3, reference);
     expect(result3).toEqual(expectedPath);
     expect(offset3).toEqual(expectedOffset);
 
-    const [result4, offset4] = xpath.getXPathForElement(target3.childNodes[1], 8, reference);
+    const [result4, offset4] = getXPathForElementCountingLabels(target3.childNodes[1], 8, reference);
     expect(result4).toEqual(expectedPath);
     expect(offset4).toEqual(expectedOffset);
   });
@@ -236,21 +243,21 @@ describe('getXPathForElement', () => {
     const expectedOffset = 0;
 
     const target1 = document.getElementById('target1');
-    const [result1, offset1] = xpath.getXPathForElement(target1, 0, reference);
+    const [result1, offset1] = getXPathForElementCountingLabels(target1, 0, reference);
     expect(result1).toEqual(expectedPath);
     expect(offset1).toEqual(expectedOffset);
 
     const target2 = document.getElementById('target2');
-    const [result2, offset2] = xpath.getXPathForElement(target2, 0, reference);
+    const [result2, offset2] = getXPathForElementCountingLabels(target2, 0, reference);
     expect(result2).toEqual(expectedPath);
     expect(offset2).toEqual(expectedOffset);
 
     const target3 = document.getElementById('target3');
-    const [result3, offset3] = xpath.getXPathForElement(target3, 0, reference);
+    const [result3, offset3] = getXPathForElementCountingLabels(target3, 0, reference);
     expect(result3).toEqual(expectedPath);
     expect(offset3).toEqual(expectedOffset);
 
-    const [result4, offset4] = xpath.getXPathForElement(target3.childNodes[0], 0, reference);
+    const [result4, offset4] = getXPathForElementCountingLabels(target3.childNodes[0], 0, reference);
     expect(result4).toEqual(expectedPath);
     expect(offset4).toEqual(expectedOffset);
   });
@@ -275,7 +282,7 @@ describe('getXPathForElement', () => {
 
     const reference = document.getElementById('reference');
     const text = document.getElementById('target').nextSibling;
-    const [result, offset] = xpath.getXPathForElement(text, 0, reference);
+    const [result, offset] = getXPathForElementCountingLabels(text, 0, reference);
 
     expect(result).toEqual("./*[name()='div'][3]/*[name()='div'][1]/*[name()='section'][1]");
     expect(offset).toEqual(2);
@@ -301,7 +308,7 @@ describe('getXPathForElement', () => {
 
     const reference = document.getElementById('reference');
     const text = document.getElementById('target').previousSibling;
-    const [result, offset] = xpath.getXPathForElement(text, 0, reference);
+    const [result, offset] = getXPathForElementCountingLabels(text, 0, reference);
 
     expect(result).toEqual("./*[name()='span'][1]/*[name()='div'][1]/*[name()='section'][1]");
     expect(offset).toEqual(0);
@@ -327,7 +334,7 @@ describe('getXPathForElement', () => {
     `;
 
     const reference = document.getElementById('reference');
-    const [result, offset] = xpath.getXPathForElement(reference, 4, reference);
+    const [result, offset] = getXPathForElementCountingLabels(reference, 4, reference);
 
     expect(result).toEqual("./text()[2]");
     expect(offset).toEqual(2);
@@ -348,7 +355,7 @@ describe('getXPathForElement', () => {
 
     const reference = document.getElementById('reference');
     const element = document.getElementById('target');
-    const [result, offset] = xpath.getXPathForElement(element, 1, reference);
+    const [result, offset] = getXPathForElementCountingLabels(element, 1, reference);
 
     expect(result).toEqual("./*[name()='div'][3]/*[name()='div'][1]");
     expect(offset).toEqual(1);
@@ -373,7 +380,7 @@ describe('getXPathForElement', () => {
 
     const reference = document.getElementById('reference');
     const text = document.getElementById('target').previousSibling;
-    const [result] = xpath.getXPathForElement(text, 0, reference);
+    const [result] = getXPathForElementCountingLabels(text, 0, reference);
 
     expect(result).toEqual("./*[name()='div'][3]/*[name()='div'][1]/text()[1]");
   });
@@ -397,7 +404,7 @@ describe('getXPathForElement', () => {
 
     const reference = document.getElementById('reference');
     const text = document.getElementById('target').previousSibling;
-    const [result, offset] = xpath.getXPathForElement(text, 0, reference);
+    const [result, offset] = getXPathForElementCountingLabels(text, 0, reference);
 
     expect(result).toEqual("./*[name()='div'][3]/*[name()='div'][1]/text()[1]");
     expect(offset).toEqual(22);
@@ -410,7 +417,7 @@ describe('getXPathForElement', () => {
 
     const reference = document.getElementById('reference');
     const text = reference.firstChild;
-    const [result, offset] = xpath.getXPathForElement(text, 3, reference);
+    const [result, offset] = getXPathForElementCountingLabels(text, 3, reference);
 
     expect(result).toEqual("./text()[1]");
     expect(offset).toEqual(3);
@@ -422,7 +429,7 @@ describe('getXPathForElement', () => {
     `;
 
     const reference = document.getElementById('reference');
-    const [result, offset] = xpath.getXPathForElement(reference, 3, reference);
+    const [result, offset] = getXPathForElementCountingLabels(reference, 3, reference);
 
     expect(result).toEqual("./text()[2]");
     expect(offset).toEqual(5);
@@ -434,7 +441,7 @@ describe('getXPathForElement', () => {
     `;
 
     const reference = document.getElementById('reference');
-    const [result, offset] = xpath.getXPathForElement(reference, 2, reference);
+    const [result, offset] = getXPathForElementCountingLabels(reference, 2, reference);
 
     expect(result).toEqual("./text()[1]");
     expect(offset).toEqual(10);
@@ -446,7 +453,7 @@ describe('getXPathForElement', () => {
     `;
 
     const reference = document.getElementById('reference');
-    const [result, offset] = xpath.getXPathForElement(reference, 2, reference);
+    const [result, offset] = getXPathForElementCountingLabels(reference, 2, reference);
 
     expect(result).toEqual("./text()[1]");
     expect(offset).toEqual(9);
@@ -464,7 +471,7 @@ describe('getXPathForElement', () => {
 
     const reference = document.getElementById('reference');
     const element = document.getElementById('target');
-    const [result, offset] = xpath.getXPathForElement(element, 3, reference);
+    const [result, offset] = getXPathForElementCountingLabels(element, 3, reference);
 
     expect(result).toEqual("./*[name()='div'][1]");
     expect(offset).toEqual(1);
@@ -478,7 +485,7 @@ describe('getFirstByXPath', () => {
     `;
 
     const reference = document.getElementById('reference');
-    const [result] = xpath.getFirstByXPath('.', 0, reference);
+    const [result] = getFirstByXPathCountingLabels('.', 0, reference);
 
     expect(result).toEqual(reference);
   });
@@ -492,7 +499,7 @@ describe('getFirstByXPath', () => {
 
     const reference = document.getElementById('reference');
     const target = document.getElementById('target');
-    const [result] = xpath.getFirstByXPath("./*[name()='div'][1]", 0, reference);
+    const [result] = getFirstByXPathCountingLabels("./*[name()='div'][1]", 0, reference);
 
     expect(result).toEqual(target);
   });
@@ -504,7 +511,7 @@ describe('getFirstByXPath', () => {
 
     const reference = document.getElementById('reference');
     const target = reference.firstChild;
-    const [result] = xpath.getFirstByXPath("./text()[1]", 0, reference);
+    const [result] = getFirstByXPathCountingLabels("./text()[1]", 0, reference);
 
     expect(result).toEqual(target);
     expect(result.textContent).toEqual('asdf');
@@ -529,7 +536,7 @@ describe('getFirstByXPath', () => {
 
     const reference = document.getElementById('reference');
     const target = document.getElementById('target');
-    const [result] = xpath.getFirstByXPath("./*[name()='div'][52]/*[name()='div'][1]/*[name()='section'][1]/*[name()='div'][1]", 0, reference);
+    const [result] = getFirstByXPathCountingLabels("./*[name()='div'][52]/*[name()='div'][1]/*[name()='section'][1]/*[name()='div'][1]", 0, reference);
 
     expect(result).toEqual(target);
   });
@@ -554,7 +561,7 @@ describe('getFirstByXPath', () => {
 
     const reference = document.getElementById('reference');
     const target = document.getElementById('target').previousSibling;
-    const [result] = xpath.getFirstByXPath("./*[name()='div'][3]/*[name()='div'][1]/*[name()='section'][1]/text()[1]", 0, reference);
+    const [result] = getFirstByXPathCountingLabels("./*[name()='div'][3]/*[name()='div'][1]/*[name()='section'][1]/text()[1]", 0, reference);
 
     expect(result).toEqual(target);
     expect(result.textContent).toEqual('asdfasdf');
@@ -580,7 +587,7 @@ describe('getFirstByXPath', () => {
 
     const reference = document.getElementById('reference');
     const target = document.getElementById('target').previousSibling;
-    const [result] = xpath.getFirstByXPath("./*[name()='span'][1]/*[name()='div'][1]/*[name()='section'][1]/text()[1]", 0, reference);
+    const [result] = getFirstByXPathCountingLabels("./*[name()='span'][1]/*[name()='div'][1]/*[name()='section'][1]/text()[1]", 0, reference);
 
     expect(result).toEqual(target);
     expect(result.textContent).toEqual('asdfasdf');
@@ -594,7 +601,7 @@ describe('getFirstByXPath', () => {
     `;
 
     const reference = document.getElementById('reference');
-    const [result, offset] = xpath.getFirstByXPath(".", 1, reference);
+    const [result, offset] = getFirstByXPathCountingLabels(".", 1, reference);
 
     expect(result).toBe(reference);
     expect(offset).toEqual(4);
@@ -608,7 +615,7 @@ describe('getFirstByXPath', () => {
     `;
 
     const reference = document.getElementById('reference');
-    const [result, offset] = xpath.getFirstByXPath(".", 3, reference);
+    const [result, offset] = getFirstByXPathCountingLabels(".", 3, reference);
 
     expect(result).toBe(reference);
     expect(offset).toEqual(5);
@@ -622,7 +629,7 @@ describe('getFirstByXPath', () => {
     `;
 
     const reference = document.getElementById('reference');
-    const [result, offset] = xpath.getFirstByXPath(".", 2, reference);
+    const [result, offset] = getFirstByXPathCountingLabels(".", 2, reference);
 
     expect(result).toBe(reference);
     expect(offset).toEqual(3);
@@ -646,7 +653,7 @@ describe('getFirstByXPath', () => {
     `;
 
     const reference = document.getElementById('reference');
-    const [result] = xpath.getFirstByXPath("./*[name()='div'][3]/*[name()='div'][1]/text()[2]", 0, reference);
+    const [result] = getFirstByXPathCountingLabels("./*[name()='div'][3]/*[name()='div'][1]/text()[2]", 0, reference);
 
     expect(result.textContent.trim()).toEqual('asdfasdf');
   });
@@ -669,7 +676,7 @@ describe('getFirstByXPath', () => {
     `;
 
     const reference = document.getElementById('reference');
-    const [result, offset] = xpath.getFirstByXPath("./*[name()='div'][3]/*[name()='div'][1]/text()[1]", 23, reference);
+    const [result, offset] = getFirstByXPathCountingLabels("./*[name()='div'][3]/*[name()='div'][1]/text()[1]", 23, reference);
 
     expect(result.textContent.trim()).toEqual('werewwer');
     expect(offset).toEqual(1);
@@ -681,7 +688,7 @@ describe('getFirstByXPath', () => {
     `;
 
     const reference = document.getElementById('reference');
-    const [result] = xpath.getFirstByXPath("./text()[1]", 10, reference);
+    const [result] = getFirstByXPathCountingLabels("./text()[1]", 10, reference);
 
     expect(result).toEqual(null);
   });
@@ -694,7 +701,7 @@ describe('getFirstByXPath', () => {
     `;
 
     const reference = document.getElementById('reference');
-    const [result] = xpath.getFirstByXPath("./text()[1]", 18, reference);
+    const [result] = getFirstByXPathCountingLabels("./text()[1]", 18, reference);
 
     expect(result.textContent.trim()).toEqual('werewwer');
   });
@@ -707,7 +714,7 @@ describe('getFirstByXPath', () => {
     `;
 
     const reference = document.getElementById('reference');
-    const [result] = xpath.getFirstByXPath("./text()[1]", 14, reference);
+    const [result] = getFirstByXPathCountingLabels("./text()[1]", 14, reference);
 
     expect(result.textContent.trim()).toEqual('qwer');
   });
@@ -720,7 +727,7 @@ describe('getFirstByXPath', () => {
     `;
 
     const reference = document.getElementById('reference');
-    const [result] = xpath.getFirstByXPath("./text()[4]", 0, reference);
+    const [result] = getFirstByXPathCountingLabels("./text()[4]", 0, reference);
 
     expect(result).toEqual(null);
   });
@@ -731,7 +738,7 @@ describe('getFirstByXPath', () => {
     `;
 
     const reference = document.getElementById('reference');
-    const [result] = xpath.getFirstByXPath("./text()[1]", 5, reference);
+    const [result] = getFirstByXPathCountingLabels("./text()[1]", 5, reference);
 
     expect(result).toEqual(null);
   });
@@ -742,7 +749,7 @@ describe('getFirstByXPath', () => {
     `;
 
     const reference = document.getElementById('reference');
-    const [result] = xpath.getFirstByXPath("./text()[1]", 4, reference);
+    const [result] = getFirstByXPathCountingLabels("./text()[1]", 4, reference);
 
     expect(result).not.toEqual(null);
   });
@@ -758,7 +765,7 @@ describe('getFirstByXPath', () => {
     `;
 
     const reference = document.getElementById('reference');
-    const [result] = xpath.getFirstByXPath("./*[name()='div'][2]", 1, reference);
+    const [result] = getFirstByXPathCountingLabels("./*[name()='div'][2]", 1, reference);
 
     expect(result).toEqual(null);
   });
@@ -774,7 +781,7 @@ describe('getFirstByXPath', () => {
     `;
 
     const reference = document.getElementById('reference');
-    const [result] = xpath.getFirstByXPath("./*[name()='div'][2]", 0, reference);
+    const [result] = getFirstByXPathCountingLabels("./*[name()='div'][2]", 0, reference);
 
     expect(result).not.toEqual(null);
   });
@@ -795,41 +802,46 @@ describe('text offsets next to a highlight with screen reader labels', () => {
 
   const textAfterHighlight = () => document.getElementById('reference').lastChild;
 
-  it('counts the labels by default, like older highlights', () => {
+  it('counts the labels the way XpathRangeSelector does', () => {
+    const reference = document.getElementById('reference');
+
+    expect(getXPathForElementCountingLabels(textAfterHighlight(), 1, reference))
+      .toEqual(['./text()[1]', OFFSET_OF_ZXCV + LABELS_LENGTH]);
+    expect(getFirstByXPathCountingLabels('./text()[1]', OFFSET_OF_ZXCV + LABELS_LENGTH, reference))
+      .toEqual([textAfterHighlight(), 1]);
+  });
+
+  it('does not find a point inside the highlight the way XpathRangeSelector does', () => {
+    const reference = document.getElementById('reference');
+
+    expect(getFirstByXPathCountingLabels('./text()[1]', 'qwer as'.length + START_LABEL.length, reference)[0])
+      .toBe(null);
+  });
+
+  it('leaves the labels out by default', () => {
     const reference = document.getElementById('reference');
 
     expect(xpath.getXPathForElement(textAfterHighlight(), 1, reference))
-      .toEqual(['./text()[1]', OFFSET_OF_ZXCV + LABELS_LENGTH]);
-    expect(xpath.getFirstByXPath('./text()[1]', OFFSET_OF_ZXCV + LABELS_LENGTH, reference))
-      .toEqual([textAfterHighlight(), 1]);
-  });
-
-  it('finds a point inside the highlight only when asked to', () => {
-    const reference = document.getElementById('reference');
-    const highlightedText = reference.childNodes[1].childNodes[1];
-
-    expect(xpath.getFirstByXPath('./text()[1]', 'qwer as'.length + START_LABEL.length, reference)[0])
-      .toBe(null);
-    expect(xpath.getFirstByXPath('./text()[1]', 'qwer as'.length, reference, xpath.getVisibleTextLength)[0])
-      .toBe(null);
-    expect(xpath.getFirstByXPath('./text()[1]', 'qwer as'.length, reference, xpath.getVisibleTextLength, true))
-      .toEqual([highlightedText, 2]);
-  });
-
-  it('leaves the labels out when measuring visible text', () => {
-    const reference = document.getElementById('reference');
-
-    expect(xpath.getXPathForElement(textAfterHighlight(), 1, reference, xpath.getVisibleTextLength))
       .toEqual(['./text()[1]', OFFSET_OF_ZXCV]);
-    expect(xpath.getFirstByXPath('./text()[1]', OFFSET_OF_ZXCV, reference, xpath.getVisibleTextLength))
+    expect(xpath.getFirstByXPath('./text()[1]', OFFSET_OF_ZXCV, reference))
       .toEqual([textAfterHighlight(), 1]);
   });
 
-  it('leaves the labels out of a point inside the highlight', () => {
+  it('leaves the labels out of a point inside the highlight by default', () => {
     const reference = document.getElementById('reference');
     const highlightedText = reference.childNodes[1].childNodes[1];
 
-    expect(xpath.getXPathForElement(highlightedText, 2, reference, xpath.getVisibleTextLength))
+    expect(xpath.getXPathForElement(highlightedText, 2, reference))
       .toEqual(['./text()[1]', 'qwer as'.length]);
+  });
+
+  it('finds a point inside the highlight by default, unless turned off', () => {
+    const reference = document.getElementById('reference');
+    const highlightedText = reference.childNodes[1].childNodes[1];
+
+    expect(xpath.getFirstByXPath('./text()[1]', 'qwer as'.length, reference))
+      .toEqual([highlightedText, 2]);
+    expect(xpath.getFirstByXPath('./text()[1]', 'qwer as'.length, reference, xpath.getVisibleTextLength, false)[0])
+      .toBe(null);
   });
 });

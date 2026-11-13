@@ -1,8 +1,13 @@
 import dom from './dom';
 import { removeAllHighlights } from './removeHighlightWrappers';
 
-export const rangeContentsString = (range: Range): string => {
-  const fragment = cloneRangeContents(range);
+/**
+ * Returns the HTML of the range's contents without highlight wrappers or screen reader labels.
+ * Content saved with an XpathRangeSelector was built with one character past the end of a range inside a single
+ * text node, so pass `includeCharacterAfterEnd` to compare against it.
+ */
+export const rangeContentsString = (range: Range, includeCharacterAfterEnd = false): string => {
+  const fragment = cloneRangeContents(range, includeCharacterAfterEnd);
   const container = document.createElement('div');
   const removeAll = (nodes: NodeListOf<Element>) => nodes.forEach((element: Element) => element.remove());
 
@@ -37,7 +42,7 @@ export const rangeContentsString = (range: Range): string => {
   return container.innerHTML;
 };
 
-export const cloneRangeContents = (range: Range): DocumentFragment => {
+export const cloneRangeContents = (range: Range, includeCharacterAfterEnd = false): DocumentFragment => {
   const tableTags = ['TR', 'TBODY', 'TABLE'];
   const fragment = document.createDocumentFragment();
 
@@ -51,14 +56,14 @@ export const cloneRangeContents = (range: Range): DocumentFragment => {
     }
   };
 
-  cloneForRange(getStartNode(), range).childNodes.forEach((node: Node) =>
+  cloneForRange(getStartNode(), range, includeCharacterAfterEnd).childNodes.forEach((node: Node) =>
     fragment.appendChild(node.cloneNode(true))
   );
 
   return fragment;
 };
 
-function cloneForRange(element: Node, range: Range, foundStart: boolean = false) {
+function cloneForRange(element: Node, range: Range, includeCharacterAfterEnd: boolean, foundStart: boolean = false) {
   const isStart = (node: Node) => node.parentElement === range.startContainer
     && Array.prototype.indexOf.call(range.startContainer.childNodes, node) === range.startOffset;
   const isEnd = (node: Node) => node.parentElement === range.endContainer
@@ -68,7 +73,8 @@ function cloneForRange(element: Node, range: Range, foundStart: boolean = false)
 
   if (element.nodeType === 3 /* #text */) {
     if (element === range.startContainer && element === range.endContainer) {
-      result.textContent = (element.textContent || '').substring(range.startOffset, range.endOffset + 1);
+      const end = includeCharacterAfterEnd ? range.endOffset + 1 : range.endOffset;
+      result.textContent = (element.textContent || '').substring(range.startOffset, end);
     } else if (element === range.startContainer) {
       result.textContent = (element.textContent || '').substring(range.startOffset);
     } else if (element === range.endContainer) {
@@ -88,7 +94,7 @@ function cloneForRange(element: Node, range: Range, foundStart: boolean = false)
         const copy = node.cloneNode(true);
         result.appendChild(copy);
       } else if (foundStart || dom(node).isParent(range.startContainer)) {
-        const copy = cloneForRange(node, range, foundStart);
+        const copy = cloneForRange(node, range, includeCharacterAfterEnd, foundStart);
         result.appendChild(copy);
         foundStart = true;
       }

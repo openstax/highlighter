@@ -117,7 +117,7 @@ export default class SerializedHighlight {
   public shouldMigrateLocation(highlighter: Highlighter): boolean {
     return this.data.type === xpathRangeSelectorDiscriminator
       && this.isLoadable(highlighter)
-      && rangeContentsString(this.deserializer.load(highlighter)) === this.content;
+      && rangeContentsString(this.deserializer.load(highlighter), true) === this.content;
   }
 
   public load(highlighter: Highlighter): Highlight {
