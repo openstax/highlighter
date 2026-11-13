@@ -91,6 +91,84 @@ describe('load', () => {
     expectSameRange(serializer.load(page.highlighter, data), rangeOver(page.reference, 'jjjj'));
   });
 
+  it('loads a highlight that starts inside a search result drawn after it was saved', () => {
+    const pageWithoutSearch = createPage();
+    const [savedNode, savedOffset] = findText(pageWithoutSearch.reference, 'ter bbbb');
+    const savedRange = document.createRange();
+    savedRange.setStart(savedNode, savedOffset);
+    savedRange.setEnd(savedNode, savedOffset + 'ter bbbb'.length);
+    const data = serializer.serialize(savedRange, pageWithoutSearch.reference);
+
+    const page = createPage();
+    page.drawSearchResult('meter');
+    const [hitNode, hitOffset] = findText(page.reference, 'meter');
+    const [endNode, endOffset] = findText(page.reference, 'bbbb');
+    const expected = document.createRange();
+    expected.setStart(hitNode, hitOffset + 'me'.length);
+    expected.setEnd(endNode, endOffset + 'bbbb'.length);
+
+    expectSameRange(serializer.load(page.highlighter, data), expected);
+  });
+
+  it('loads a highlight that ends inside a search result drawn after it was saved', () => {
+    const pageWithoutSearch = createPage();
+    const [savedNode, savedOffset] = findText(pageWithoutSearch.reference, 'aa me');
+    const savedRange = document.createRange();
+    savedRange.setStart(savedNode, savedOffset);
+    savedRange.setEnd(savedNode, savedOffset + 'aa me'.length);
+    const data = serializer.serialize(savedRange, pageWithoutSearch.reference);
+
+    const page = createPage();
+    page.drawSearchResult('meter');
+    const [startNode, startOffset] = findText(page.reference, 'aa ');
+    const [hitNode, hitOffset] = findText(page.reference, 'meter');
+    const expected = document.createRange();
+    expected.setStart(startNode, startOffset);
+    expected.setEnd(hitNode, hitOffset + 'me'.length);
+
+    expectSameRange(serializer.load(page.highlighter, data), expected);
+  });
+
+  it('loads a highlight that was saved and loaded starting inside the same search result', () => {
+    const pageWithSearch = createPage();
+    pageWithSearch.drawSearchResult('meter');
+    const range = (reference: HTMLElement) => {
+      const [hitNode, hitOffset] = findText(reference, 'meter');
+      const [endNode, endOffset] = findText(reference, 'bbbb');
+      const result = document.createRange();
+      result.setStart(hitNode, hitOffset + 'me'.length);
+      result.setEnd(endNode, endOffset + 'bbbb'.length);
+      return result;
+    };
+    const data = serializer.serialize(range(pageWithSearch.reference), pageWithSearch.reference);
+
+    const page = createPage();
+    page.drawSearchResult('meter');
+
+    expectSameRange(serializer.load(page.highlighter, data), range(page.reference));
+  });
+
+  it('loads a highlight that starts inside a search result inside another highlight', () => {
+    const pageBefore = createPage();
+    const [savedNode, savedOffset] = findText(pageBefore.reference, 'ter bbbb cccc');
+    const savedRange = document.createRange();
+    savedRange.setStart(savedNode, savedOffset);
+    savedRange.setEnd(savedNode, savedOffset + 'ter bbbb cccc'.length);
+    const data = serializer.serialize(savedRange, pageBefore.reference);
+
+    const page = createPage();
+    page.drawUserHighlight('aaaa meter bbbb');
+    page.drawSearchResult('meter');
+    const [hitNode, hitOffset] = findText(page.reference, 'meter');
+    const [endNode, endOffset] = findText(page.reference, 'cccc');
+    const expected = document.createRange();
+    expected.setStart(hitNode, hitOffset + 'me'.length);
+    expected.setEnd(endNode, endOffset + 'cccc'.length);
+
+    expect(page.reference.querySelector('[data-highlight-id="user-aaaa meter bbbb"] .search-highlight')).not.toBe(null);
+    expectSameRange(serializer.load(page.highlighter, data), expected);
+  });
+
   it('returns an empty range when the reference element is missing', () => {
     const page = createPage();
     const data = serializer.serialize(rangeOver(page.reference, 'cccc'), page.reference);

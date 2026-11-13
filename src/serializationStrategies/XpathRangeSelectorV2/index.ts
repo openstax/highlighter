@@ -36,8 +36,8 @@ export function serialize(range: Range, referenceElement: HTMLElement): IData {
 }
 
 const findBoundaries = (referenceElement: HTMLElement, data: IData) => ({
-  end: getFirstByXPath(data.endContainer, data.endOffset, referenceElement, getVisibleTextLength),
-  start: getFirstByXPath(data.startContainer, data.startOffset, referenceElement, getVisibleTextLength),
+  end: getFirstByXPath(data.endContainer, data.endOffset, referenceElement, getVisibleTextLength, true),
+  start: getFirstByXPath(data.startContainer, data.startOffset, referenceElement, getVisibleTextLength, true),
 });
 
 export function isLoadable(highlighter: Highlighter, data: IData): boolean {

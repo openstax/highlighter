@@ -804,6 +804,18 @@ describe('text offsets next to a highlight with screen reader labels', () => {
       .toEqual([textAfterHighlight(), 1]);
   });
 
+  it('finds a point inside the highlight only when asked to', () => {
+    const reference = document.getElementById('reference');
+    const highlightedText = reference.childNodes[1].childNodes[1];
+
+    expect(xpath.getFirstByXPath('./text()[1]', 'qwer as'.length + START_LABEL.length, reference)[0])
+      .toBe(null);
+    expect(xpath.getFirstByXPath('./text()[1]', 'qwer as'.length, reference, xpath.getVisibleTextLength)[0])
+      .toBe(null);
+    expect(xpath.getFirstByXPath('./text()[1]', 'qwer as'.length, reference, xpath.getVisibleTextLength, true))
+      .toEqual([highlightedText, 2]);
+  });
+
   it('leaves the labels out when measuring visible text', () => {
     const reference = document.getElementById('reference');
 

@@ -45,6 +45,24 @@ export const getVisibleTextLength = (node: Node): number => {
  */
 const getTextLengthCountingScreenReaderText = (node: Node) => (node.textContent || '').length;
 
+/**
+ * Returns the text node inside a highlight that holds the given offset, and the offset into that text node.
+ * The offset counts only text a reader sees, so screen reader labels are skipped.
+ */
+const findVisibleTextInHighlight = (highlight: Node, offset: number): [Node | null, number] => {
+  for (const child of Array.from(highlight.childNodes)) {
+    if (isScreenReaderNode(child)) {
+      continue;
+    }
+    const length = getVisibleTextLength(child);
+    if (offset <= length) {
+      return isText(child) ? [child, offset] : findVisibleTextInHighlight(child, offset);
+    }
+    offset -= length;
+  }
+  return [null, offset];
+};
+
 const getMaxOffset = (node: Node) => {
   if (isText(node)) {
     return node.length;
@@ -191,7 +209,8 @@ export function getFirstByXPath(
   path: string,
   offset: number,
   referenceElement: HTMLElement,
-  getTextLength: MeasureTextLength = getTextLengthCountingScreenReaderText
+  getTextLength: MeasureTextLength = getTextLengthCountingScreenReaderText,
+  findTextInsideHighlights = false
 ): [HTMLElement | null, number] {
   const parts = path.split('/');
 
@@ -215,6 +234,12 @@ export function getFirstByXPath(
   while ((isTextHighlightOrScreenReaderNode(node!) && offset >= getTextLength(node!)) || (isText(node!) && offset > getTextLength(node!))) {
     offset -= getTextLength(node!);
     node = isTextOrTextHighlightOrScreenReaderNode(node!.nextSibling!) ? node!.nextSibling as HTMLElement : null;
+  }
+
+  // The point is inside another highlight, such as a search result drawn after this location was saved. Only
+  // XpathRangeSelectorV2 looks for the text inside it; XpathRangeSelector keeps returning null here as it always has.
+  if (node && isTextHighlight(node) && findTextInsideHighlights) {
+    [node, offset] = findVisibleTextInHighlight(node, offset) as [HTMLElement | null, number];
   }
 
   // for element targets, highlight children might be artifically
