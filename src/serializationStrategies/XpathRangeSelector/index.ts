@@ -1,7 +1,13 @@
 import Highlighter from '../../Highlighter';
-import { getFirstByXPath, getXPathForElement } from './xpath';
+import { getFirstByXPath, getTextLengthCountingScreenReaderText, getXPathForElement } from './xpath';
 
 export const discriminator = 'XpathRangeSelector';
+
+// Offsets count the screen reader labels inside other highlights, and a point inside another highlight is not found.
+const findPoint = (path: string, offset: number, referenceElement: HTMLElement) =>
+  getFirstByXPath(path, offset, referenceElement, getTextLengthCountingScreenReaderText, false);
+const getPath = (node: Node, offset: number, referenceElement: HTMLElement) =>
+  getXPathForElement(node, offset, referenceElement, getTextLengthCountingScreenReaderText);
 
 export interface IData {
   type: 'XpathRangeSelector';
@@ -14,8 +20,8 @@ export interface IData {
 
 export function serialize(range: Range, referenceElement: HTMLElement): IData {
 
-  const [endContainer, endOffset] = getXPathForElement(range.endContainer, range.endOffset, referenceElement);
-  const [startContainer, startOffset] = getXPathForElement(range.startContainer, range.startOffset, referenceElement);
+  const [endContainer, endOffset] = getPath(range.endContainer, range.endOffset, referenceElement);
+  const [startContainer, startOffset] = getPath(range.startContainer, range.startOffset, referenceElement);
 
   return {
     endContainer,
@@ -33,8 +39,8 @@ export function isLoadable(highlighter: Highlighter, data: IData): boolean {
     return false;
   }
 
-  const [startContainer] = getFirstByXPath(data.startContainer, data.startOffset, referenceElement);
-  const [endContainer] = getFirstByXPath(data.endContainer, data.endOffset, referenceElement);
+  const [startContainer] = findPoint(data.startContainer, data.startOffset, referenceElement);
+  const [endContainer] = findPoint(data.endContainer, data.endOffset, referenceElement);
 
   return !!startContainer && !!endContainer;
 }
@@ -43,8 +49,8 @@ export function load(highlighter: Highlighter, data: IData): Range {
   const range = highlighter.document.createRange();
   const referenceElement = highlighter.getReferenceElement(data.referenceElementId);
 
-  const [startContainer, startOffset] = getFirstByXPath(data.startContainer, data.startOffset, referenceElement!);
-  const [endContainer, endOffset] = getFirstByXPath(data.endContainer, data.endOffset, referenceElement!);
+  const [startContainer, startOffset] = findPoint(data.startContainer, data.startOffset, referenceElement!);
+  const [endContainer, endOffset] = findPoint(data.endContainer, data.endOffset, referenceElement!);
 
   if (startContainer && endContainer) {
     range.setStart(startContainer, startOffset);
