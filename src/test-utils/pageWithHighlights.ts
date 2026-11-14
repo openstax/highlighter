@@ -5,7 +5,7 @@ import Highlighter from '../Highlighter';
  * Builds a paragraph that specs can draw search results and user highlights on, with the same screen reader labels
  * that REX uses.
  */
-export const PAGE_TEXT = 'aaaa meter bbbb cccc dddd eeee ffff gggg hhhh iiii jjjj kkkk';
+export const PAGE_TEXT = 'Each meter equals roughly three feet, a bit longer than an average step';
 
 const userMessages: { [id: string]: string } = {
   'i18n:highlighter:highlight:end': 'End of yellow highlight',
