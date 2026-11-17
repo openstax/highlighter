@@ -2,14 +2,32 @@ import {camelCase, snakeCase} from 'change-case';
 import {Highlight as ApiHighlight, NewHighlight as NewApiHighlight, styleIsColor } from './api';
 import Highlight, {IHighlightData} from './Highlight';
 import Highlighter from './Highlighter';
+import { rangeContentsString } from './rangeContents';
 import {getDeserializer, IDeserializer, ISerializationData} from './serializationStrategies';
-import {serialize as defaultSerializer} from './serializationStrategies/XpathRangeSelector';
+import { discriminator as xpathRangeSelectorDiscriminator } from './serializationStrategies/XpathRangeSelector';
+import {serialize as defaultSerializer} from './serializationStrategies/XpathRangeSelectorV2';
 
 const mapKeys = (transform: (key: string) => string, obj: {[key: string]: any}) => Object.keys(obj).reduce((result, key) => ({
   ...result, [transform(key)]: obj[key],
 }), {});
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
+/**
+ * Says whether content saved by an older version matches the loaded contents. Older versions sometimes saved one
+ * extra character past the end of the highlight. The content is HTML, so that character may be an entity such as
+ * `&nbsp;`.
+ */
+const matchesSavedContent = (loadedContent: string, savedContent: string): boolean => {
+  if (loadedContent === savedContent) {
+    return true;
+  }
+  if (!savedContent.startsWith(loadedContent)) {
+    return false;
+  }
+  const extra = savedContent.slice(loadedContent.length);
+  return /^&#?\w+;$/.test(extra) || Array.from(extra).length === 1;
+};
 
 interface IOptionalApiData {
   annotation?: string;
@@ -105,6 +123,17 @@ export default class SerializedHighlight {
 
   public isLoadable(highlighter: Highlighter): boolean {
     return this.deserializer.isLoadable(highlighter);
+  }
+
+  /**
+   * Says whether this highlight is saved with an XpathRangeSelector that finds its saved content, so it can be
+   * saved again as an XpathRangeSelectorV2. Call this before adding the highlight to the page: its own screen
+   * reader labels would change where an XpathRangeSelector points.
+   */
+  public shouldMigrateLocation(highlighter: Highlighter): boolean {
+    return this.data.type === xpathRangeSelectorDiscriminator
+      && this.isLoadable(highlighter)
+      && matchesSavedContent(rangeContentsString(this.deserializer.load(highlighter)), this.content);
   }
 
   public load(highlighter: Highlighter): Highlight {
