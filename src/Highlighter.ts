@@ -49,13 +49,13 @@ export default class Highlighter {
       ...options,
     };
     this.debouncedSnapSelection = debounce(this.snapSelection, ON_SELECT_DELAY);
-    this.debouncedOnSelect = debounce(this.onSelect, ON_SELECT_DELAY);
+    this.debouncedOnSelect = debounce(this.onKeyUp, ON_SELECT_DELAY);
     this.focusInHandler = this.onFocusHandler('in');
     this.focusOutHandler = this.onFocusHandler('out');
     this.container.addEventListener('click', this.onClickHandler);
     document.addEventListener('selectionchange', this.onSelectionChange);
     this.container.addEventListener('keyup', this.debouncedOnSelect);
-    this.container.addEventListener('mouseup', this.onSelect);
+    this.container.addEventListener('mouseup', this.onMouseUp);
     this.container.addEventListener('focusin', this.focusInHandler);
     this.container.addEventListener('focusout', this.focusOutHandler);
   }
@@ -64,7 +64,7 @@ export default class Highlighter {
     this.container.removeEventListener('click', this.onClickHandler);
     document.removeEventListener('selectionchange', this.onSelectionChange);
     this.container.removeEventListener('keyup', this.debouncedOnSelect);
-    this.container.removeEventListener('mouseup', this.onSelect);
+    this.container.removeEventListener('mouseup', this.onMouseUp);
     this.container.removeEventListener('focusin', this.focusInHandler);
     this.container.removeEventListener('focusout', this.focusOutHandler);
   }
@@ -263,7 +263,18 @@ export default class Highlighter {
     onClick(undefined, event);
   }
 
-  private onSelect = (): void => {
+  // A mouse gesture is a deliberate selection, so report it even if the range is the same as the last one
+  // (e.g. double-clicking the same word again after dismissing its card with Esc)
+  private onMouseUp = (): void => {
+    this.onSelect(true);
+  }
+
+  // keyup fires for many reasons other than selecting text (e.g. Tab moving focus), so don't repeat a report
+  private onKeyUp = (): void => {
+    this.onSelect(false);
+  }
+
+  private onSelect = (reportRepeat: boolean): void => {
     const { onSelect } = this.options;
 
     const selection = document.getSelection();
@@ -277,9 +288,7 @@ export default class Highlighter {
 
     const range = this.snapSelection();
 
-    // keyup and mouseup fire for many reasons other than selecting text (e.g. Tab moving focus),
-    // so only report a selection the first time it is seen
-    if (range && this.compareRanges(range, this.reportedRange)) {
+    if (!reportRepeat && range && this.compareRanges(range, this.reportedRange)) {
       return;
     }
 

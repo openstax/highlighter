@@ -337,22 +337,33 @@ describe('onSelect', () => {
       new Highlighter(container, {onSelect: spyOnSelect, formatMessage: jest.fn()});
     });
 
-    it('reports a selection only once', () => {
+    it('does not report the same selection again after a keyup', () => {
       selectInContainer(rangeInNode(0, 5));
 
       dispatch(container, 'mouseup');
       dispatch(container, 'keyup');
-      dispatch(container, 'mouseup');
+      dispatch(container, 'keyup');
 
       expect(spyOnSelect).toHaveBeenCalledTimes(1);
     });
 
-    it('treats a separate range with the same boundaries as the same selection', () => {
+    it('reports the same selection again after a mouseup', () => {
+      selectInContainer(rangeInNode(0, 5));
+      dispatch(container, 'mouseup');
+
+      // e.g. Esc dismisses the card but keeps the selection, then the same word is double-clicked again
+      selectInContainer(rangeInNode(0, 5));
+      dispatch(container, 'mouseup');
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(2);
+    });
+
+    it('treats a separate range with the same boundaries as the same selection for keyup', () => {
       selectInContainer(rangeInNode(0, 5));
       dispatch(container, 'mouseup');
 
       selectInContainer(rangeInNode(0, 5));
-      dispatch(container, 'mouseup');
+      dispatch(container, 'keyup');
 
       expect(spyOnSelect).toHaveBeenCalledTimes(1);
     });
@@ -374,7 +385,7 @@ describe('onSelect', () => {
 
       // e.g. a consumer calling getSelection().getRangeAt(0).setEnd(...) on the live range
       range.setEnd(node, 8);
-      dispatch(container, 'mouseup');
+      dispatch(container, 'keyup');
 
       expect(spyOnSelect).toHaveBeenCalledTimes(2);
     });
