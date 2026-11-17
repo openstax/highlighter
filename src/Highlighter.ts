@@ -39,7 +39,7 @@ export default class Highlighter {
     this.options = {
       className: 'highlight',
       onFocusIn: (highlight) => {
-        this.clearFocusedStyles();
+        this.clearFocusedStyles(highlight);
         highlight.addFocusedStyles();
       },
       onFocusOut: () => {
@@ -109,11 +109,20 @@ export default class Highlighter {
     return this.getHighlight(highlightId);
   }
 
-  public clearFocusedStyles(): void {
+  /**
+   * @param except a highlight to leave as it is, because it is about to be focused. Resetting it and then
+   * focusing it again changes the focused start span twice, and a screen reader speaks each change.
+   */
+  public clearFocusedStyles(except?: Highlight): void {
     this.container.querySelectorAll(`.${this.options.className}[aria-current]`)
       .forEach((el: Element) => {
-        el.removeAttribute('aria-current');
         const highlight = this.getHighlightFromElement(el);
+
+        if (except && highlight && highlight.id === except.id) {
+          return;
+        }
+
+        el.removeAttribute('aria-current');
 
         if (!highlight) {
           return;
