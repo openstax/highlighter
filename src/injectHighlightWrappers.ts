@@ -88,10 +88,17 @@ function createAndInsertNodeForScreenReaders(highlight: Highlight, element: HTML
 
 /**
  * Sets the start span's text and its accessible name together, so they always agree.
+ *
+ * Does nothing when they already match: the span can have focus, and a screen reader speaks the name
+ * again every time it is written, even to the same value.
  */
 export function setStartMarkerMessage(marker: Element, message: string): void {
-  marker.textContent = message;
-  marker.setAttribute('aria-label', message);
+  if (marker.textContent !== message) {
+    marker.textContent = message;
+  }
+  if (marker.getAttribute('aria-label') !== message) {
+    marker.setAttribute('aria-label', message);
+  }
 }
 
 /**

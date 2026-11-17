@@ -521,6 +521,62 @@ describe('screen reader spans', () => {
       expect(start.getAttribute('aria-label')).toBe('Start of highlight');
     });
 
+    describe('when the start span gets focus', () => {
+      // A screen reader speaks the focused span's name each time it changes, so count the writes
+      const focusStart = (highlightIsAlreadySelected: boolean) => {
+        const { highlight, spans } = highlightText({ tabbable: true });
+        const [start] = Array.from(spans);
+
+        if (highlightIsAlreadySelected) {
+          highlight.addFocusedStyles();
+        }
+
+        const textSpy = jest.spyOn(Node.prototype, 'textContent', 'set');
+        const attributeSpy = jest.spyOn(Element.prototype, 'setAttribute');
+
+        start.dispatchEvent(new Event('focusin', { bubbles: true }));
+
+        const textWrites = (textSpy.mock.instances as any[]).filter((instance) => instance === start).length;
+        const labelWrites = attributeSpy.mock.calls
+          .filter((args, index) => (attributeSpy.mock.instances as any[])[index] === start && args[0] === 'aria-label')
+          .length;
+
+        textSpy.mockRestore();
+        attributeSpy.mockRestore();
+
+        return { labelWrites, start, textWrites };
+      };
+
+      it('writes the name once when the highlight was not selected', () => {
+        const { labelWrites, start, textWrites } = focusStart(false);
+
+        expect(textWrites).toBe(1);
+        expect(labelWrites).toBe(1);
+        expect(start.textContent).toBe('Start of selected highlight');
+        expect(start.getAttribute('aria-label')).toBe('Start of selected highlight');
+      });
+
+      it('does not write the name when the highlight is already selected', () => {
+        const { labelWrites, start, textWrites } = focusStart(true);
+
+        expect(textWrites).toBe(0);
+        expect(labelWrites).toBe(0);
+        expect(start.textContent).toBe('Start of selected highlight');
+        expect(start.getAttribute('aria-label')).toBe('Start of selected highlight');
+      });
+    });
+
+    it('leaves the highlight it is told to except when clearing', () => {
+      const { highlight, highlighter, spans } = highlightText({ tabbable: true });
+      const [start] = Array.from(spans);
+
+      highlight.addFocusedStyles();
+      highlighter.clearFocusedStyles(highlight);
+
+      expect(start.getAttribute('aria-label')).toBe('Start of selected highlight');
+      expect(document.querySelector(`[${DATA_ATTR}='true']`)!.getAttribute('aria-current')).toBe('true');
+    });
+
     it('leaves the end span alone', () => {
       const { highlight, spans } = highlightText({ tabbable: true });
       const [, end] = Array.from(spans);
