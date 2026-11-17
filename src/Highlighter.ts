@@ -24,6 +24,9 @@ interface IOptions {
   tabbable?: boolean;
 }
 
+const NON_SELECTING_CONTROLS = 'button, input, select, textarea, [role="button"]';
+const isNode = (target: EventTarget | null): target is Node => !!target && 'nodeType' in target;
+
 export default class Highlighter {
   public readonly container: HTMLElement;
   private highlights: { [key: string]: Highlight } = {};
@@ -263,19 +266,44 @@ export default class Highlighter {
     onClick(undefined, event);
   }
 
-  // Double or triple clicking with the primary button re-selects text, even if it is the same text as before
-  // (e.g. double-clicking the same word again after dismissing its card with Esc). Other mouse releases can leave
-  // the selection untouched (e.g. a right-click for the context menu), so they must not repeat a report.
+  // Double or triple clicking selected text with the primary button re-selects it, even if it is the same text as
+  // before (e.g. double-clicking the same word again after dismissing its card with Esc). Other mouse releases can
+  // leave the selection untouched (e.g. a right-click for the context menu, or a double-click on a button that
+  // does not select text), so they must not repeat a report.
   private onMouseUp = (event: MouseEvent): void => {
-    this.onSelect(event.button === 0 && event.detail > 1);
+    this.onSelect(event);
   }
 
   // keyup fires for many reasons other than selecting text (e.g. Tab moving focus), so don't repeat a report
   private onKeyUp = (): void => {
-    this.onSelect(false);
+    this.onSelect();
   }
 
-  private onSelect = (reportRepeat: boolean): void => {
+  private isReselection(event: MouseEvent | undefined, range: Range): boolean {
+    const target = event ? event.target : null;
+
+    if (!event || event.button !== 0 || event.detail < 2 || !isNode(target)) {
+      return false;
+    }
+
+    if (isHtmlElement(target) && target.closest(NON_SELECTING_CONTROLS)) {
+      return false;
+    }
+
+    // the click has to land on the selected text
+    const parent = target.parentNode;
+    if (!parent) {
+      return true;
+    }
+    const index = Array.prototype.indexOf.call(parent.childNodes, target);
+    const targetRange = new Range();
+    targetRange.setStart(parent, index);
+    targetRange.setEnd(parent, index + 1);
+    return range.compareBoundaryPoints(Range.END_TO_START, targetRange) < 0
+      && range.compareBoundaryPoints(Range.START_TO_END, targetRange) > 0;
+  }
+
+  private onSelect = (event?: MouseEvent): void => {
     const { onSelect } = this.options;
 
     const selection = document.getSelection();
@@ -289,7 +317,7 @@ export default class Highlighter {
 
     const range = this.snapSelection();
 
-    if (!reportRepeat && range && this.compareRanges(range, this.reportedRange)) {
+    if (range && !this.isReselection(event, range) && this.compareRanges(range, this.reportedRange)) {
       return;
     }
 

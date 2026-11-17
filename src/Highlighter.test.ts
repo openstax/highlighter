@@ -306,8 +306,8 @@ describe('onSelect', () => {
       target.dispatchEvent(event);
     };
 
-    const dispatchMouseUp = (init: MouseEventInit) => {
-      container.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, ...init }));
+    const dispatchMouseUp = (init: MouseEventInit, target: EventTarget = node) => {
+      target.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, ...init }));
     };
 
     const selectInContainer = (snappedRange: Range) => {
@@ -387,6 +387,30 @@ describe('onSelect', () => {
       // the context menu leaves the selection as it was
       dispatchMouseUp({ button: 2, detail: 1 });
       dispatchMouseUp({ button: 2, detail: 2 });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report the same selection again after a double click outside the selected text', () => {
+      const button = document.createElement('button');
+      container.appendChild(button);
+
+      selectInContainer(rangeInNode(0, 5));
+      dispatchMouseUp({ button: 0, detail: 1 });
+
+      // a control that does not select text leaves the old selection in place
+      dispatchMouseUp({ button: 0, detail: 2 }, button);
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report the same selection again after a double click on a control inside the selected text', () => {
+      const button = document.createElement('button');
+      node.appendChild(button);
+
+      selectInContainer(rangeInNode(0, 5));
+      dispatchMouseUp({ button: 0, detail: 1 });
+      dispatchMouseUp({ button: 0, detail: 2 }, button);
 
       expect(spyOnSelect).toHaveBeenCalledTimes(1);
     });
