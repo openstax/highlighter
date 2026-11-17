@@ -392,13 +392,25 @@ describe('onSelect', () => {
     });
 
     it('does not report the same selection again after a double click outside the selected text', () => {
+      // not a control, so only the check that the click landed on the selected text can reject it
+      const elsewhere = document.createElement('p');
+      container.appendChild(elsewhere);
+
+      selectInContainer(rangeInNode(0, 5));
+      dispatchMouseUp({ button: 0, detail: 1 });
+
+      // e.g. an element that does not select text, so the old selection stays in place
+      dispatchMouseUp({ button: 0, detail: 2 }, elsewhere);
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report the same selection again after a double click on a control outside the selected text', () => {
       const button = document.createElement('button');
       container.appendChild(button);
 
       selectInContainer(rangeInNode(0, 5));
       dispatchMouseUp({ button: 0, detail: 1 });
-
-      // a control that does not select text leaves the old selection in place
       dispatchMouseUp({ button: 0, detail: 2 }, button);
 
       expect(spyOnSelect).toHaveBeenCalledTimes(1);
