@@ -415,6 +415,22 @@ describe('onSelect', () => {
       expect(spyOnSelect).toHaveBeenCalledTimes(1);
     });
 
+    it('does not report the same selection again after a double click on an svg icon inside a button', () => {
+      const button = document.createElement('button');
+      const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      icon.appendChild(path);
+      button.appendChild(icon);
+      node.appendChild(button);
+
+      selectInContainer(rangeInNode(0, 5));
+      dispatchMouseUp({ button: 0, detail: 1 });
+      dispatchMouseUp({ button: 0, detail: 2 }, icon);
+      dispatchMouseUp({ button: 0, detail: 2 }, path);
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
     it('treats a separate range with the same boundaries as the same selection', () => {
       selectInContainer(rangeInNode(0, 5));
       dispatch(container, 'mouseup');

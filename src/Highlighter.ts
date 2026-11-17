@@ -25,6 +25,7 @@ interface IOptions {
 }
 
 const NON_SELECTING_CONTROLS = 'button, input, select, textarea, [role="button"]';
+const isElement = (node: Node): node is Element => node.nodeType === 1;
 const isNode = (target: EventTarget | null): target is Node => !!target && 'nodeType' in target;
 
 export default class Highlighter {
@@ -286,7 +287,8 @@ export default class Highlighter {
       return false;
     }
 
-    if (isHtmlElement(target) && target.closest(NON_SELECTING_CONTROLS)) {
+    // any element, not just HTML ones, so an SVG icon inside a button counts as part of the button
+    if (isElement(target) && target.closest(NON_SELECTING_CONTROLS)) {
       return false;
     }
 
