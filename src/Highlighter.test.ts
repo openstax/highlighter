@@ -306,6 +306,10 @@ describe('onSelect', () => {
       target.dispatchEvent(event);
     };
 
+    const dispatchMouseUp = (init: MouseEventInit, target: EventTarget = node) => {
+      target.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, ...init }));
+    };
+
     const selectInContainer = (snappedRange: Range) => {
       getSelectionSpy.mockImplementation(() => ({
         anchorNode: node,
@@ -337,12 +341,104 @@ describe('onSelect', () => {
       new Highlighter(container, {onSelect: spyOnSelect, formatMessage: jest.fn()});
     });
 
-    it('reports a selection only once', () => {
+    it('does not report the same selection again after a keyup', () => {
       selectInContainer(rangeInNode(0, 5));
 
       dispatch(container, 'mouseup');
       dispatch(container, 'keyup');
-      dispatch(container, 'mouseup');
+      dispatch(container, 'keyup');
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports the same selection again after a double click', () => {
+      selectInContainer(rangeInNode(0, 5));
+      dispatchMouseUp({ button: 0, detail: 1 });
+
+      // e.g. Esc dismisses the card but keeps the selection, then the same word is double-clicked again
+      selectInContainer(rangeInNode(0, 5));
+      dispatchMouseUp({ button: 0, detail: 1 });
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+      dispatchMouseUp({ button: 0, detail: 2 });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(2);
+    });
+
+    it('reports the same selection again after a triple click', () => {
+      selectInContainer(rangeInNode(0, 5));
+      dispatchMouseUp({ button: 0, detail: 1 });
+      dispatchMouseUp({ button: 0, detail: 3 });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not report the same selection again after a single click', () => {
+      selectInContainer(rangeInNode(0, 5));
+      dispatchMouseUp({ button: 0, detail: 1 });
+      dispatchMouseUp({ button: 0, detail: 1 });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report the same selection again after a right-click', () => {
+      selectInContainer(rangeInNode(0, 5));
+      dispatchMouseUp({ button: 0, detail: 1 });
+
+      // the context menu leaves the selection as it was
+      dispatchMouseUp({ button: 2, detail: 1 });
+      dispatchMouseUp({ button: 2, detail: 2 });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report the same selection again after a double click outside the selected text', () => {
+      // not a control, so only the check that the click landed on the selected text can reject it
+      const elsewhere = document.createElement('p');
+      container.appendChild(elsewhere);
+
+      selectInContainer(rangeInNode(0, 5));
+      dispatchMouseUp({ button: 0, detail: 1 });
+
+      // e.g. an element that does not select text, so the old selection stays in place
+      dispatchMouseUp({ button: 0, detail: 2 }, elsewhere);
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report the same selection again after a double click on a control outside the selected text', () => {
+      const button = document.createElement('button');
+      container.appendChild(button);
+
+      selectInContainer(rangeInNode(0, 5));
+      dispatchMouseUp({ button: 0, detail: 1 });
+      dispatchMouseUp({ button: 0, detail: 2 }, button);
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report the same selection again after a double click on a control inside the selected text', () => {
+      const button = document.createElement('button');
+      node.appendChild(button);
+
+      selectInContainer(rangeInNode(0, 5));
+      dispatchMouseUp({ button: 0, detail: 1 });
+      dispatchMouseUp({ button: 0, detail: 2 }, button);
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report the same selection again after a double click on an svg icon inside a button', () => {
+      const button = document.createElement('button');
+      const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      icon.appendChild(path);
+      button.appendChild(icon);
+      node.appendChild(button);
+
+      selectInContainer(rangeInNode(0, 5));
+      dispatchMouseUp({ button: 0, detail: 1 });
+      dispatchMouseUp({ button: 0, detail: 2 }, icon);
+      dispatchMouseUp({ button: 0, detail: 2 }, path);
 
       expect(spyOnSelect).toHaveBeenCalledTimes(1);
     });
@@ -374,7 +470,7 @@ describe('onSelect', () => {
 
       // e.g. a consumer calling getSelection().getRangeAt(0).setEnd(...) on the live range
       range.setEnd(node, 8);
-      dispatch(container, 'mouseup');
+      dispatch(container, 'keyup');
 
       expect(spyOnSelect).toHaveBeenCalledTimes(2);
     });

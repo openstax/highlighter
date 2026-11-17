@@ -24,6 +24,10 @@ interface IOptions {
   tabbable?: boolean;
 }
 
+const NON_SELECTING_CONTROLS = 'button, input, select, textarea, [role="button"]';
+const isElement = (node: Node): node is Element => node.nodeType === 1;
+const isNode = (target: EventTarget | null): target is Node => !!target && 'nodeType' in target;
+
 export default class Highlighter {
   public readonly container: HTMLElement;
   private highlights: { [key: string]: Highlight } = {};
@@ -49,13 +53,13 @@ export default class Highlighter {
       ...options,
     };
     this.debouncedSnapSelection = debounce(this.snapSelection, ON_SELECT_DELAY);
-    this.debouncedOnSelect = debounce(this.onSelect, ON_SELECT_DELAY);
+    this.debouncedOnSelect = debounce(this.onKeyUp, ON_SELECT_DELAY);
     this.focusInHandler = this.onFocusHandler('in');
     this.focusOutHandler = this.onFocusHandler('out');
     this.container.addEventListener('click', this.onClickHandler);
     document.addEventListener('selectionchange', this.onSelectionChange);
     this.container.addEventListener('keyup', this.debouncedOnSelect);
-    this.container.addEventListener('mouseup', this.onSelect);
+    this.container.addEventListener('mouseup', this.onMouseUp);
     this.container.addEventListener('focusin', this.focusInHandler);
     this.container.addEventListener('focusout', this.focusOutHandler);
   }
@@ -64,7 +68,7 @@ export default class Highlighter {
     this.container.removeEventListener('click', this.onClickHandler);
     document.removeEventListener('selectionchange', this.onSelectionChange);
     this.container.removeEventListener('keyup', this.debouncedOnSelect);
-    this.container.removeEventListener('mouseup', this.onSelect);
+    this.container.removeEventListener('mouseup', this.onMouseUp);
     this.container.removeEventListener('focusin', this.focusInHandler);
     this.container.removeEventListener('focusout', this.focusOutHandler);
   }
@@ -263,7 +267,45 @@ export default class Highlighter {
     onClick(undefined, event);
   }
 
-  private onSelect = (): void => {
+  // Double or triple clicking selected text with the primary button re-selects it, even if it is the same text as
+  // before (e.g. double-clicking the same word again after dismissing its card with Esc). Other mouse releases can
+  // leave the selection untouched (e.g. a right-click for the context menu, or a double-click on a button that
+  // does not select text), so they must not repeat a report.
+  private onMouseUp = (event: MouseEvent): void => {
+    this.onSelect(event);
+  }
+
+  // keyup fires for many reasons other than selecting text (e.g. Tab moving focus), so don't repeat a report
+  private onKeyUp = (): void => {
+    this.onSelect();
+  }
+
+  private isReselection(event: MouseEvent | undefined, range: Range): boolean {
+    const target = event ? event.target : null;
+
+    if (!event || event.button !== 0 || event.detail < 2 || !isNode(target)) {
+      return false;
+    }
+
+    // any element, not just HTML ones, so an SVG icon inside a button counts as part of the button
+    if (isElement(target) && target.closest(NON_SELECTING_CONTROLS)) {
+      return false;
+    }
+
+    // the click has to land on the selected text
+    const parent = target.parentNode;
+    if (!parent) {
+      return true;
+    }
+    const index = Array.prototype.indexOf.call(parent.childNodes, target);
+    const targetRange = new Range();
+    targetRange.setStart(parent, index);
+    targetRange.setEnd(parent, index + 1);
+    return range.compareBoundaryPoints(Range.END_TO_START, targetRange) < 0
+      && range.compareBoundaryPoints(Range.START_TO_END, targetRange) > 0;
+  }
+
+  private onSelect = (event?: MouseEvent): void => {
     const { onSelect } = this.options;
 
     const selection = document.getSelection();
@@ -277,9 +319,7 @@ export default class Highlighter {
 
     const range = this.snapSelection();
 
-    // keyup and mouseup fire for many reasons other than selecting text (e.g. Tab moving focus),
-    // so only report a selection the first time it is seen
-    if (range && this.compareRanges(range, this.reportedRange)) {
+    if (range && !this.isReselection(event, range) && this.compareRanges(range, this.reportedRange)) {
       return;
     }
 
