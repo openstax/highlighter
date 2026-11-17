@@ -263,10 +263,11 @@ export default class Highlighter {
     onClick(undefined, event);
   }
 
-  // A mouse gesture is a deliberate selection, so report it even if the range is the same as the last one
-  // (e.g. double-clicking the same word again after dismissing its card with Esc)
-  private onMouseUp = (): void => {
-    this.onSelect(true);
+  // Double or triple clicking with the primary button re-selects text, even if it is the same text as before
+  // (e.g. double-clicking the same word again after dismissing its card with Esc). Other mouse releases can leave
+  // the selection untouched (e.g. a right-click for the context menu), so they must not repeat a report.
+  private onMouseUp = (event: MouseEvent): void => {
+    this.onSelect(event.button === 0 && event.detail > 1);
   }
 
   // keyup fires for many reasons other than selecting text (e.g. Tab moving focus), so don't repeat a report

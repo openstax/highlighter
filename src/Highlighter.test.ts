@@ -306,6 +306,10 @@ describe('onSelect', () => {
       target.dispatchEvent(event);
     };
 
+    const dispatchMouseUp = (init: MouseEventInit) => {
+      container.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, ...init }));
+    };
+
     const selectInContainer = (snappedRange: Range) => {
       getSelectionSpy.mockImplementation(() => ({
         anchorNode: node,
@@ -347,23 +351,52 @@ describe('onSelect', () => {
       expect(spyOnSelect).toHaveBeenCalledTimes(1);
     });
 
-    it('reports the same selection again after a mouseup', () => {
+    it('reports the same selection again after a double click', () => {
       selectInContainer(rangeInNode(0, 5));
-      dispatch(container, 'mouseup');
+      dispatchMouseUp({ button: 0, detail: 1 });
 
       // e.g. Esc dismisses the card but keeps the selection, then the same word is double-clicked again
       selectInContainer(rangeInNode(0, 5));
-      dispatch(container, 'mouseup');
+      dispatchMouseUp({ button: 0, detail: 1 });
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+      dispatchMouseUp({ button: 0, detail: 2 });
 
       expect(spyOnSelect).toHaveBeenCalledTimes(2);
     });
 
-    it('treats a separate range with the same boundaries as the same selection for keyup', () => {
+    it('reports the same selection again after a triple click', () => {
+      selectInContainer(rangeInNode(0, 5));
+      dispatchMouseUp({ button: 0, detail: 1 });
+      dispatchMouseUp({ button: 0, detail: 3 });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not report the same selection again after a single click', () => {
+      selectInContainer(rangeInNode(0, 5));
+      dispatchMouseUp({ button: 0, detail: 1 });
+      dispatchMouseUp({ button: 0, detail: 1 });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report the same selection again after a right-click', () => {
+      selectInContainer(rangeInNode(0, 5));
+      dispatchMouseUp({ button: 0, detail: 1 });
+
+      // the context menu leaves the selection as it was
+      dispatchMouseUp({ button: 2, detail: 1 });
+      dispatchMouseUp({ button: 2, detail: 2 });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('treats a separate range with the same boundaries as the same selection', () => {
       selectInContainer(rangeInNode(0, 5));
       dispatch(container, 'mouseup');
 
       selectInContainer(rangeInNode(0, 5));
-      dispatch(container, 'keyup');
+      dispatch(container, 'mouseup');
 
       expect(spyOnSelect).toHaveBeenCalledTimes(1);
     });
