@@ -34,7 +34,7 @@ export default class Highlighter {
   // Copies, because the ranges themselves are the browser selection's live range, which can change in place
   private reportedRange: Range | null = null; // last range passed to onSelect
   private snappedRange: Range | null = null; // last range snapping put into the selection
-  private mouseDownPrevented = false; // the last mousedown had its default action cancelled
+  private lastMouseDown: MouseEvent | null = null; // read at mouseup, after every mousedown listener has run
   private focusInHandler: (ev: Event) => void;
   private focusOutHandler: (ev: Event) => void;
 
@@ -269,9 +269,8 @@ export default class Highlighter {
     onClick(undefined, event);
   }
 
-  // Bubbles up from the target, so this sees a default action that was cancelled on the way
   private onMouseDown = (event: MouseEvent): void => {
-    this.mouseDownPrevented = event.defaultPrevented;
+    this.lastMouseDown = event;
   }
 
   // A double or triple click re-selects text even when it is the same text as before (e.g. double-clicking the same
@@ -284,29 +283,37 @@ export default class Highlighter {
   private isReselection(event: MouseEvent): boolean {
     return event.button === 0
       && event.detail > 1
-      && !this.mouseDownPrevented
+      && !(this.lastMouseDown && this.lastMouseDown.defaultPrevented)
       && this.canSelectTextAt(event.target);
   }
 
   // False for a button or other control, and for text with user-select: none, where a click selects nothing.
+  // The nearest explicit user-select value wins, so text can opt back in inside an unselectable wrapper.
   // The target can be an SVG element, which is why this does not use isHtmlElement.
   private canSelectTextAt(target: EventTarget | null): boolean {
     let node = target as Node | null;
+    let selectable: boolean | undefined;
 
-    while (node && node !== this.container) {
+    while (node) {
       if (isElement(node)) {
         if (node.matches(NON_SELECTING_CONTROLS)) {
           return false;
         }
-        const style = window.getComputedStyle(node);
-        if (style.userSelect === 'none' || (style as any).webkitUserSelect === 'none') {
-          return false;
+        if (selectable === undefined) {
+          const style = window.getComputedStyle(node);
+          const value = style.userSelect || (style as any).webkitUserSelect;
+          if (value && value !== 'auto') {
+            selectable = value !== 'none';
+          }
         }
+      }
+      if (node === this.container) {
+        break;
       }
       node = node.parentNode;
     }
 
-    return true;
+    return selectable !== false;
   }
 
   // keyup fires for many reasons other than selecting text (e.g. Tab moving focus), so don't repeat a report

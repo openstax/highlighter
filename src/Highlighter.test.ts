@@ -418,6 +418,81 @@ describe('onSelect', () => {
       expect(spyOnSelect).toHaveBeenCalledTimes(2);
     });
 
+    it('does not report the same selection again when a later mousedown listener cancels it', () => {
+      // registered after the highlighter's own listener
+      container.addEventListener('mousedown', (event) => event.preventDefault());
+
+      selectInContainer(rangeInNode(0, 5));
+      mouseGesture({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 2 });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report the same selection again when an ancestor cancels mousedown', () => {
+      const wrapper = document.createElement('div');
+      wrapper.appendChild(container);
+      wrapper.addEventListener('mousedown', (event) => event.preventDefault());
+
+      selectInContainer(rangeInNode(0, 5));
+      mouseGesture({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 2 });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    describe('with user-select', () => {
+      const withUserSelect = (values: Array<[Element, string]>) => {
+        const getComputedStyle = window.getComputedStyle.bind(window);
+        return jest.spyOn(window, 'getComputedStyle').mockImplementation((element: Element) => {
+          const match = values.find(([candidate]) => candidate === element);
+          return match ? { userSelect: match[1] } as CSSStyleDeclaration : getComputedStyle(element);
+        });
+      };
+
+      it('does not report the same selection again when the container cannot be selected', () => {
+        const styleSpy = withUserSelect([[container, 'none']]);
+
+        selectInContainer(rangeInNode(0, 5));
+        mouseGesture({ button: 0, detail: 1 });
+        mouseGesture({ button: 0, detail: 2, target: container });
+        mouseGesture({ button: 0, detail: 2, target: node });
+        styleSpy.mockRestore();
+
+        expect(spyOnSelect).toHaveBeenCalledTimes(1);
+      });
+
+      it('reports the same selection again for text that opts back in inside an unselectable wrapper', () => {
+        const wrapper = document.createElement('span');
+        const selectable = document.createElement('span');
+        wrapper.appendChild(selectable);
+        node.appendChild(wrapper);
+        const styleSpy = withUserSelect([[wrapper, 'none'], [selectable, 'text']]);
+
+        selectInContainer(rangeInNode(0, 5));
+        mouseGesture({ button: 0, detail: 1 });
+        mouseGesture({ button: 0, detail: 2, target: selectable });
+        styleSpy.mockRestore();
+
+        expect(spyOnSelect).toHaveBeenCalledTimes(2);
+      });
+
+      it('does not report the same selection again for a button inside text that opts in', () => {
+        const wrapper = document.createElement('span');
+        const button = document.createElement('button');
+        wrapper.appendChild(button);
+        node.appendChild(wrapper);
+        const styleSpy = withUserSelect([[wrapper, 'text']]);
+
+        selectInContainer(rangeInNode(0, 5));
+        mouseGesture({ button: 0, detail: 1 });
+        mouseGesture({ button: 0, detail: 2, target: button });
+        styleSpy.mockRestore();
+
+        expect(spyOnSelect).toHaveBeenCalledTimes(1);
+      });
+    });
+
     it('does not report the same selection again after a double click on a control', () => {
       const button = document.createElement('button');
       const insideSelection = document.createElement('button');
