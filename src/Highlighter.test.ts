@@ -306,8 +306,22 @@ describe('onSelect', () => {
       target.dispatchEvent(event);
     };
 
-    const dispatchMouseUp = (init: MouseEventInit, target: EventTarget = node) => {
-      target.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, ...init }));
+    // One mouse gesture as a browser fires it: mousedown, then mouseup
+    const mouseGesture = (init: {
+      button?: number,
+      detail: number,
+      preventMouseDown?: boolean,
+      target?: EventTarget,
+    }) => {
+      const { preventMouseDown, target = node, ...mouseInit } = init;
+      const preventDefault = (event: Event) => event.preventDefault();
+
+      if (preventMouseDown) {
+        target.addEventListener('mousedown', preventDefault);
+      }
+      target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, ...mouseInit }));
+      target.removeEventListener('mousedown', preventDefault);
+      target.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, ...mouseInit }));
     };
 
     const selectInContainer = (snappedRange: Range) => {
@@ -353,76 +367,67 @@ describe('onSelect', () => {
 
     it('reports the same selection again after a double click', () => {
       selectInContainer(rangeInNode(0, 5));
-      dispatchMouseUp({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 1 });
 
       // e.g. Esc dismisses the card but keeps the selection, then the same word is double-clicked again
-      selectInContainer(rangeInNode(0, 5));
-      dispatchMouseUp({ button: 0, detail: 1 });
-      expect(spyOnSelect).toHaveBeenCalledTimes(1);
-      dispatchMouseUp({ button: 0, detail: 2 });
+      mouseGesture({ button: 0, detail: 2 });
 
       expect(spyOnSelect).toHaveBeenCalledTimes(2);
     });
 
     it('reports the same selection again after a triple click', () => {
       selectInContainer(rangeInNode(0, 5));
-      dispatchMouseUp({ button: 0, detail: 1 });
-      dispatchMouseUp({ button: 0, detail: 3 });
+      mouseGesture({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 3 });
 
       expect(spyOnSelect).toHaveBeenCalledTimes(2);
     });
 
     it('does not report the same selection again after a single click', () => {
       selectInContainer(rangeInNode(0, 5));
-      dispatchMouseUp({ button: 0, detail: 1 });
-      dispatchMouseUp({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 1 });
 
       expect(spyOnSelect).toHaveBeenCalledTimes(1);
     });
 
     it('does not report the same selection again after a right-click', () => {
       selectInContainer(rangeInNode(0, 5));
-      dispatchMouseUp({ button: 0, detail: 1 });
-
-      // the context menu leaves the selection as it was
-      dispatchMouseUp({ button: 2, detail: 1 });
-      dispatchMouseUp({ button: 2, detail: 2 });
+      mouseGesture({ button: 0, detail: 1 });
+      mouseGesture({ button: 2, detail: 2 });
 
       expect(spyOnSelect).toHaveBeenCalledTimes(1);
     });
 
-    it('does not report the same selection again after a double click outside the selected text', () => {
-      // not a control, so only the check that the click landed on the selected text can reject it
-      const elsewhere = document.createElement('p');
-      container.appendChild(elsewhere);
-
+    it('does not report the same selection again when mousedown is cancelled', () => {
       selectInContainer(rangeInNode(0, 5));
-      dispatchMouseUp({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 1 });
 
-      // e.g. an element that does not select text, so the old selection stays in place
-      dispatchMouseUp({ button: 0, detail: 2 }, elsewhere);
+      // e.g. the padding of the paragraph holding the selection: cancelling mousedown keeps the old selection
+      mouseGesture({ button: 0, detail: 2, preventMouseDown: true });
 
       expect(spyOnSelect).toHaveBeenCalledTimes(1);
     });
 
-    it('does not report the same selection again after a double click on a control outside the selected text', () => {
+    it('only skips the report for the gesture whose mousedown was cancelled', () => {
+      selectInContainer(rangeInNode(0, 5));
+      mouseGesture({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 2, preventMouseDown: true });
+      mouseGesture({ button: 0, detail: 2 });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not report the same selection again after a double click on a control', () => {
       const button = document.createElement('button');
+      const insideSelection = document.createElement('button');
       container.appendChild(button);
+      node.appendChild(insideSelection);
 
       selectInContainer(rangeInNode(0, 5));
-      dispatchMouseUp({ button: 0, detail: 1 });
-      dispatchMouseUp({ button: 0, detail: 2 }, button);
-
-      expect(spyOnSelect).toHaveBeenCalledTimes(1);
-    });
-
-    it('does not report the same selection again after a double click on a control inside the selected text', () => {
-      const button = document.createElement('button');
-      node.appendChild(button);
-
-      selectInContainer(rangeInNode(0, 5));
-      dispatchMouseUp({ button: 0, detail: 1 });
-      dispatchMouseUp({ button: 0, detail: 2 }, button);
+      mouseGesture({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 2, target: button });
+      mouseGesture({ button: 0, detail: 2, target: insideSelection });
 
       expect(spyOnSelect).toHaveBeenCalledTimes(1);
     });
@@ -436,9 +441,27 @@ describe('onSelect', () => {
       node.appendChild(button);
 
       selectInContainer(rangeInNode(0, 5));
-      dispatchMouseUp({ button: 0, detail: 1 });
-      dispatchMouseUp({ button: 0, detail: 2 }, icon);
-      dispatchMouseUp({ button: 0, detail: 2 }, path);
+      mouseGesture({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 2, target: icon });
+      mouseGesture({ button: 0, detail: 2, target: path });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report the same selection again after a double click on text that cannot be selected', () => {
+      const unselectable = document.createElement('span');
+      const inner = document.createElement('em');
+      unselectable.appendChild(inner);
+      node.appendChild(unselectable);
+      const getComputedStyle = window.getComputedStyle.bind(window);
+      const styleSpy = jest.spyOn(window, 'getComputedStyle').mockImplementation((element: Element) =>
+        element === unselectable ? { userSelect: 'none' } as CSSStyleDeclaration : getComputedStyle(element));
+
+      selectInContainer(rangeInNode(0, 5));
+      mouseGesture({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 2, target: unselectable });
+      mouseGesture({ button: 0, detail: 2, target: inner });
+      styleSpy.mockRestore();
 
       expect(spyOnSelect).toHaveBeenCalledTimes(1);
     });

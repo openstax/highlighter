@@ -26,7 +26,6 @@ interface IOptions {
 
 const NON_SELECTING_CONTROLS = 'button, input, select, textarea, [role="button"]';
 const isElement = (node: Node): node is Element => node.nodeType === 1;
-const isNode = (target: EventTarget | null): target is Node => !!target && 'nodeType' in target;
 
 export default class Highlighter {
   public readonly container: HTMLElement;
@@ -35,6 +34,7 @@ export default class Highlighter {
   // Copies, because the ranges themselves are the browser selection's live range, which can change in place
   private reportedRange: Range | null = null; // last range passed to onSelect
   private snappedRange: Range | null = null; // last range snapping put into the selection
+  private mouseDownPrevented = false; // the last mousedown had its default action cancelled
   private focusInHandler: (ev: Event) => void;
   private focusOutHandler: (ev: Event) => void;
 
@@ -59,6 +59,7 @@ export default class Highlighter {
     this.container.addEventListener('click', this.onClickHandler);
     document.addEventListener('selectionchange', this.onSelectionChange);
     this.container.addEventListener('keyup', this.debouncedOnSelect);
+    this.container.addEventListener('mousedown', this.onMouseDown);
     this.container.addEventListener('mouseup', this.onMouseUp);
     this.container.addEventListener('focusin', this.focusInHandler);
     this.container.addEventListener('focusout', this.focusOutHandler);
@@ -68,6 +69,7 @@ export default class Highlighter {
     this.container.removeEventListener('click', this.onClickHandler);
     document.removeEventListener('selectionchange', this.onSelectionChange);
     this.container.removeEventListener('keyup', this.debouncedOnSelect);
+    this.container.removeEventListener('mousedown', this.onMouseDown);
     this.container.removeEventListener('mouseup', this.onMouseUp);
     this.container.removeEventListener('focusin', this.focusInHandler);
     this.container.removeEventListener('focusout', this.focusOutHandler);
@@ -267,45 +269,52 @@ export default class Highlighter {
     onClick(undefined, event);
   }
 
-  // Double or triple clicking selected text with the primary button re-selects it, even if it is the same text as
-  // before (e.g. double-clicking the same word again after dismissing its card with Esc). Other mouse releases can
-  // leave the selection untouched (e.g. a right-click for the context menu, or a double-click on a button that
-  // does not select text), so they must not repeat a report.
+  // Bubbles up from the target, so this sees a default action that was cancelled on the way
+  private onMouseDown = (event: MouseEvent): void => {
+    this.mouseDownPrevented = event.defaultPrevented;
+  }
+
+  // A double or triple click re-selects text even when it is the same text as before (e.g. double-clicking the same
+  // word again after dismissing its card with Esc). Other mouse releases can leave the selection untouched, so they
+  // must not repeat a report.
   private onMouseUp = (event: MouseEvent): void => {
-    this.onSelect(event);
+    this.onSelect(this.isReselection(event));
+  }
+
+  private isReselection(event: MouseEvent): boolean {
+    return event.button === 0
+      && event.detail > 1
+      && !this.mouseDownPrevented
+      && this.canSelectTextAt(event.target);
+  }
+
+  // False for a button or other control, and for text with user-select: none, where a click selects nothing.
+  // The target can be an SVG element, which is why this does not use isHtmlElement.
+  private canSelectTextAt(target: EventTarget | null): boolean {
+    let node = target as Node | null;
+
+    while (node && node !== this.container) {
+      if (isElement(node)) {
+        if (node.matches(NON_SELECTING_CONTROLS)) {
+          return false;
+        }
+        const style = window.getComputedStyle(node);
+        if (style.userSelect === 'none' || (style as any).webkitUserSelect === 'none') {
+          return false;
+        }
+      }
+      node = node.parentNode;
+    }
+
+    return true;
   }
 
   // keyup fires for many reasons other than selecting text (e.g. Tab moving focus), so don't repeat a report
   private onKeyUp = (): void => {
-    this.onSelect();
+    this.onSelect(false);
   }
 
-  private isReselection(event: MouseEvent | undefined, range: Range): boolean {
-    const target = event ? event.target : null;
-
-    if (!event || event.button !== 0 || event.detail < 2 || !isNode(target)) {
-      return false;
-    }
-
-    // any element, not just HTML ones, so an SVG icon inside a button counts as part of the button
-    if (isElement(target) && target.closest(NON_SELECTING_CONTROLS)) {
-      return false;
-    }
-
-    // the click has to land on the selected text
-    const parent = target.parentNode;
-    if (!parent) {
-      return true;
-    }
-    const index = Array.prototype.indexOf.call(parent.childNodes, target);
-    const targetRange = new Range();
-    targetRange.setStart(parent, index);
-    targetRange.setEnd(parent, index + 1);
-    return range.compareBoundaryPoints(Range.END_TO_START, targetRange) < 0
-      && range.compareBoundaryPoints(Range.START_TO_END, targetRange) > 0;
-  }
-
-  private onSelect = (event?: MouseEvent): void => {
+  private onSelect = (reportRepeat: boolean): void => {
     const { onSelect } = this.options;
 
     const selection = document.getSelection();
@@ -319,7 +328,7 @@ export default class Highlighter {
 
     const range = this.snapSelection();
 
-    if (range && !this.isReselection(event, range) && this.compareRanges(range, this.reportedRange)) {
+    if (range && !reportRepeat && this.compareRanges(range, this.reportedRange)) {
       return;
     }
 
