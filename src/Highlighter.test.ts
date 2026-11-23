@@ -441,6 +441,19 @@ describe('onSelect', () => {
       expect(spyOnSelect).toHaveBeenCalledTimes(1);
     });
 
+    it('does not report the same selection again when mousedown is cancelled and its propagation stopped', () => {
+      node.addEventListener('mousedown', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+
+      selectInContainer(rangeInNode(0, 5));
+      mouseGesture({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 2 });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
     describe('with user-select', () => {
       const withUserSelect = (values: Array<[Element, string]>) => {
         const getComputedStyle = window.getComputedStyle.bind(window);
@@ -460,6 +473,32 @@ describe('onSelect', () => {
         styleSpy.mockRestore();
 
         expect(spyOnSelect).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not report the same selection again when a wrapper above the container cannot be selected', () => {
+        const wrapper = document.createElement('div');
+        wrapper.appendChild(container);
+        const styleSpy = withUserSelect([[wrapper, 'none']]);
+
+        selectInContainer(rangeInNode(0, 5));
+        mouseGesture({ button: 0, detail: 1 });
+        mouseGesture({ button: 0, detail: 2 });
+        styleSpy.mockRestore();
+
+        expect(spyOnSelect).toHaveBeenCalledTimes(1);
+      });
+
+      it('reports the same selection again when the container opts back in inside an unselectable wrapper', () => {
+        const wrapper = document.createElement('div');
+        wrapper.appendChild(container);
+        const styleSpy = withUserSelect([[wrapper, 'none'], [container, 'text']]);
+
+        selectInContainer(rangeInNode(0, 5));
+        mouseGesture({ button: 0, detail: 1 });
+        mouseGesture({ button: 0, detail: 2 });
+        styleSpy.mockRestore();
+
+        expect(spyOnSelect).toHaveBeenCalledTimes(2);
       });
 
       it('reports the same selection again for text that opts back in inside an unselectable wrapper', () => {

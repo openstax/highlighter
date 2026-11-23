@@ -59,7 +59,7 @@ export default class Highlighter {
     this.container.addEventListener('click', this.onClickHandler);
     document.addEventListener('selectionchange', this.onSelectionChange);
     this.container.addEventListener('keyup', this.debouncedOnSelect);
-    this.container.addEventListener('mousedown', this.onMouseDown);
+    this.container.addEventListener('mousedown', this.onMouseDown, true);
     this.container.addEventListener('mouseup', this.onMouseUp);
     this.container.addEventListener('focusin', this.focusInHandler);
     this.container.addEventListener('focusout', this.focusOutHandler);
@@ -69,7 +69,7 @@ export default class Highlighter {
     this.container.removeEventListener('click', this.onClickHandler);
     document.removeEventListener('selectionchange', this.onSelectionChange);
     this.container.removeEventListener('keyup', this.debouncedOnSelect);
-    this.container.removeEventListener('mousedown', this.onMouseDown);
+    this.container.removeEventListener('mousedown', this.onMouseDown, true);
     this.container.removeEventListener('mouseup', this.onMouseUp);
     this.container.removeEventListener('focusin', this.focusInHandler);
     this.container.removeEventListener('focusout', this.focusOutHandler);
@@ -269,6 +269,7 @@ export default class Highlighter {
     onClick(undefined, event);
   }
 
+  // Capture phase, so a handler that stops propagation cannot hide the event. Its defaultPrevented value is read later.
   private onMouseDown = (event: MouseEvent): void => {
     this.lastMouseDown = event;
   }
@@ -288,15 +289,16 @@ export default class Highlighter {
   }
 
   // False for a button or other control, and for text with user-select: none, where a click selects nothing.
-  // The nearest explicit user-select value wins, so text can opt back in inside an unselectable wrapper.
-  // The target can be an SVG element, which is why this does not use isHtmlElement.
+  // The nearest explicit user-select value wins, including one above the container, so text can opt back in
+  // inside an unselectable wrapper. The target can be an SVG element, which is why this does not use isHtmlElement.
   private canSelectTextAt(target: EventTarget | null): boolean {
     let node = target as Node | null;
+    let insideContainer = true;
     let selectable: boolean | undefined;
 
     while (node) {
       if (isElement(node)) {
-        if (node.matches(NON_SELECTING_CONTROLS)) {
+        if (insideContainer && node.matches(NON_SELECTING_CONTROLS)) {
           return false;
         }
         if (selectable === undefined) {
@@ -308,6 +310,10 @@ export default class Highlighter {
         }
       }
       if (node === this.container) {
+        insideContainer = false;
+      }
+      // above the container only user-select matters, so stop as soon as it is known
+      if (!insideContainer && selectable !== undefined) {
         break;
       }
       node = node.parentNode;
