@@ -68,7 +68,7 @@ function cloneForRange(element: Node, range: Range, foundStart: boolean = false)
 
   if (element.nodeType === 3 /* #text */) {
     if (element === range.startContainer && element === range.endContainer) {
-      result.textContent = (element.textContent || '').substring(range.startOffset, range.endOffset + 1);
+      result.textContent = (element.textContent || '').substring(range.startOffset, range.endOffset);
     } else if (element === range.startContainer) {
       result.textContent = (element.textContent || '').substring(range.startOffset);
     } else if (element === range.endContainer) {

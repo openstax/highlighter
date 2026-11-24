@@ -48,6 +48,12 @@ class Range {
     this.startContainer = container;
     this.startOffset = offset;
   };
+  setStartBefore = (node) => {
+    this.setStart(node.parentNode, Array.prototype.indexOf.call(node.parentNode.childNodes, node));
+  };
+  setEndAfter = (node) => {
+    this.setEnd(node.parentNode, Array.prototype.indexOf.call(node.parentNode.childNodes, node) + 1);
+  };
   // Same meaning of `how` as the real Range: e.g. START_TO_END compares this range's end to the other's start
   compareBoundaryPoints = (how, other) => {
     const useThisEnd = how === Range.START_TO_END || how === Range.END_TO_END;
@@ -59,6 +65,14 @@ class Range {
       useOtherEnd ? other.endOffset : other.startOffset
     );
   };
+  // The deepest node that contains both ends of the range, like the real property
+  get commonAncestorContainer() {
+    let ancestor = this.startContainer;
+    while (ancestor && !ancestor.contains(this.endContainer)) {
+      ancestor = ancestor.parentNode;
+    }
+    return ancestor;
+  }
   getBoundingClientRect = () => {};
   getClientRects = () => {};
   createContextualFragment = (html) => {
