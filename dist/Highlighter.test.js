@@ -1,0 +1,553 @@
+"use strict";
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const lodash = require("lodash");
+const Highlight_1 = require("./Highlight");
+const Highlighter_1 = require("./Highlighter");
+const injectHighlightWrappersUtils = require("./injectHighlightWrappers");
+const rangeContents = require("./rangeContents");
+const selection = require("./selection");
+describe('Reference elements', () => {
+    test('resolve', () => {
+        document.body.innerHTML = `
+      <div id="container">
+        <div id="referenceElement1"></div>
+        <div id="referenceElement2"></div>
+        <div id="referenceElement3"></div>
+      </div>
+    `;
+        const container = document.getElementById('container');
+        const reference = document.getElementById('referenceElement2');
+        if (!container) {
+            throw new Error('cannot find container');
+        }
+        const highlighter = new Highlighter_1.default(container, { formatMessage: jest.fn() });
+        expect(highlighter.getReferenceElement('referenceElement2')).toEqual(reference);
+    });
+    test('do not resolve outside the container', () => {
+        document.body.innerHTML = `
+      <div>
+        <div id="referenceElement1"></div>
+        <div id="container">
+          <div id="referenceElement2"></div>
+          <div id="referenceElement3"></div>
+        </div>
+      </div>
+    `;
+        const container = document.getElementById('container');
+        if (!container) {
+            throw new Error('can\'t find container');
+        }
+        const highlighter = new Highlighter_1.default(container, { formatMessage: jest.fn() });
+        expect(highlighter.getReferenceElement('referenceElement1')).toEqual(null);
+    });
+});
+describe('onClick', () => {
+    test('handle clicks inside of the container', () => {
+        const spyOnClick = jest.fn();
+        const container = document.createElement('div');
+        // tslint:disable-next-line no-unused-expression
+        new Highlighter_1.default(container, { onClick: spyOnClick, formatMessage: jest.fn() });
+        const e = document.createEvent('MouseEvent');
+        e.initEvent('click', true, true);
+        container.dispatchEvent(e);
+        expect(spyOnClick).toHaveBeenCalledWith(undefined, e);
+    });
+    test('handle clicks on the highlights', () => {
+        const spyOnClick = jest.fn();
+        const spyInjectHighlightWrappersUtils = jest.fn();
+        const container = document.createElement('div');
+        const highlightElement = document.createElement('span');
+        highlightElement.setAttribute(injectHighlightWrappersUtils.DATA_ATTR, 'highlight');
+        highlightElement.setAttribute(injectHighlightWrappersUtils.DATA_ID_ATTR, 'some-highlight');
+        container.append(highlightElement);
+        const highlight = new Highlight_1.default(new Range(), { id: 'some-highlight', content: 'asd' }, { formatMessage: jest.fn() });
+        jest.spyOn(injectHighlightWrappersUtils, 'default')
+            .mockImplementation(spyInjectHighlightWrappersUtils);
+        // tslint:disable-next-line no-unused-expression
+        const highlighter = new Highlighter_1.default(container, { onClick: spyOnClick, formatMessage: jest.fn() });
+        highlighter.highlight(highlight);
+        const e = document.createEvent('MouseEvent');
+        e.initEvent('click', true, true);
+        Object.defineProperty(e, 'target', { value: highlightElement });
+        container.dispatchEvent(e);
+        expect(spyInjectHighlightWrappersUtils).toHaveBeenCalledWith(highlight, expect.anything());
+        expect(spyOnClick).toHaveBeenCalledWith(highlight, e);
+    });
+    test('does not handle clicks outside of the container', () => {
+        const spyOnClick = jest.fn();
+        const container = document.createElement('div');
+        // tslint:disable-next-line no-unused-expression
+        new Highlighter_1.default(container, { onClick: spyOnClick, formatMessage: jest.fn() });
+        const e = document.createEvent('MouseEvent');
+        e.initEvent('click', true, true);
+        document.dispatchEvent(e);
+        expect(spyOnClick).not.toHaveBeenCalled();
+    });
+});
+describe('onSelect', () => {
+    let getSelectionSpy;
+    let snapSelectionSpy;
+    let rangeContentsStringSpy;
+    jest.useFakeTimers();
+    beforeEach(() => {
+        getSelectionSpy = jest.spyOn(document, 'getSelection');
+        snapSelectionSpy = jest.spyOn(selection, 'snapSelection');
+        rangeContentsStringSpy = jest.spyOn(rangeContents, 'rangeContentsString');
+        rangeContentsStringSpy.mockImplementation(() => '');
+    });
+    afterEach(() => {
+        getSelectionSpy.mockRestore();
+        snapSelectionSpy.mockRestore();
+        rangeContentsStringSpy.mockRestore();
+    });
+    it('returns a highlight with the snapped range, even if document selection returns something completely different (looking at you safari)', () => {
+        let highlight;
+        const container = document.createElement('div');
+        const node = document.createElement('div');
+        node.innerHTML = 'some text';
+        container.appendChild(node);
+        window.matchMedia = () => ({ matches: false }); // doesnt match touch device media query
+        const spyDebounce = jest.spyOn(lodash, 'debounce')
+            .mockImplementation((fn) => fn);
+        // tslint:disable-next-line no-unused-expression
+        new Highlighter_1.default(container, { formatMessage: jest.fn(), onSelect: (_, newHighlight) => highlight = newHighlight });
+        expect(spyDebounce).toHaveBeenCalled();
+        const inputSelection = new Selection();
+        const selectionRange = new Range();
+        const snappedRange = new Range();
+        selectionRange.setStart(node, 0);
+        selectionRange.setEnd(node, 5);
+        selectionRange.setStart(node, 0);
+        selectionRange.setEnd(node, 5);
+        Object.defineProperty(inputSelection, 'isCollapsed', { value: false });
+        Object.defineProperty(inputSelection, 'anchorNode', { value: node });
+        Object.defineProperty(inputSelection, 'focusNode', { value: node });
+        inputSelection.setBaseAndExtent = jest.fn(() => inputSelection);
+        inputSelection.getRangeAt = jest.fn(() => selectionRange);
+        snapSelectionSpy.mockImplementation(() => snappedRange);
+        getSelectionSpy.mockImplementation(() => inputSelection);
+        const e = document.createEvent('Event');
+        e.initEvent('selectionchange', true, true);
+        document.dispatchEvent(e);
+        const eKeyUp = document.createEvent('Event');
+        eKeyUp.initEvent('keyup', true, true);
+        container.dispatchEvent(eKeyUp);
+        if (highlight === undefined) {
+            expect(highlight).toBeDefined();
+        }
+        else {
+            expect(highlight.range).not.toEqual(selectionRange);
+            expect(highlight.range).toEqual(snappedRange);
+        }
+    });
+    it('noops on selecitonchange event if there is no selection, selection is collapsed or selection type is None', () => {
+        const spyOnSelect = jest.fn();
+        const container = document.createElement('div');
+        const node = document.createElement('div');
+        container.appendChild(node);
+        window.matchMedia = () => ({ matches: false }); // doesnt match touch device media query
+        const spyDebounce = jest.spyOn(lodash, 'debounce')
+            .mockImplementation((fn) => fn);
+        // tslint:disable-next-line no-unused-expression
+        new Highlighter_1.default(container, { onSelect: spyOnSelect, formatMessage: jest.fn() });
+        expect(spyDebounce).toHaveBeenCalled();
+        getSelectionSpy.mockImplementation(() => null);
+        const e = document.createEvent('Event');
+        e.initEvent('selectionchange', true, true);
+        document.dispatchEvent(e);
+        expect(spyOnSelect).not.toHaveBeenCalled();
+        getSelectionSpy.mockImplementation(() => ({ isCollapsed: true }));
+        expect(spyOnSelect).not.toHaveBeenCalled();
+        getSelectionSpy.mockImplementation(() => ({ isCollapsed: false, type: 'None' }));
+        expect(spyOnSelect).not.toHaveBeenCalled();
+    });
+    it('noops on selecitonchange event if anchorNode or focusNode is not in the container', () => {
+        const spyOnSelect = jest.fn();
+        const container = document.createElement('div');
+        const nodeInside = document.createElement('div');
+        const nodeOutside = document.createElement('div');
+        container.appendChild(nodeInside);
+        window.matchMedia = () => ({ matches: false }); // doesnt match touch device media query
+        const spyDebounce = jest.spyOn(lodash, 'debounce')
+            .mockImplementation((fn) => fn);
+        // tslint:disable-next-line no-unused-expression
+        new Highlighter_1.default(container, { onSelect: spyOnSelect, formatMessage: jest.fn() });
+        expect(spyDebounce).toHaveBeenCalled();
+        getSelectionSpy.mockImplementation(() => ({ isCollapsed: false, anchorNode: nodeOutside, focusNode: nodeInside }));
+        const e = document.createEvent('Event');
+        e.initEvent('selectionchange', true, true);
+        document.dispatchEvent(e);
+        expect(spyOnSelect).not.toHaveBeenCalled();
+        getSelectionSpy.mockImplementation(() => ({ isCollapsed: false, anchorNode: nodeInside, focusNode: nodeOutside }));
+        expect(spyOnSelect).not.toHaveBeenCalled();
+    });
+    it('noops on selectionchange event for touch devices', () => {
+        const spyOnSelect = jest.fn();
+        const container = document.createElement('div');
+        const node = document.createElement('div');
+        const inputSelection = new Selection();
+        const selectionRange = new Range();
+        selectionRange.setStart(node, 0);
+        selectionRange.setEnd(node, 5);
+        selectionRange.setStart(node, 0);
+        selectionRange.setEnd(node, 5);
+        Object.defineProperty(inputSelection, 'isCollapsed', { value: false });
+        Object.defineProperty(inputSelection, 'anchorNode', { value: node });
+        Object.defineProperty(inputSelection, 'focusNode', { value: node });
+        inputSelection.getRangeAt = jest.fn(() => selectionRange);
+        container.appendChild(node);
+        window.matchMedia = () => ({ matches: true }); // matches touch device media query
+        const spyDebounce = jest.spyOn(lodash, 'debounce')
+            .mockImplementation((fn) => fn);
+        // tslint:disable-next-line no-unused-expression
+        new Highlighter_1.default(container, { onSelect: spyOnSelect, formatMessage: jest.fn() });
+        expect(spyDebounce).toHaveBeenCalled();
+        getSelectionSpy.mockImplementation(() => inputSelection);
+        const e = document.createEvent('Event');
+        e.initEvent('selectionchange', true, true);
+        document.dispatchEvent(e);
+        expect(spyOnSelect).not.toHaveBeenCalled();
+    });
+    describe('repeated events for the same selection', () => {
+        let container;
+        let node;
+        let spyOnSelect;
+        const dispatch = (target, type) => {
+            const event = document.createEvent('Event');
+            event.initEvent(type, true, true);
+            target.dispatchEvent(event);
+        };
+        // One mouse gesture as a browser fires it: mousedown, then mouseup
+        const mouseGesture = (init) => {
+            const { preventMouseDown, target = node } = init, mouseInit = __rest(init, ["preventMouseDown", "target"]);
+            const preventDefault = (event) => event.preventDefault();
+            if (preventMouseDown) {
+                target.addEventListener('mousedown', preventDefault);
+            }
+            target.dispatchEvent(new MouseEvent('mousedown', Object.assign({ bubbles: true, cancelable: true }, mouseInit)));
+            target.removeEventListener('mousedown', preventDefault);
+            target.dispatchEvent(new MouseEvent('mouseup', Object.assign({ bubbles: true, cancelable: true }, mouseInit)));
+        };
+        const selectInContainer = (snappedRange) => {
+            getSelectionSpy.mockImplementation(() => ({
+                anchorNode: node,
+                focusNode: node,
+                getRangeAt: () => snappedRange,
+                isCollapsed: false,
+                rangeCount: 1,
+            }));
+            snapSelectionSpy.mockImplementation(() => snappedRange);
+        };
+        const rangeInNode = (start, end) => {
+            const range = new Range();
+            range.setStart(node, start);
+            range.setEnd(node, end);
+            return range;
+        };
+        beforeEach(() => {
+            container = document.createElement('div');
+            node = document.createElement('div');
+            container.appendChild(node);
+            spyOnSelect = jest.fn();
+            window.matchMedia = () => ({ matches: false }); // doesnt match touch device media query
+            jest.spyOn(lodash, 'debounce').mockImplementation((fn) => fn);
+            // tslint:disable-next-line no-unused-expression
+            new Highlighter_1.default(container, { onSelect: spyOnSelect, formatMessage: jest.fn() });
+        });
+        it('does not report the same selection again after a keyup', () => {
+            selectInContainer(rangeInNode(0, 5));
+            dispatch(container, 'mouseup');
+            dispatch(container, 'keyup');
+            dispatch(container, 'keyup');
+            expect(spyOnSelect).toHaveBeenCalledTimes(1);
+        });
+        it('reports the same selection again after a double click', () => {
+            selectInContainer(rangeInNode(0, 5));
+            mouseGesture({ button: 0, detail: 1 });
+            // e.g. Esc dismisses the card but keeps the selection, then the same word is double-clicked again
+            mouseGesture({ button: 0, detail: 2 });
+            expect(spyOnSelect).toHaveBeenCalledTimes(2);
+        });
+        it('reports the same selection again after a triple click', () => {
+            selectInContainer(rangeInNode(0, 5));
+            mouseGesture({ button: 0, detail: 1 });
+            mouseGesture({ button: 0, detail: 3 });
+            expect(spyOnSelect).toHaveBeenCalledTimes(2);
+        });
+        it('does not report the same selection again after a single click', () => {
+            selectInContainer(rangeInNode(0, 5));
+            mouseGesture({ button: 0, detail: 1 });
+            mouseGesture({ button: 0, detail: 1 });
+            expect(spyOnSelect).toHaveBeenCalledTimes(1);
+        });
+        it('does not report the same selection again after a right-click', () => {
+            selectInContainer(rangeInNode(0, 5));
+            mouseGesture({ button: 0, detail: 1 });
+            mouseGesture({ button: 2, detail: 2 });
+            expect(spyOnSelect).toHaveBeenCalledTimes(1);
+        });
+        it('does not report the same selection again when mousedown is cancelled', () => {
+            selectInContainer(rangeInNode(0, 5));
+            mouseGesture({ button: 0, detail: 1 });
+            // e.g. the padding of the paragraph holding the selection: cancelling mousedown keeps the old selection
+            mouseGesture({ button: 0, detail: 2, preventMouseDown: true });
+            expect(spyOnSelect).toHaveBeenCalledTimes(1);
+        });
+        it('only skips the report for the gesture whose mousedown was cancelled', () => {
+            selectInContainer(rangeInNode(0, 5));
+            mouseGesture({ button: 0, detail: 1 });
+            mouseGesture({ button: 0, detail: 2, preventMouseDown: true });
+            mouseGesture({ button: 0, detail: 2 });
+            expect(spyOnSelect).toHaveBeenCalledTimes(2);
+        });
+        it('does not report the same selection again when a later mousedown listener cancels it', () => {
+            // registered after the highlighter's own listener
+            container.addEventListener('mousedown', (event) => event.preventDefault());
+            selectInContainer(rangeInNode(0, 5));
+            mouseGesture({ button: 0, detail: 1 });
+            mouseGesture({ button: 0, detail: 2 });
+            expect(spyOnSelect).toHaveBeenCalledTimes(1);
+        });
+        it('does not report the same selection again when an ancestor cancels mousedown', () => {
+            const wrapper = document.createElement('div');
+            wrapper.appendChild(container);
+            wrapper.addEventListener('mousedown', (event) => event.preventDefault());
+            selectInContainer(rangeInNode(0, 5));
+            mouseGesture({ button: 0, detail: 1 });
+            mouseGesture({ button: 0, detail: 2 });
+            expect(spyOnSelect).toHaveBeenCalledTimes(1);
+        });
+        it('does not report the same selection again when mousedown is cancelled and its propagation stopped', () => {
+            node.addEventListener('mousedown', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+            });
+            selectInContainer(rangeInNode(0, 5));
+            mouseGesture({ button: 0, detail: 1 });
+            mouseGesture({ button: 0, detail: 2 });
+            expect(spyOnSelect).toHaveBeenCalledTimes(1);
+        });
+        describe('with user-select', () => {
+            const withUserSelect = (values) => {
+                const getComputedStyle = window.getComputedStyle.bind(window);
+                return jest.spyOn(window, 'getComputedStyle').mockImplementation((element) => {
+                    const match = values.find(([candidate]) => candidate === element);
+                    return match ? { userSelect: match[1] } : getComputedStyle(element);
+                });
+            };
+            it('does not report the same selection again when the container cannot be selected', () => {
+                const styleSpy = withUserSelect([[container, 'none']]);
+                selectInContainer(rangeInNode(0, 5));
+                mouseGesture({ button: 0, detail: 1 });
+                mouseGesture({ button: 0, detail: 2, target: container });
+                mouseGesture({ button: 0, detail: 2, target: node });
+                styleSpy.mockRestore();
+                expect(spyOnSelect).toHaveBeenCalledTimes(1);
+            });
+            it('does not report the same selection again when a wrapper above the container cannot be selected', () => {
+                const wrapper = document.createElement('div');
+                wrapper.appendChild(container);
+                const styleSpy = withUserSelect([[wrapper, 'none']]);
+                selectInContainer(rangeInNode(0, 5));
+                mouseGesture({ button: 0, detail: 1 });
+                mouseGesture({ button: 0, detail: 2 });
+                styleSpy.mockRestore();
+                expect(spyOnSelect).toHaveBeenCalledTimes(1);
+            });
+            it('reports the same selection again when the container opts back in inside an unselectable wrapper', () => {
+                const wrapper = document.createElement('div');
+                wrapper.appendChild(container);
+                const styleSpy = withUserSelect([[wrapper, 'none'], [container, 'text']]);
+                selectInContainer(rangeInNode(0, 5));
+                mouseGesture({ button: 0, detail: 1 });
+                mouseGesture({ button: 0, detail: 2 });
+                styleSpy.mockRestore();
+                expect(spyOnSelect).toHaveBeenCalledTimes(2);
+            });
+            it('reports the same selection again for text that opts back in inside an unselectable wrapper', () => {
+                const wrapper = document.createElement('span');
+                const selectable = document.createElement('span');
+                wrapper.appendChild(selectable);
+                node.appendChild(wrapper);
+                const styleSpy = withUserSelect([[wrapper, 'none'], [selectable, 'text']]);
+                selectInContainer(rangeInNode(0, 5));
+                mouseGesture({ button: 0, detail: 1 });
+                mouseGesture({ button: 0, detail: 2, target: selectable });
+                styleSpy.mockRestore();
+                expect(spyOnSelect).toHaveBeenCalledTimes(2);
+            });
+            it('does not report the same selection again for a button inside text that opts in', () => {
+                const wrapper = document.createElement('span');
+                const button = document.createElement('button');
+                wrapper.appendChild(button);
+                node.appendChild(wrapper);
+                const styleSpy = withUserSelect([[wrapper, 'text']]);
+                selectInContainer(rangeInNode(0, 5));
+                mouseGesture({ button: 0, detail: 1 });
+                mouseGesture({ button: 0, detail: 2, target: button });
+                styleSpy.mockRestore();
+                expect(spyOnSelect).toHaveBeenCalledTimes(1);
+            });
+        });
+        it('does not report the same selection again after a double click on a control', () => {
+            const button = document.createElement('button');
+            const insideSelection = document.createElement('button');
+            container.appendChild(button);
+            node.appendChild(insideSelection);
+            selectInContainer(rangeInNode(0, 5));
+            mouseGesture({ button: 0, detail: 1 });
+            mouseGesture({ button: 0, detail: 2, target: button });
+            mouseGesture({ button: 0, detail: 2, target: insideSelection });
+            expect(spyOnSelect).toHaveBeenCalledTimes(1);
+        });
+        it('does not report the same selection again after a double click on an svg icon inside a button', () => {
+            const button = document.createElement('button');
+            const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            icon.appendChild(path);
+            button.appendChild(icon);
+            node.appendChild(button);
+            selectInContainer(rangeInNode(0, 5));
+            mouseGesture({ button: 0, detail: 1 });
+            mouseGesture({ button: 0, detail: 2, target: icon });
+            mouseGesture({ button: 0, detail: 2, target: path });
+            expect(spyOnSelect).toHaveBeenCalledTimes(1);
+        });
+        it('does not report the same selection again after a double click on text that cannot be selected', () => {
+            const unselectable = document.createElement('span');
+            const inner = document.createElement('em');
+            unselectable.appendChild(inner);
+            node.appendChild(unselectable);
+            const getComputedStyle = window.getComputedStyle.bind(window);
+            const styleSpy = jest.spyOn(window, 'getComputedStyle').mockImplementation((element) => element === unselectable ? { userSelect: 'none' } : getComputedStyle(element));
+            selectInContainer(rangeInNode(0, 5));
+            mouseGesture({ button: 0, detail: 1 });
+            mouseGesture({ button: 0, detail: 2, target: unselectable });
+            mouseGesture({ button: 0, detail: 2, target: inner });
+            styleSpy.mockRestore();
+            expect(spyOnSelect).toHaveBeenCalledTimes(1);
+        });
+        it('treats a separate range with the same boundaries as the same selection', () => {
+            selectInContainer(rangeInNode(0, 5));
+            dispatch(container, 'mouseup');
+            selectInContainer(rangeInNode(0, 5));
+            dispatch(container, 'mouseup');
+            expect(spyOnSelect).toHaveBeenCalledTimes(1);
+        });
+        it('reports a different selection', () => {
+            selectInContainer(rangeInNode(0, 5));
+            dispatch(container, 'mouseup');
+            selectInContainer(rangeInNode(0, 8));
+            dispatch(container, 'mouseup');
+            expect(spyOnSelect).toHaveBeenCalledTimes(2);
+        });
+        it('reports a selection whose range was changed in place after it was reported', () => {
+            const range = rangeInNode(0, 5);
+            selectInContainer(range);
+            dispatch(container, 'mouseup');
+            // e.g. a consumer calling getSelection().getRangeAt(0).setEnd(...) on the live range
+            range.setEnd(node, 8);
+            dispatch(container, 'keyup');
+            expect(spyOnSelect).toHaveBeenCalledTimes(2);
+        });
+        it('snaps a selection that was changed in place only once', () => {
+            const range = rangeInNode(0, 5);
+            selectInContainer(range);
+            dispatch(container, 'mouseup');
+            expect(snapSelectionSpy).toHaveBeenCalledTimes(1);
+            // changing the live range fires selectionchange, which snaps it
+            range.setEnd(node, 8);
+            dispatch(document, 'selectionchange');
+            expect(snapSelectionSpy).toHaveBeenCalledTimes(2);
+            // snapping replaced the selection, which fires selectionchange again
+            dispatch(document, 'selectionchange');
+            dispatch(document, 'selectionchange');
+            expect(snapSelectionSpy).toHaveBeenCalledTimes(2);
+        });
+        it('reports the same selection again after the selection is cleared', () => {
+            const range = rangeInNode(0, 5);
+            selectInContainer(range);
+            dispatch(container, 'mouseup');
+            getSelectionSpy.mockImplementation(() => ({ isCollapsed: true }));
+            dispatch(document, 'selectionchange');
+            selectInContainer(range);
+            dispatch(container, 'mouseup');
+            expect(spyOnSelect).toHaveBeenCalledTimes(2);
+        });
+        it('does not forget the selection when it changes to a range inside the container', () => {
+            const range = rangeInNode(0, 5);
+            selectInContainer(range);
+            dispatch(container, 'mouseup');
+            dispatch(document, 'selectionchange');
+            dispatch(container, 'keyup');
+            expect(spyOnSelect).toHaveBeenCalledTimes(1);
+        });
+    });
+});
+describe('setSnapValues', () => {
+    test('sets all snap options to true', () => {
+        const container = document.createElement('div');
+        const highlighter = new Highlighter_1.default(container, { formatMessage: jest.fn() });
+        highlighter.setSnapValues(true);
+        expect(highlighter.options.snapCode).toBe(true);
+        expect(highlighter.options.snapTableRows).toBe(true);
+        expect(highlighter.options.snapMathJax).toBe(true);
+        expect(highlighter.options.snapWords).toBe(true);
+    });
+    test('sets all snap options to false', () => {
+        const container = document.createElement('div');
+        const highlighter = new Highlighter_1.default(container, { formatMessage: jest.fn() });
+        highlighter.setSnapValues(true);
+        highlighter.setSnapValues(false);
+        expect(highlighter.options.snapCode).toBe(false);
+        expect(highlighter.options.snapTableRows).toBe(false);
+        expect(highlighter.options.snapMathJax).toBe(false);
+        expect(highlighter.options.snapWords).toBe(false);
+    });
+    test('overwrites previous snap option values', () => {
+        const container = document.createElement('div');
+        const highlighter = new Highlighter_1.default(container, {
+            formatMessage: jest.fn(),
+            snapCode: false,
+            snapMathJax: false,
+            snapTableRows: true,
+            snapWords: true,
+        });
+        highlighter.setSnapValues(true);
+        expect(highlighter.options.snapCode).toBe(true);
+        expect(highlighter.options.snapTableRows).toBe(true);
+        expect(highlighter.options.snapMathJax).toBe(true);
+        expect(highlighter.options.snapWords).toBe(true);
+    });
+    test('does not throw if snap options are initially undefined', () => {
+        const container = document.createElement('div');
+        const highlighter = new Highlighter_1.default(container, { formatMessage: jest.fn() });
+        expect(() => highlighter.setSnapValues(false)).not.toThrow();
+        expect(highlighter.options.snapCode).toBe(false);
+        expect(highlighter.options.snapTableRows).toBe(false);
+        expect(highlighter.options.snapMathJax).toBe(false);
+        expect(highlighter.options.snapWords).toBe(false);
+    });
+    test('can toggle snap options multiple times', () => {
+        const container = document.createElement('div');
+        const highlighter = new Highlighter_1.default(container, { formatMessage: jest.fn() });
+        highlighter.setSnapValues(true);
+        expect(highlighter.options.snapCode).toBe(true);
+        highlighter.setSnapValues(false);
+        expect(highlighter.options.snapCode).toBe(false);
+        highlighter.setSnapValues(true);
+        expect(highlighter.options.snapCode).toBe(true);
+    });
+});
+//# sourceMappingURL=Highlighter.test.js.map
