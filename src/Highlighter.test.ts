@@ -306,6 +306,24 @@ describe('onSelect', () => {
       target.dispatchEvent(event);
     };
 
+    // One mouse gesture as a browser fires it: mousedown, then mouseup
+    const mouseGesture = (init: {
+      button?: number,
+      detail: number,
+      preventMouseDown?: boolean,
+      target?: EventTarget,
+    }) => {
+      const { preventMouseDown, target = node, ...mouseInit } = init;
+      const preventDefault = (event: Event) => event.preventDefault();
+
+      if (preventMouseDown) {
+        target.addEventListener('mousedown', preventDefault);
+      }
+      target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, ...mouseInit }));
+      target.removeEventListener('mousedown', preventDefault);
+      target.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, ...mouseInit }));
+    };
+
     const selectInContainer = (snappedRange: Range) => {
       getSelectionSpy.mockImplementation(() => ({
         anchorNode: node,
@@ -337,12 +355,227 @@ describe('onSelect', () => {
       new Highlighter(container, {onSelect: spyOnSelect, formatMessage: jest.fn()});
     });
 
-    it('reports a selection only once', () => {
+    it('does not report the same selection again after a keyup', () => {
       selectInContainer(rangeInNode(0, 5));
 
       dispatch(container, 'mouseup');
       dispatch(container, 'keyup');
-      dispatch(container, 'mouseup');
+      dispatch(container, 'keyup');
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports the same selection again after a double click', () => {
+      selectInContainer(rangeInNode(0, 5));
+      mouseGesture({ button: 0, detail: 1 });
+
+      // e.g. Esc dismisses the card but keeps the selection, then the same word is double-clicked again
+      mouseGesture({ button: 0, detail: 2 });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(2);
+    });
+
+    it('reports the same selection again after a triple click', () => {
+      selectInContainer(rangeInNode(0, 5));
+      mouseGesture({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 3 });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not report the same selection again after a single click', () => {
+      selectInContainer(rangeInNode(0, 5));
+      mouseGesture({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 1 });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report the same selection again after a right-click', () => {
+      selectInContainer(rangeInNode(0, 5));
+      mouseGesture({ button: 0, detail: 1 });
+      mouseGesture({ button: 2, detail: 2 });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report the same selection again when mousedown is cancelled', () => {
+      selectInContainer(rangeInNode(0, 5));
+      mouseGesture({ button: 0, detail: 1 });
+
+      // e.g. the padding of the paragraph holding the selection: cancelling mousedown keeps the old selection
+      mouseGesture({ button: 0, detail: 2, preventMouseDown: true });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('only skips the report for the gesture whose mousedown was cancelled', () => {
+      selectInContainer(rangeInNode(0, 5));
+      mouseGesture({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 2, preventMouseDown: true });
+      mouseGesture({ button: 0, detail: 2 });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not report the same selection again when a later mousedown listener cancels it', () => {
+      // registered after the highlighter's own listener
+      container.addEventListener('mousedown', (event) => event.preventDefault());
+
+      selectInContainer(rangeInNode(0, 5));
+      mouseGesture({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 2 });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report the same selection again when an ancestor cancels mousedown', () => {
+      const wrapper = document.createElement('div');
+      wrapper.appendChild(container);
+      wrapper.addEventListener('mousedown', (event) => event.preventDefault());
+
+      selectInContainer(rangeInNode(0, 5));
+      mouseGesture({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 2 });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report the same selection again when mousedown is cancelled and its propagation stopped', () => {
+      node.addEventListener('mousedown', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+
+      selectInContainer(rangeInNode(0, 5));
+      mouseGesture({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 2 });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    describe('with user-select', () => {
+      const withUserSelect = (values: Array<[Element, string]>) => {
+        const getComputedStyle = window.getComputedStyle.bind(window);
+        return jest.spyOn(window, 'getComputedStyle').mockImplementation((element: Element) => {
+          const match = values.find(([candidate]) => candidate === element);
+          return match ? { userSelect: match[1] } as CSSStyleDeclaration : getComputedStyle(element);
+        });
+      };
+
+      it('does not report the same selection again when the container cannot be selected', () => {
+        const styleSpy = withUserSelect([[container, 'none']]);
+
+        selectInContainer(rangeInNode(0, 5));
+        mouseGesture({ button: 0, detail: 1 });
+        mouseGesture({ button: 0, detail: 2, target: container });
+        mouseGesture({ button: 0, detail: 2, target: node });
+        styleSpy.mockRestore();
+
+        expect(spyOnSelect).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not report the same selection again when a wrapper above the container cannot be selected', () => {
+        const wrapper = document.createElement('div');
+        wrapper.appendChild(container);
+        const styleSpy = withUserSelect([[wrapper, 'none']]);
+
+        selectInContainer(rangeInNode(0, 5));
+        mouseGesture({ button: 0, detail: 1 });
+        mouseGesture({ button: 0, detail: 2 });
+        styleSpy.mockRestore();
+
+        expect(spyOnSelect).toHaveBeenCalledTimes(1);
+      });
+
+      it('reports the same selection again when the container opts back in inside an unselectable wrapper', () => {
+        const wrapper = document.createElement('div');
+        wrapper.appendChild(container);
+        const styleSpy = withUserSelect([[wrapper, 'none'], [container, 'text']]);
+
+        selectInContainer(rangeInNode(0, 5));
+        mouseGesture({ button: 0, detail: 1 });
+        mouseGesture({ button: 0, detail: 2 });
+        styleSpy.mockRestore();
+
+        expect(spyOnSelect).toHaveBeenCalledTimes(2);
+      });
+
+      it('reports the same selection again for text that opts back in inside an unselectable wrapper', () => {
+        const wrapper = document.createElement('span');
+        const selectable = document.createElement('span');
+        wrapper.appendChild(selectable);
+        node.appendChild(wrapper);
+        const styleSpy = withUserSelect([[wrapper, 'none'], [selectable, 'text']]);
+
+        selectInContainer(rangeInNode(0, 5));
+        mouseGesture({ button: 0, detail: 1 });
+        mouseGesture({ button: 0, detail: 2, target: selectable });
+        styleSpy.mockRestore();
+
+        expect(spyOnSelect).toHaveBeenCalledTimes(2);
+      });
+
+      it('does not report the same selection again for a button inside text that opts in', () => {
+        const wrapper = document.createElement('span');
+        const button = document.createElement('button');
+        wrapper.appendChild(button);
+        node.appendChild(wrapper);
+        const styleSpy = withUserSelect([[wrapper, 'text']]);
+
+        selectInContainer(rangeInNode(0, 5));
+        mouseGesture({ button: 0, detail: 1 });
+        mouseGesture({ button: 0, detail: 2, target: button });
+        styleSpy.mockRestore();
+
+        expect(spyOnSelect).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('does not report the same selection again after a double click on a control', () => {
+      const button = document.createElement('button');
+      const insideSelection = document.createElement('button');
+      container.appendChild(button);
+      node.appendChild(insideSelection);
+
+      selectInContainer(rangeInNode(0, 5));
+      mouseGesture({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 2, target: button });
+      mouseGesture({ button: 0, detail: 2, target: insideSelection });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report the same selection again after a double click on an svg icon inside a button', () => {
+      const button = document.createElement('button');
+      const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      icon.appendChild(path);
+      button.appendChild(icon);
+      node.appendChild(button);
+
+      selectInContainer(rangeInNode(0, 5));
+      mouseGesture({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 2, target: icon });
+      mouseGesture({ button: 0, detail: 2, target: path });
+
+      expect(spyOnSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report the same selection again after a double click on text that cannot be selected', () => {
+      const unselectable = document.createElement('span');
+      const inner = document.createElement('em');
+      unselectable.appendChild(inner);
+      node.appendChild(unselectable);
+      const getComputedStyle = window.getComputedStyle.bind(window);
+      const styleSpy = jest.spyOn(window, 'getComputedStyle').mockImplementation((element: Element) =>
+        element === unselectable ? { userSelect: 'none' } as CSSStyleDeclaration : getComputedStyle(element));
+
+      selectInContainer(rangeInNode(0, 5));
+      mouseGesture({ button: 0, detail: 1 });
+      mouseGesture({ button: 0, detail: 2, target: unselectable });
+      mouseGesture({ button: 0, detail: 2, target: inner });
+      styleSpy.mockRestore();
 
       expect(spyOnSelect).toHaveBeenCalledTimes(1);
     });
@@ -374,7 +607,7 @@ describe('onSelect', () => {
 
       // e.g. a consumer calling getSelection().getRangeAt(0).setEnd(...) on the live range
       range.setEnd(node, 8);
-      dispatch(container, 'mouseup');
+      dispatch(container, 'keyup');
 
       expect(spyOnSelect).toHaveBeenCalledTimes(2);
     });
